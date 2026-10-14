@@ -1,0 +1,50 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+6.4  sed
+
+TL;DR
+  - sed edits text line by line as it flows through. Its most used command is
+    s/old/new/.
+  - Without g, only the first match on each line changes; s/old/new/g changes
+    them all.
+  - -i edits the file in place. GNU sed (Linux) takes -i alone; macOS needs
+    -i ''.
+
+      sed 's/http:/https:/g' links.txt
+      sed -i.bak 's/DEBUG=1/DEBUG=0/' .env    # keeps a copy in .env.bak
+      sed -n '10,20p' big.log                 # print lines 10 to 20
+
+Pitfalls
+  - Run the command without -i first and read the output: -i has no undo, unless
+    you give it a suffix like -i.bak.
+  - When the text contains /, use another separator: s|/usr/local|/opt|.
+  - In the replacement, & means "what matched": write \& for a literal
+    ampersand.
+  - As with grep, + and | need -E to have their usual meaning.
+  - sed -i on a symbolic link replaces the link with a regular file, unless you
+    add --follow-symlinks.
+
+Deep dive
+
+  ▾ How does sed work?
+
+    It reads one line, runs the script on it, prints the result, then moves to
+    the next line. -n turns off the automatic printing, so only p prints.
+
+    A command can be limited to some lines with an address in front: /^#/d
+    deletes comment lines, 5,10s/a/b/ only replaces on lines 5 to 10, and
+    /start/,/end/ covers everything between two matches.
+
+  ▾ How do I reuse part of the match?
+
+    With -E, parentheses capture, and \1, \2 bring the captures back in the
+    replacement. This swaps "user@host" into "host: user":
+
+        sed -E 's/([a-z]+)@([a-z.]+)/\2: \1/' contacts.txt
+
+Related
+  Commands  sed
+  See also  idk 6.2 grep and regex
+  See also  idk 6.3 awk

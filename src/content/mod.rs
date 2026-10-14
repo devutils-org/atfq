@@ -83,6 +83,9 @@ pub struct Hub {
 pub struct HubCommand {
     pub cmd: String,
     pub desc: String,
+    /// The card that explains this command, by id.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub card: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

@@ -6,6 +6,8 @@ pub fn is_dangerous(cmd: &str) -> bool {
     let words: Vec<&str> = code_part(cmd).split_whitespace().collect();
     words.iter().enumerate().any(|(i, &w)| match w {
         "rm" | "dd" | "shred" | "wipefs" | "truncate" | "-delete" => true,
+        // rsync --delete, --delete-after…: removes files from the destination.
+        _ if w.starts_with("--delete") => true,
         "chmod" | "chown" | "chgrp" => words[i + 1..].contains(&"-R"),
         _ => w.starts_with("mkfs"),
     })
@@ -37,6 +39,8 @@ mod tests {
             "chmod -R 755 .",
             "sudo chown alice -R /srv",
             "shred -u secret.txt",
+            "rsync -a --delete src/ backup/",
+            "rsync -a --delete-after src/ backup/",
         ] {
             assert!(is_dangerous(cmd), "{cmd}");
         }

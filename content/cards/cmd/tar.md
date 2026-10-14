@@ -1,0 +1,50 @@
+---
+id: cmd.tar
+kind: concept
+title: tar
+aliases: [tar, archive, tarball, tar.gz, tgz, untar, extract archive]
+hubs: []
+probes: []
+see_also: [cmd.rsync]
+commands: [tar]
+paths: []
+---
+
+## TL;DR
+
+- `c` creates, `x` extracts, `t` lists. `f` names the archive file and `v`
+  prints each file name.
+- `z` for gzip (`.tar.gz`), `J` for xz (`.tar.xz`), `--zstd` for zstd
+  (`.tar.zst`). When extracting, GNU tar detects the compression itself.
+
+```
+tar czf backup.tar.gz ~/projects
+tar tf backup.tar.gz | head              # look inside first
+tar xf backup.tar.gz -C /tmp/restore     # extract into a folder
+```
+
+## Pitfalls
+
+- List an archive before extracting it: some have no top folder and spill
+  their files into the current one.
+- Extracting overwrites existing files with the same name, without asking.
+- The folder given to `-C` must exist: create it with `mkdir -p` first.
+- GNU tar removes the leading `/` from paths it stores, and says so:
+  extracting never writes to absolute paths unless you ask.
+- Extracting as root restores the owners stored in the archive.
+
+## Deep dive
+
+### Why tar and gzip, and not zip?
+
+tar comes from tape backups ("tape archive"): it writes files one after the
+other, with their owner, rights and links, into a single stream. Compression
+is a separate step applied to the whole stream. That compresses better than
+zip, which compresses each file on its own, but to get one file out, tar
+has to read through the archive up to it.
+
+### Which compression?
+
+gzip is fast and available everywhere. xz makes the smallest files but is
+slow to create them. zstd comes close to xz at its higher levels and
+decompresses much faster; Arch Linux uses it for its packages.

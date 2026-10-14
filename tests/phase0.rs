@@ -96,6 +96,14 @@ Chapters
      5.3  Swap and swappiness
   6. Finding and transforming
      6.1  find
+     6.2  grep and regex
+     6.3  awk
+     6.4  sed
+     6.5  xargs
+     6.6  tar
+     6.7  rsync
+     6.8  jq
+     6.9  sort, uniq and cut
   7. CPU  hub: idk cpu
      7.1  Load average
   8. Network  hub: idk network

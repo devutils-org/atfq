@@ -1,0 +1,31 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+6.9  sort, uniq and cut
+
+TL;DR
+  - sort sorts lines: -n by number, -h by size with units (2K, 1G), -r in
+    reverse, -k 2 by the second column.
+  - uniq removes repeated lines that follow each other, so sort first. uniq -c
+    counts them.
+  - cut keeps some columns: -d, sets the separator, -f 1,3 the columns.
+
+      sort ips.txt | uniq -c | sort -rn | head    # most frequent lines
+      du -sh * | sort -h                          # biggest items last
+      cut -d: -f1,7 /etc/passwd                   # users and their shells
+
+Pitfalls
+  - uniq without sort only merges neighbours: an unsorted file keeps its
+    duplicates.
+  - sort without -n compares text, so 10 comes before 9.
+  - cut splits on one character: with columns separated by several spaces, use
+    awk (see 6.3).
+  - The order depends on your language settings (case, accents). LC_ALL=C sort
+    sorts by byte value, and faster.
+
+Deep dive: 2 questions. Read them with idk 6.9 --why
+
+Related
+  Commands  sort, uniq, cut, wc
+  See also  idk 6.3 awk

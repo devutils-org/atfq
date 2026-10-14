@@ -5,7 +5,7 @@ title: find
 aliases: [find, find files, find file, search files, find by name]
 hubs: [disk]
 probes: []
-see_also: [fs.inodes-links]
+see_also: [cmd.xargs, cmd.grep, fs.inodes-links]
 commands: [find, xargs]
 paths: []
 ---

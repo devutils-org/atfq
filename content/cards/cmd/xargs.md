@@ -1,0 +1,48 @@
+---
+id: cmd.xargs
+kind: concept
+title: xargs
+aliases: [xargs, arguments from stdin, argument list too long]
+hubs: []
+probes: []
+see_also: [cmd.find]
+commands: [xargs]
+paths: []
+---
+
+## TL;DR
+
+- `xargs` turns its input into arguments for a command, many at a time.
+- Use `-0` with `find -print0`: names with spaces or newlines stay whole.
+- `-n 1` runs the command once per item; `-P 4` runs four at a time.
+
+```
+find . -name '*.log' -print0 | xargs -0 gzip
+xargs -n 1 -P 4 curl -sO < urls.txt
+```
+
+## Pitfalls
+
+- Without `-0`, a file named `my report.pdf` becomes two arguments: `my`
+  and `report.pdf`.
+- When the input is empty, GNU xargs still runs the command once. Add `-r`
+  to skip it.
+- `-I {}` puts the item where you want it (`xargs -I {} mv {} {}.bak`), but
+  then runs the command once per line.
+- To see what would run, put `echo` in front of the command:
+  `xargs -0 echo rm`.
+
+## Deep dive
+
+### Why not $(…)?
+
+`rm $(find . -name '*.tmp')` also splits names on spaces. And with
+thousands of files, the command fails with "Argument list too long": the
+kernel caps the total size of a command's arguments. xargs splits the list
+into as many runs as needed, each one under the limit.
+
+### xargs or find -exec?
+
+`find -exec cmd {} +` batches arguments the same way, without a pipe (see
+6.1). xargs is for input from anywhere (a file, `grep -l`, a list of URLs)
+and for running several commands at once with `-P`.

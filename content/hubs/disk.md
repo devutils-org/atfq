@@ -7,9 +7,9 @@ probes: [disk.tree]
 commands:
   - { cmd: "lsblk", desc: "tree of disks and partitions" }
   - { cmd: "df -h", desc: "free space per mounted filesystem" }
-  - { cmd: "du -sh *", desc: "size of each item in this folder" }
+  - { cmd: "du -sh * | sort -h", desc: "size of each item here, biggest last", card: cmd.sort-uniq-cut }
   - { cmd: "findmnt", desc: "mount points and their options" }
-  - { cmd: "find / -xdev -type f -size +1G 2>/dev/null", desc: "files over 1 GiB on the root filesystem" }
+  - { cmd: "find / -xdev -type f -size +1G 2>/dev/null", desc: "files over 1 GiB on the root filesystem", card: cmd.find }
   - { cmd: "iostat -x 1", desc: "live disk activity (package sysstat)" }
   - { cmd: "sudo smartctl -a /dev/sda", desc: "disk health (package smartmontools)" }
 paths:

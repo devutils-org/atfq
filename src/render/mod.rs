@@ -304,7 +304,16 @@ pub fn hub_doc(
     let commands: Vec<_> = hub
         .commands
         .iter()
-        .map(|c| Row::new(&c.cmd, &c.desc))
+        .map(|c| {
+            let mut row = Row::new(&c.cmd, &c.desc);
+            // The command stays what you copy; in the TUI it also opens its card.
+            row.action = c
+                .card
+                .as_ref()
+                .and_then(|id| lib.card(id))
+                .map(|card| Action::Open(card.number.to_string()));
+            row
+        })
         .collect();
     page.section("Commands", table(&commands, w));
     let paths: Vec<_> = hub

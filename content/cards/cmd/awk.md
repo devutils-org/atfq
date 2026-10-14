@@ -1,0 +1,53 @@
+---
+id: cmd.awk
+kind: concept
+title: awk
+aliases: [awk, gawk, mawk, columns, fields, print column]
+hubs: []
+probes: []
+see_also: [cmd.sort-uniq-cut, cmd.sed]
+commands: [awk]
+paths: []
+---
+
+## TL;DR
+
+- `awk` reads text line by line and splits each line into fields: `$1`,
+  `$2`… and `$NF`, the last one.
+- A program is `pattern { action }`: the action runs for each line that
+  matches the pattern.
+- `-F` sets the field separator. By default, fields are separated by runs of
+  spaces and tabs.
+
+```
+df -h | awk '{print $5, $6}'
+awk -F: '$3 >= 1000 && $3 < 65534 {print $1}' /etc/passwd
+awk '{sum += $2} END {print sum}' sales.txt
+```
+
+## Pitfalls
+
+- Put the program in single quotes: inside double quotes, the shell
+  replaces `$1` before awk sees it.
+- `-F,` doesn't understand CSV: a comma inside quotes still splits the
+  field. Use a real CSV tool for CSV.
+- `print $1 $2` glues the fields together; `print $1, $2` puts a space
+  between them.
+- Debian and Ubuntu install `mawk` as `awk`, others `gawk`: in scripts,
+  stay with the features both have.
+
+## Deep dive
+
+### What are NR, NF and FS?
+
+Built-in variables. `NR` is the line number, `NF` the number of fields on
+the current line, `FS` the field separator (what `-F` sets) and `OFS` the
+separator `print` puts between values. So `awk 'NR > 1'` skips a header
+line, and `awk 'NF'` drops empty lines: a pattern with no action prints
+the lines it matches.
+
+### awk, cut or a script?
+
+`cut` is enough for columns separated by one fixed character. awk handles
+columns separated by spaces, conditions and sums. Past a few lines of awk,
+a short Python script is often easier to read and to change.

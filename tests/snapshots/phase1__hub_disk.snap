@@ -20,7 +20,7 @@ On your machine
 Commands
   lsblk                      tree of disks and partitions
   df -h                      free space per mounted filesystem
-  du -sh *                   size of each item in this folder
+  du -sh * | sort -h         size of each item here, biggest last
   findmnt                    mount points and their options
   find / -xdev -type f -size +1G 2>/dev/null
                              files over 1 GiB on the root filesystem

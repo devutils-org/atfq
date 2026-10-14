@@ -1,0 +1,49 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+6.7  rsync
+
+TL;DR
+  - rsync copies files and only transfers what changed: run it again and it
+    finishes fast.
+  - -a keeps rights, times and symbolic links (owners too, as root), -v lists
+    files, -z compresses over the network, -n shows what would happen without
+    doing it.
+  - A trailing slash on the source means "what's inside": src/ copies the
+    content of src, src copies the folder itself.
+
+      rsync -av --dry-run src/ backup/
+      rsync -av src/ backup/
+      rsync -avz photos/ alice@nas:/data/photos/
+
+Pitfalls
+  - --delete removes from the destination what isn't in the source: with a wrong
+    path, it empties a whole folder. Always run it with -n first.
+  - The order is source then destination, as with cp: swapping them copies the
+    old version over the new one.
+  - Over SSH, rsync must be installed on both machines.
+  - -a doesn't keep hard links, ACLs or extended attributes: add -H, -A and -X
+    when they matter.
+
+Deep dive
+
+  ▾ How does rsync know what changed?
+
+    By default it skips files whose size and modification time match on both
+    sides; -c compares checksums instead, which is slower. For a file that did
+    change, over the network it sends only the parts that differ, found by
+    comparing checksums of blocks. Between two local folders, it simply copies
+    the whole file.
+
+  ▾ rsync, cp or scp?
+
+    cp for a one-time local copy. scp for a one-time copy to another machine
+    (since OpenSSH 9.0 it uses the SFTP protocol). rsync for anything you will
+    repeat, such as backups, and for big transfers that may be interrupted:
+    --partial keeps what was already sent.
+
+Related
+  Commands  rsync
+  Hub       idk disk Disk
+  See also  idk 6.6 tar

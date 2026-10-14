@@ -216,6 +216,14 @@ impl Library {
                     problems.push(format!("{}: cards: no card with id `{r}`", h.source));
                 }
             }
+            for c in &h.commands {
+                if let Some(r) = c.card.as_ref().filter(|r| !cards.contains_key(*r)) {
+                    problems.push(format!(
+                        "{}: commands: `{}` points to no card with id `{r}`",
+                        h.source, c.cmd
+                    ));
+                }
+            }
             check_probes(&mut problems, &h.source, &h.probes);
         }
 
@@ -470,6 +478,16 @@ mod tests {
             "{p}"
         );
         assert!(p.contains("cards: no card with id `ghost`"), "{p}");
+    }
+
+    #[test]
+    fn hub_command_card_must_exist() {
+        let mut f = base();
+        let cmds = "commands:\n  - { cmd: \"free -h\", desc: \"RAM\", card: memory.free }\n  - { cmd: \"x\", desc: \"y\", card: nope }\n";
+        f.insert("hubs/memory.md".into(), hub("memory", "Memory", cmds));
+        let p = problems(&f);
+        assert!(p.contains("`x` points to no card with id `nope`"), "{p}");
+        assert!(!p.contains("free -h"), "{p}");
     }
 
     #[test]

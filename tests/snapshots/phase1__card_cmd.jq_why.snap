@@ -1,0 +1,46 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+6.8  jq
+
+TL;DR
+  - jq filters JSON: give it a path, get the value back.
+  - . is the whole input, pretty-printed. .name is a field, .items[] each
+    element of an array, and | chains filters.
+  - -r prints strings without quotes, ready for the shell.
+
+      curl -s https://api.github.com/repos/jqlang/jq | jq .stargazers_count
+      jq -r '.dependencies | keys[]' package.json
+      jq '.[] | select(.age > 30) | .name' people.json
+
+Pitfalls
+  - Usually not installed by default: the package is jq on every major distro.
+  - Put the filter in single quotes: [], | and $ mean something to the shell.
+  - A missing field gives null, not an error. .port // 8080 gives a default
+    instead.
+  - jq can't edit a file in place: write to a temporary file, then move it over
+    the original.
+
+Deep dive
+
+  ▾ How do filters work?
+
+    Each filter takes an input and produces zero, one or several outputs. |
+    feeds every output of the left side to the right side. .items[] produces one
+    output per element, so .items[] | .id gives every id.
+
+    [ … ] collects outputs back into an array, and {name: .user.login} builds a
+    new object.
+
+  ▾ Which functions are worth knowing?
+
+    select(condition) keeps what matches, map(f) applies a filter to each
+    element, length, keys and sort_by(.field) do what they say. With -r, @csv
+    and @tsv turn arrays into lines a spreadsheet can open:
+
+        jq -r '.[] | [.name, .age] | @csv' people.json
+
+Related
+  Commands  jq
+  See also  idk 6.2 grep and regex

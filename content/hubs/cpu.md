@@ -7,7 +7,7 @@ probes: [cpu.summary]
 commands:
   - { cmd: "nproc", desc: "number of CPUs you can use" }
   - { cmd: "lscpu", desc: "model, cores, threads and caches" }
-  - { cmd: "uptime", desc: "load average over 1, 5 and 15 minutes" }
+  - { cmd: "uptime", desc: "load average over 1, 5 and 15 minutes", card: cpu.load-average }
   - { cmd: "top", desc: "busiest processes; press 1 for one line per CPU" }
   - { cmd: "mpstat -P ALL 1", desc: "usage of each CPU every second (package sysstat)" }
 paths:

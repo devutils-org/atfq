@@ -52,3 +52,7 @@ Decisions taken during development that ROADMAP.md does not cover, one line each
 - 2026-10-14 — The live block's label column is 10 wide instead of 9. — "Firmware" and "Governor" left a single space before their value.
 - 2026-10-14 — Word wrap cuts a non-code word longer than a whole line (a kernel command line token on the dev VM was 88 characters); code is still never cut. — Keeps the 80-column rule on real machines.
 - 2026-10-14 — Search excerpts prefer the card's text (TL;DR, pitfalls, deep dive) over its commands and paths fields. — "swapon vmstat" told less than the TL;DR line.
+- 2026-10-14 — The command cards (6.2 to 6.9) have no probe. — They answer "how do I use this command", which the machine can't answer; probing for "is it installed" would mean searching PATH, for little value.
+- 2026-10-14 — Hub commands can name their card (`card:` field, planned in 6.2 of the roadmap); validation checks it, and in the TUI the command opens that card. CLI text is unchanged. — Commands in hubs now lead to their explanation.
+- 2026-10-14 — `rsync --delete` (and `--delete-*`) counts as a dangerous command. — It removes files from the destination; the rsync card shows it.
+- 2026-10-14 — The disk hub shows `du -sh * | sort -h` instead of `du -sh *`. — Sorted output is what people want, and it links to the sort card.

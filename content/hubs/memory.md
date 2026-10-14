@@ -5,11 +5,11 @@ title: Memory
 aliases: [ram, mem]
 probes: [mem.summary]
 commands:
-  - { cmd: "free -h", desc: "RAM and swap, in human units" }
+  - { cmd: "free -h", desc: "RAM and swap, in human units", card: memory.free-vs-available }
   - { cmd: "vmstat 1", desc: "memory and swap activity every second (Ctrl-C stops)" }
   - { cmd: "top -o %MEM", desc: "processes sorted by memory use" }
-  - { cmd: "swapon --show", desc: "swap areas and how full they are" }
-  - { cmd: "sudo dmesg | grep -i oom", desc: "recent work of the OOM killer" }
+  - { cmd: "swapon --show", desc: "swap areas and how full they are", card: memory.swap }
+  - { cmd: "sudo dmesg | grep -i oom", desc: "recent work of the OOM killer", card: memory.oom-killer }
 paths:
   - { path: "/proc/meminfo", desc: "the kernel's memory counters, read by free and top" }
   - { path: "/proc/sys/vm/swappiness", desc: "how willing the kernel is to swap" }
