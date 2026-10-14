@@ -1,0 +1,33 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+13.4  Exit codes
+
+TL;DR
+  - Every command ends with a number: 0 means success, anything else (1 to 255)
+    a failure.
+  - $? holds the last one. && runs the next command only on success, || only on
+    failure.
+  - 126: found but not executable. 127: command not found. 128 + N: killed by
+    signal N, so 130 is Ctrl-C and 137 is SIGKILL.
+
+      grep -q error app.log; echo $?
+      make && ./install.sh
+      cd build || exit 1
+
+Pitfalls
+  - In a pipeline, $? is the code of the last command: false | true succeeds.
+    set -o pipefail makes any failure count.
+  - grep returns 1 when nothing matches: not an error, but a script with set -e
+    stops there. Write grep … || true when no match is fine.
+  - set -e doesn't stop on a failure inside an if condition or on the left of &&
+    and ||.
+  - Codes wrap around at 256: exit 256 gives 0.
+
+Deep dive: 2 questions. Read them with idk 13.4 --why
+
+Related
+  Commands  echo
+  See also  idk 13.3 Redirections and file descriptors
+  See also  idk 4.2 Signals

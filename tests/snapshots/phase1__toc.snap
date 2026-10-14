@@ -57,3 +57,12 @@ Chapters
       11.1  Units and timers
       11.2  Why a service won't start
       11.3  Unit files and overrides
+  12. Libraries & binaries
+      12.1  Dynamic linking and ldd
+      12.2  ELF and "command not found"
+      12.3  PATH and command resolution
+  13. Environment & shell
+      13.1  Where environment variables come from
+      13.2  Shell startup files
+      13.3  Redirections and file descriptors
+      13.4  Exit codes

@@ -71,3 +71,18 @@ systemd.overrides  unit files and drop-ins changed in /etc/systemd/system
 
   not available on this system
   note: /etc/systemd/system: not found
+
+shell.env  well-known environment variables (never secrets) and login shell
+
+  not available on this system
+  note: /proc/self/environ: not found
+
+shell.startup  shell startup files that exist, and which ones bash reads
+
+  not available on this system
+  note: home folder unknown: no entry in /etc/passwd
+
+bin.path  PATH folders, library path and the dynamic loaders present
+
+  not available on this system
+  note: /proc/self/environ: not found

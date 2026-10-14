@@ -1,0 +1,42 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+12.2  ELF and "command not found"
+
+TL;DR
+  - "command not found": no file of that name in any folder of your PATH.
+    Install the package, or call the program by its full path.
+  - "No such file or directory" for a file that exists: what's missing is its
+    interpreter, the #! line of a script, or the loader a binary was built for.
+  - "Exec format error": the binary is built for another CPU (ARM vs x86).
+
+      file ./mytool          # architecture, linking, interpreter
+      head -1 deploy.sh      # the #! line of a script
+
+On your machine
+  PATH      /home/alice/.local/bin
+            /usr/local/bin (doesn't exist)
+            /usr/bin
+            . ⚠ the current folder, wherever you are
+  Repeated  /usr/bin (listed more than once: harmless, the first one wins)
+  Libraries LD_LIBRARY_PATH=/opt/oracle/lib
+  Runs      programs built for x86-64, glibc
+
+Pitfalls
+  - A script saved with Windows line endings asks for /bin/bash\r: "bad
+    interpreter". Fix it with dos2unix or sed -i 's/\r$//' deploy.sh.
+  - "Permission denied" on your own file: it lacks the x bit (chmod +x), or sits
+    on a filesystem mounted noexec.
+  - Programs built for musl (Alpine) don't run on glibc systems, nor the other
+    way round, unless they are statically linked.
+  - To find the package that provides a command: apt-file search bin/NAME
+    (Debian, Ubuntu), dnf provides '*/bin/NAME' (Fedora), pacman -F NAME (Arch).
+
+Deep dive: 2 questions. Read them with idk 12.2 --why
+
+Related
+  Commands  file, readelf
+  See also  idk 12.3 PATH and command resolution
+  See also  idk 12.1 Dynamic linking and ldd
+  See also  idk 3.1 rwx, octal and umask

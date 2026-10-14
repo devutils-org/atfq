@@ -1,0 +1,52 @@
+---
+id: shell.startup
+kind: concept
+title: Shell startup files
+aliases: [bashrc, .bashrc, bash_profile, .bash_profile, .profile, zshrc, .zshrc, startup files, dotfiles, login shell]
+hubs: []
+probes: [shell.startup]
+see_also: [shell.env, bin.path]
+commands: [source]
+paths: [~/.bashrc, ~/.profile, /etc/profile, /etc/profile.d/]
+---
+
+## TL;DR
+
+- A login shell (console, SSH) reads the profile files. bash reads only the
+  first that exists of `~/.bash_profile`, `~/.bash_login` and `~/.profile`.
+- An interactive shell that isn't a login shell, such as a new terminal tab
+  on most desktops, reads `~/.bashrc`.
+- zsh reads `~/.zprofile` for login shells and `~/.zshrc` for every
+  interactive shell.
+
+```
+echo $0               # "-bash" with a dash: a login shell
+source ~/.bashrc      # reload after editing
+```
+
+## Pitfalls
+
+- When `~/.bash_profile` exists, bash login shells ignore `~/.profile`
+  completely. Have `~/.bash_profile` source `~/.bashrc` to get both.
+- Scripts are not interactive: they read none of these files. Set what a
+  script needs inside the script.
+- bash also reads `~/.bashrc` for commands run over SSH: output from it
+  (an `echo`) breaks `scp` and `rsync`. Print only in interactive shells.
+- A change to `~/.profile` only applies at the next login, not in a new
+  terminal tab.
+
+## Deep dive
+
+### Why two kinds of files?
+
+The profile files run once per session, to set environment variables that
+every program started later inherits. The rc files run in every
+interactive shell, for what isn't inherited: aliases, functions, the
+prompt, completion. So `export` goes in the profile, `alias` in the rc.
+
+### And the files in /etc?
+
+`/etc/profile` and the scripts in `/etc/profile.d/` run for every user's
+login shell. bash's system-wide rc file is `/etc/bash.bashrc` on Debian and
+Ubuntu, `/etc/bashrc` on Fedora. To change something for everyone, add a
+small file to `/etc/profile.d/` rather than editing `/etc/profile`.

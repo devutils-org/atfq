@@ -1,0 +1,46 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+13.3  Redirections and file descriptors
+
+TL;DR
+  - Every program starts with three open files: 0 is stdin (its input), 1 is
+    stdout (its output), 2 is stderr (its errors).
+  - > sends stdout to a file, replacing it; >> appends; < reads stdin from a
+    file.
+  - 2> redirects errors, 2>&1 sends them where stdout goes, and | connects
+    stdout to the next program's stdin.
+
+      make > build.log 2>&1              # everything into one file
+      find / -name '*.conf' 2>/dev/null  # hide the errors
+      ./deploy.sh | tee deploy.log       # see it and save it
+
+Pitfalls
+  - Order matters: > file 2>&1 puts both in the file, 2>&1 > file leaves errors
+    on the terminal.
+  - > empties the file before the command starts: sort data > data leaves an
+    empty file. Write elsewhere, then move it.
+  - A pipe only carries stdout: errors still reach the terminal, unless you
+    write 2>&1 | (or |& in bash).
+  - set -o noclobber makes > refuse to overwrite an existing file; >| forces it.
+
+Deep dive
+
+  ▾ What is a file descriptor?
+
+    A small number that stands for something a process has open: a file, a pipe,
+    a socket, the terminal. Children inherit them. That's how redirections work:
+    the shell opens build.log as descriptor 1, then starts the command, which
+    writes to 1 as always. ls -l /proc/$$/fd shows those of your shell.
+
+  ▾ Why is stderr separate?
+
+    So that errors stay visible when the output goes to a file or a pipe, and
+    the data stays clean: with export.sh > data.csv, the warnings don't end up
+    in the CSV.
+
+Related
+  Commands  tee
+  Paths     /dev/null
+  See also  idk 13.4 Exit codes

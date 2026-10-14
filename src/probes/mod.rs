@@ -12,6 +12,7 @@ mod kernel;
 mod mem;
 mod net;
 mod proc;
+mod shell;
 mod sys;
 mod systemd;
 mod user;
@@ -31,6 +32,7 @@ pub use kernel::{Modules, Sysctl, SysctlSetting, SysctlValue};
 pub use mem::MemSummary;
 pub use net::{DnsConfig, Interface, Listener, Listening, NetInterfaces};
 pub use proc::{ProcInfo, ProcStates};
+pub use shell::{BinPath, PathEntry, ShellEnv, Startup};
 pub use sys::{FsSpace, IfAddr};
 pub use systemd::{DropIn, FailedUnit, Overrides, SystemdStatus};
 pub use user::Identity;
@@ -66,6 +68,9 @@ pub enum ProbeData {
     Modules(Modules),
     Systemd(SystemdStatus),
     Overrides(Overrides),
+    Env(ShellEnv),
+    Startup(Startup),
+    BinPath(BinPath),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -337,6 +342,21 @@ pub const REGISTRY: &[ProbeInfo] = &[
         name: systemd::OVERRIDES,
         description: "unit files and drop-ins changed in /etc/systemd/system",
         run: systemd::overrides,
+    },
+    ProbeInfo {
+        name: shell::ENV,
+        description: "well-known environment variables (never secrets) and login shell",
+        run: shell::env,
+    },
+    ProbeInfo {
+        name: shell::STARTUP,
+        description: "shell startup files that exist, and which ones bash reads",
+        run: shell::startup,
+    },
+    ProbeInfo {
+        name: shell::PATH,
+        description: "PATH folders, library path and the dynamic loaders present",
+        run: shell::path,
     },
 ];
 

@@ -2,6 +2,7 @@
 
 use super::text::{wrap, Kind, Line, Span};
 use super::INDENT;
+use crate::probes::{BinPath, ShellEnv, Startup};
 use crate::probes::{
     BlockDevice, BootInfo, CpuSummary, DiskTree, DnsConfig, FsSpace, Identity, Listening,
     MemSummary, Modules, Mount, NetInterfaces, Overrides, ProbeData, ProbeResult, ProcInfo,
@@ -49,6 +50,9 @@ pub(crate) fn result(r: &ProbeResult, w: usize) -> Vec<Line> {
         (_, Some(ProbeData::Modules(m))) => modules(m, w),
         (_, Some(ProbeData::Systemd(s))) => systemd(s, w),
         (_, Some(ProbeData::Overrides(o))) => overrides(o, w),
+        (_, Some(ProbeData::Env(e))) => shell_env(e, w),
+        (_, Some(ProbeData::Startup(s))) => startup(s, w),
+        (_, Some(ProbeData::BinPath(p))) => bin_path(p, w),
         (_, None) => Vec::new(),
     };
     for note in &r.notes {
@@ -64,7 +68,9 @@ pub(crate) fn result(r: &ProbeResult, w: usize) -> Vec<Line> {
 
 /// `  Label    text`, wrapped under the text.
 fn row(label: &str, text: &str, w: usize) -> Vec<Line> {
-    let first = Line::spaces(INDENT).then(Line::styled(format!("{label:<LABEL$}"), Kind::Bold));
+    // A label wider than the column still gets a space after it.
+    let pad = LABEL.max(label.chars().count() + 1);
+    let first = Line::spaces(INDENT).then(Line::styled(format!("{label:<pad$}"), Kind::Bold));
     let rest = Line::spaces(INDENT + LABEL);
     let mut lines = wrap(&[Span::plain(text)], &first, &rest, w);
     if lines.is_empty() {
@@ -704,6 +710,104 @@ fn overrides(o: &Overrides, w: usize) -> Vec<Line> {
             w,
         ));
     }
+    out
+}
+
+fn shell_env(e: &ShellEnv, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    for (k, v) in &e.vars {
+        out.extend(row(k, v, w));
+    }
+    if let Some(login) = &e.login_shell {
+        let shell = e.vars.iter().find(|(k, _)| k == "SHELL").map(|(_, v)| v);
+        let text = match shell {
+            Some(s) if s != login => format!("{login} (SHELL says {s}: changed since login?)"),
+            _ => login.clone(),
+        };
+        out.extend(row("Login", &text, w));
+    }
+    out.extend(row(
+        "In all",
+        &format!(
+            "{} variables set; only well-known ones are shown here",
+            e.total
+        ),
+        w,
+    ));
+    out
+}
+
+fn startup(s: &Startup, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if let Some(l) = &s.login_shell {
+        out.extend(row("Shell", l, w));
+    }
+    out.extend(row(
+        "Files",
+        &if s.files.is_empty() {
+            "none".to_string()
+        } else {
+            s.files.join(", ")
+        },
+        w,
+    ));
+    if let Some(f) = &s.bash_login_file {
+        let mut text = format!("bash login shells read {f}");
+        if !s.ignored_by_bash.is_empty() {
+            text.push_str(&format!(" and ignore {}", s.ignored_by_bash.join(", ")));
+        }
+        out.extend(row("Bash", &text, w));
+    }
+    out
+}
+
+fn bin_path(p: &BinPath, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    // Each folder once, in search order; repeats are summed up after.
+    for (i, e) in p.entries.iter().filter(|e| !e.duplicate).enumerate() {
+        let mut text = if e.dir.is_empty() {
+            "(empty)".to_string()
+        } else {
+            e.dir.clone()
+        };
+        if e.current_dir {
+            text.push_str(" ⚠ the current folder, wherever you are");
+        } else if !e.exists {
+            text.push_str(" (doesn't exist)");
+        }
+        out.extend(row(if i == 0 { "PATH" } else { "" }, &text, w));
+    }
+    let mut repeated: Vec<&str> = Vec::new();
+    for e in p.entries.iter().filter(|e| e.duplicate) {
+        if !repeated.contains(&e.dir.as_str()) {
+            repeated.push(&e.dir);
+        }
+    }
+    if !repeated.is_empty() {
+        out.extend(row(
+            "Repeated",
+            &format!(
+                "{} (listed more than once: harmless, the first one wins)",
+                repeated.join(", ")
+            ),
+            w,
+        ));
+    }
+    if let Some(v) = &p.ld_library_path {
+        out.extend(row("Libraries", &format!("LD_LIBRARY_PATH={v}"), w));
+    }
+    if let Some(v) = &p.ld_preload {
+        out.extend(row("Preload", &format!("LD_PRELOAD={v}"), w));
+    }
+    out.extend(row(
+        "Runs",
+        &if p.loaders.is_empty() {
+            "no known dynamic loader found".to_string()
+        } else {
+            format!("programs built for {}", p.loaders.join("; "))
+        },
+        w,
+    ));
     out
 }
 

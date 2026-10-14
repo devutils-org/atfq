@@ -1,0 +1,52 @@
+---
+id: shell.exit-codes
+kind: concept
+title: Exit codes
+aliases: [exit code, exit codes, exit status, return code, $?, set -e, pipefail]
+hubs: []
+probes: []
+see_also: [shell.redirections, proc.signals]
+commands: [echo]
+paths: []
+---
+
+## TL;DR
+
+- Every command ends with a number: 0 means success, anything else (1 to
+  255) a failure.
+- `$?` holds the last one. `&&` runs the next command only on success, `||`
+  only on failure.
+- 126: found but not executable. 127: command not found. 128 + N: killed
+  by signal N, so 130 is Ctrl-C and 137 is SIGKILL.
+
+```
+grep -q error app.log; echo $?
+make && ./install.sh
+cd build || exit 1
+```
+
+## Pitfalls
+
+- In a pipeline, `$?` is the code of the last command: `false | true`
+  succeeds. `set -o pipefail` makes any failure count.
+- `grep` returns 1 when nothing matches: not an error, but a script with
+  `set -e` stops there. Write `grep … || true` when no match is fine.
+- `set -e` doesn't stop on a failure inside an `if` condition or on the
+  left of `&&` and `||`.
+- Codes wrap around at 256: `exit 256` gives 0.
+
+## Deep dive
+
+### Where does the number come from?
+
+The program passes it to the kernel when it exits, and the parent reads it
+with `wait()`, the same call that clears zombies (see 4.1). The shell adds
+the conventions for 126, 127 and 128 + N. Some programs give meaning to
+their codes: for `diff` and `grep`, 1 means "different" or "no match", and
+2 means an error.
+
+### How do I write safer scripts?
+
+Start bash scripts with `set -euo pipefail`: stop at the first failure,
+treat unset variables as errors, and count failures inside pipes. Then
+allow the failures you expect, explicitly, with `|| true` or an `if`.

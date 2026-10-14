@@ -1,0 +1,57 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+12.2  ELF and "command not found"
+
+TL;DR
+  - "command not found": no file of that name in any folder of your PATH.
+    Install the package, or call the program by its full path.
+  - "No such file or directory" for a file that exists: what's missing is its
+    interpreter, the #! line of a script, or the loader a binary was built for.
+  - "Exec format error": the binary is built for another CPU (ARM vs x86).
+
+      file ./mytool          # architecture, linking, interpreter
+      head -1 deploy.sh      # the #! line of a script
+
+On your machine
+  PATH      /home/alice/.local/bin
+            /usr/local/bin (doesn't exist)
+            /usr/bin
+            . ⚠ the current folder, wherever you are
+  Repeated  /usr/bin (listed more than once: harmless, the first one wins)
+  Libraries LD_LIBRARY_PATH=/opt/oracle/lib
+  Runs      programs built for x86-64, glibc
+
+Pitfalls
+  - A script saved with Windows line endings asks for /bin/bash\r: "bad
+    interpreter". Fix it with dos2unix or sed -i 's/\r$//' deploy.sh.
+  - "Permission denied" on your own file: it lacks the x bit (chmod +x), or sits
+    on a filesystem mounted noexec.
+  - Programs built for musl (Alpine) don't run on glibc systems, nor the other
+    way round, unless they are statically linked.
+  - To find the package that provides a command: apt-file search bin/NAME
+    (Debian, Ubuntu), dnf provides '*/bin/NAME' (Fedora), pacman -F NAME (Arch).
+
+Deep dive
+
+  ▾ What is ELF?
+
+    The file format of Linux programs and libraries. Its header names the CPU
+    architecture; then come the code and the data. A dynamically linked program
+    also names its interpreter, the loader that the kernel starts first to load
+    the libraries: /lib64/ld-linux-x86-64.so.2 for x86-64 with glibc.
+    readelf -l program shows it as "Requesting program interpreter".
+
+  ▾ What does the kernel do with a script?
+
+    When a file starts with #!, the kernel runs the program named on that line
+    and gives it the script. #!/usr/bin/env python3 asks env to find python3
+    through PATH, so the same script works where Python is installed in
+    different places.
+
+Related
+  Commands  file, readelf
+  See also  idk 12.3 PATH and command resolution
+  See also  idk 12.1 Dynamic linking and ldd
+  See also  idk 3.1 rwx, octal and umask
