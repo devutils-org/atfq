@@ -4,8 +4,8 @@ use super::text::{wrap, Kind, Line, Span};
 use super::INDENT;
 use crate::probes::{
     BlockDevice, BootInfo, CpuSummary, DiskTree, DnsConfig, FsSpace, Identity, Listening,
-    MemSummary, Mount, NetInterfaces, ProbeData, ProbeResult, ProcInfo, ProcStates, Status,
-    TmpDirs,
+    MemSummary, Modules, Mount, NetInterfaces, Overrides, ProbeData, ProbeResult, ProcInfo,
+    ProcStates, Status, Sysctl, SystemdStatus, TmpDirs,
 };
 
 /// Width of the label column (`RAM`, `Swap`, `Zombies`…).
@@ -45,6 +45,10 @@ pub(crate) fn result(r: &ProbeResult, w: usize) -> Vec<Line> {
         (_, Some(ProbeData::Boot(b))) => boot(b, w),
         (_, Some(ProbeData::User(u))) => user(u, w),
         (_, Some(ProbeData::Tmp(t))) => tmp(t, w),
+        (_, Some(ProbeData::Sysctl(s))) => sysctl(s, w),
+        (_, Some(ProbeData::Modules(m))) => modules(m, w),
+        (_, Some(ProbeData::Systemd(s))) => systemd(s, w),
+        (_, Some(ProbeData::Overrides(o))) => overrides(o, w),
         (_, None) => Vec::new(),
     };
     for note in &r.notes {
@@ -574,6 +578,131 @@ fn tmp(t: &TmpDirs, w: usize) -> Vec<Line> {
             text.push_str(&format!(" · {}", free_text(s)));
         }
         out.extend(row(&d.path, &text, w));
+    }
+    out
+}
+
+fn sysctl(s: &Sysctl, w: usize) -> Vec<Line> {
+    let name_w = s.values.iter().map(|v| v.name.len()).max().unwrap_or(0);
+    let value_w = s
+        .values
+        .iter()
+        .map(|v| v.value.chars().count())
+        .max()
+        .unwrap_or(0);
+    let mut out = Vec::new();
+    for v in &s.values {
+        let text = format!("{:<name_w$}  {:>value_w$}  {}", v.name, v.value, v.meaning);
+        if INDENT + text.chars().count() <= w {
+            out.push(Line::spaces(INDENT).then(Line::plain(text)));
+        } else {
+            out.extend(row(&v.name, &format!("{}  {}", v.value, v.meaning), w));
+        }
+    }
+    if s.configured.is_empty() {
+        out.extend(row(
+            "Set in",
+            "nothing in /etc/sysctl.conf or /etc/sysctl.d/",
+            w,
+        ));
+    } else {
+        for (i, c) in s.configured.iter().enumerate() {
+            let label = if i == 0 { "Set in" } else { "" };
+            out.extend(row(
+                label,
+                &format!("{} = {} ({})", c.name, c.value, c.file),
+                w,
+            ));
+        }
+    }
+    out
+}
+
+fn modules(m: &Modules, w: usize) -> Vec<Line> {
+    let biggest: Vec<String> = m
+        .largest
+        .iter()
+        .map(|(name, bytes)| format!("{name} {}", size(*bytes)))
+        .collect();
+    let mut out = row(
+        "Loaded",
+        &format!("{} modules; biggest: {}", m.loaded, biggest.join(", ")),
+        w,
+    );
+    match m.tainted {
+        Some(0) => out.extend(row("Tainted", "no", w)),
+        Some(_) => {
+            for (i, (c, what)) in m.taint_flags.iter().enumerate() {
+                out.extend(row(
+                    if i == 0 { "Tainted" } else { "" },
+                    &format!("{c}: {what}"),
+                    w,
+                ));
+            }
+        }
+        None => {}
+    }
+    out
+}
+
+fn systemd(s: &SystemdStatus, w: usize) -> Vec<Line> {
+    let state = match s.state.as_str() {
+        "running" => "running: every unit is fine".to_string(),
+        "degraded" => "degraded: some units failed".to_string(),
+        other => other.to_string(),
+    };
+    let mut out = row("State", &state, w);
+    if s.failed.is_empty() {
+        out.extend(row("Failed", "none", w));
+    }
+    for (i, f) in s.failed.iter().enumerate() {
+        let text = if f.description.is_empty() {
+            f.unit.clone()
+        } else {
+            format!("{} ({})", f.unit, f.description)
+        };
+        out.extend(row(if i == 0 { "Failed" } else { "" }, &text, w));
+    }
+    out
+}
+
+/// Most drop-ins listed; the rest are counted.
+const SHOW_DROPINS: usize = 6;
+
+fn overrides(o: &Overrides, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    for (i, d) in o.dropins.iter().take(SHOW_DROPINS).enumerate() {
+        out.extend(row(
+            if i == 0 { "Drop-ins" } else { "" },
+            &format!("{}: {}", d.unit, d.files.join(", ")),
+            w,
+        ));
+    }
+    if o.dropins.len() > SHOW_DROPINS {
+        out.extend(row(
+            "",
+            &format!(
+                "and {} more: systemd-delta lists them all",
+                o.dropins.len() - SHOW_DROPINS
+            ),
+            w,
+        ));
+    }
+    for (label, list) in [
+        ("Replaced", &o.replaced),
+        ("Local", &o.local),
+        ("Masked", &o.masked),
+    ] {
+        if !list.is_empty() {
+            out.extend(row(label, &list.join(", "), w));
+        }
+    }
+    if out.is_empty() {
+        out.extend(row(
+            "Changes",
+            "none: every unit is as its package ships it",
+            w,
+        ));
     }
     out
 }

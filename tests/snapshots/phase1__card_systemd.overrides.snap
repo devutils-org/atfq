@@ -1,0 +1,37 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+11.3  Unit files and overrides
+
+TL;DR
+  - Packages install unit files in /usr/lib/systemd/system. Yours go in
+    /etc/systemd/system, which wins.
+  - Don't edit a packaged unit: systemctl edit NAME creates a drop-in that
+    changes only the lines you write, and survives updates.
+  - systemctl cat NAME shows the unit with all its drop-ins.
+
+      sudo systemctl edit nginx
+      systemctl cat nginx
+      systemd-delta       # every unit changed on this system
+
+On your machine
+  Drop-ins  nginx.service: override.conf
+  Replaced  sshd.service
+  Local     backup.service, backup.timer
+  Masked    bluetooth.service
+
+Pitfalls
+  - To replace a setting that can appear several times, such as ExecStart=,
+    first clear it with an empty ExecStart= line in the drop-in.
+  - systemctl edit --full copies the whole unit to /etc: from then on, it no
+    longer gets the package's fixes.
+  - A unit linked to /dev/null in /etc/systemd/system is masked: it can't start
+    at all.
+
+Deep dive: 2 questions. Read them with idk 11.3 --why
+
+Related
+  Commands  systemctl, systemd-delta
+  Paths     /etc/systemd/system, /usr/lib/systemd/system
+  See also  idk 11.1 Units and timers

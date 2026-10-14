@@ -1,0 +1,41 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+10.2  Kernel modules
+
+TL;DR
+  - Most drivers are modules: pieces of the kernel loaded when the hardware that
+    needs them shows up.
+  - lsmod lists the loaded ones, modinfo describes one, modprobe loads one with
+    what it depends on.
+  - Module options and blacklists go in a .conf file in /etc/modprobe.d/.
+
+      lsmod | sort -k2 -n | tail
+      modinfo snd_hda_intel | head
+      echo 'blacklist pcspkr' | sudo tee /etc/modprobe.d/nobeep.conf
+
+On your machine
+  Loaded    4 modules; biggest: nvidia 53.7 MiB, nvidia_modeset 1.5 MiB, iwlwifi
+            476.0 KiB, snd_hda_intel 60.0 KiB
+  Tainted   P: proprietary module loaded
+            O: out-of-tree module loaded
+
+Pitfalls
+  - Modules are built for one kernel version. After a kernel update, modules
+    from outside the kernel (NVIDIA, VirtualBox) must be rebuilt: DKMS does it
+    for you.
+  - A "tainted" kernel isn't broken: it runs code its developers can't debug,
+    such as a proprietary module. Kernel developers usually ignore bug reports
+    from tainted kernels.
+  - blacklist only stops automatic loading: the module can still load by hand or
+    as a dependency. install NAME /bin/false blocks it completely.
+  - With Secure Boot on, the kernel refuses unsigned modules (see 9.1).
+
+Deep dive: 2 questions. Read them with idk 10.2 --why
+
+Related
+  Commands  lsmod, modinfo, modprobe
+  Paths     /proc/modules, /etc/modprobe.d/, /etc/modules-load.d/
+  See also  idk 9.1 From firmware to init
+  See also  idk 10.3 dmesg and the kernel log

@@ -44,3 +44,5 @@ Related
   Paths     /boot, /boot/efi
   Hub       idk boot Boot
   See also  idk 9.2 The kernel command line
+  See also  idk 11.1 Units and timers
+  See also  idk 10.2 Kernel modules

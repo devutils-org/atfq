@@ -96,7 +96,8 @@ fn no_match_suggests_from_search() {
     assert_eq!(l.matched, Match::None);
     assert!(l.entry.is_none() && l.probes.is_empty());
     let ids: Vec<&str> = l.suggestions.iter().map(|r| r.id.as_str()).collect();
-    assert_eq!(ids, ["memory.oom-killer"]);
+    assert_eq!(ids[0], "memory.oom-killer", "{ids:?}");
+    assert!(ids.contains(&"kernel.sysctl"), "{ids:?}");
     assert_snapshot!("not_found_overcomit", render::not_found(&l, PLAIN));
 }
 

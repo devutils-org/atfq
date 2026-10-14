@@ -1,0 +1,54 @@
+---
+id: systemd.failing
+kind: concept
+title: Why a service won't start
+aliases: [failed, failed units, service failed, degraded, service won't start, troubleshooting, journalctl -u]
+hubs: []
+probes: [systemd.status]
+see_also: [systemd.units, net.ports]
+commands: [systemctl, journalctl]
+paths: []
+---
+
+## TL;DR
+
+- `systemctl status NAME` shows the state and the last log lines.
+  `journalctl -u NAME` shows the whole log.
+- Read the first error, not the last: later lines are often consequences.
+- The usual causes: a typo in the configuration, a port already in use, a
+  missing file or permission, a dependency that failed first.
+
+```
+systemctl --failed
+systemctl status nginx
+journalctl -u nginx -b --no-pager | tail -50
+```
+
+## Pitfalls
+
+- After several failures in a row, systemd stops retrying ("start request
+  repeated too quickly"). Fix the cause, then run
+  `sudo systemctl reset-failed nginx`.
+- Many programs can check their own configuration: `nginx -t`, `sshd -t`,
+  `apachectl configtest`.
+- A service runs as another user, with another environment than your shell
+  (PATH, HOME, permissions): a command that works in your terminal can fail
+  there.
+- "degraded" from `systemctl is-system-running` means at least one unit
+  failed; `systemctl --failed` says which.
+
+## Deep dive
+
+### What do the states mean?
+
+`active (running)`: the program runs. `active (exited)`: a one-time task
+finished well. `inactive (dead)`: stopped. `activating`: starting, or
+waiting before a restart. `failed`: it exited with an error, crashed, or
+didn't start within its time limit; the status shows which.
+
+### How do I reproduce the failure by hand?
+
+`systemctl cat NAME` shows the unit, with the exact `ExecStart=` command and
+the `User=` it runs as. Run that command as that user, for example
+`sudo -u www-data /usr/sbin/nginx -t`, and you usually get the full error
+message.

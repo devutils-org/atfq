@@ -1,0 +1,44 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+10.3  dmesg and the kernel log
+
+TL;DR
+  - The kernel keeps its messages in a buffer in RAM: hardware found, driver
+    errors, OOM kills, a USB stick plugged in.
+  - dmesg prints that buffer. journalctl -k shows the same messages, kept across
+    reboots when the journal is persistent.
+  - With kernel.dmesg_restrict = 1, the default on many distros, reading it
+    needs root.
+
+      sudo dmesg -T | tail -20       # with human-readable times
+      sudo dmesg -w                  # follow new messages
+      journalctl -k -b -1 -p err     # errors from the previous boot
+
+On your machine
+  vm.swappiness                    60  how willing the kernel is to swap
+  vm.overcommit_memory              0  0 guess, 1 always say yes, 2 strict limit
+  kernel.dmesg_restrict             1  1: reading dmesg needs root
+  net.ipv4.ip_forward               1  1: this machine routes packets
+  kernel.sysrq                    176  0 off, 1 all, other: some Alt+SysRq keys
+  fs.inotify.max_user_watches  524288  files a user can watch for changes
+  Set in    vm.swappiness = 10 (/etc/sysctl.d/90-swap.conf)
+            fs.inotify.max_user_watches = 524288 (/etc/sysctl.d/99-inotify.conf)
+
+Pitfalls
+  - The buffer has a fixed size: on a busy machine, early boot messages are
+    overwritten. journalctl -k -b still has them.
+  - dmesg -T times can be wrong after a suspend: the kernel's clock doesn't
+    count the time spent suspended.
+  - To see how the kernel names a device, run sudo dmesg -w, then plug it in.
+  - A "Call Trace" block means the kernel hit a bug or a warning: the whole
+    block, not just one line, is what a bug report needs.
+
+Deep dive: 2 questions. Read them with idk 10.3 --why
+
+Related
+  Commands  dmesg, journalctl
+  Paths     /dev/kmsg
+  See also  idk 10.2 Kernel modules
+  See also  idk 5.2 The OOM killer

@@ -1,0 +1,50 @@
+---
+id: systemd.overrides
+kind: concept
+title: Unit files and overrides
+aliases: [override, overrides, drop-in, drop-ins, systemctl edit, unit file, unit files, systemd-delta]
+hubs: []
+probes: [systemd.overrides]
+see_also: [systemd.units]
+commands: [systemctl, systemd-delta]
+paths: [/etc/systemd/system, /usr/lib/systemd/system]
+---
+
+## TL;DR
+
+- Packages install unit files in `/usr/lib/systemd/system`. Yours go in
+  `/etc/systemd/system`, which wins.
+- Don't edit a packaged unit: `systemctl edit NAME` creates a drop-in that
+  changes only the lines you write, and survives updates.
+- `systemctl cat NAME` shows the unit with all its drop-ins.
+
+```
+sudo systemctl edit nginx
+systemctl cat nginx
+systemd-delta       # every unit changed on this system
+```
+
+## Pitfalls
+
+- To replace a setting that can appear several times, such as `ExecStart=`,
+  first clear it with an empty `ExecStart=` line in the drop-in.
+- `systemctl edit --full` copies the whole unit to `/etc`: from then on, it
+  no longer gets the package's fixes.
+- A unit linked to `/dev/null` in `/etc/systemd/system` is masked: it can't
+  start at all.
+
+## Deep dive
+
+### In what order are files read?
+
+For a unit of a given name, the first one found wins: `/etc/systemd/system`,
+then `/run/systemd/system`, then `/usr/lib/systemd/system`. Drop-ins from
+every `NAME.d/` folder are then applied on top, sorted by file name, so a
+later file overrides an earlier one.
+
+### Why drop-ins?
+
+A package update replaces files under `/usr`, so a setting you change must
+live somewhere else. A drop-in holds only your change and leaves the rest
+to the package. The same pattern shows up across Linux: `/etc/sysctl.d/`,
+`/etc/modprobe.d/`, `/etc/ssh/sshd_config.d/`.

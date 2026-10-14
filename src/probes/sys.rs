@@ -1,9 +1,15 @@
-//! The two answers that need a system call rather than a file: filesystem
-//! space (statvfs) and IP addresses (getifaddrs). Tests replace both with
-//! fixed values through `ProbeCtx`.
+//! Answers that need more than reading a file: filesystem space (statvfs),
+//! IP addresses (getifaddrs), and the few external programs allowed (only
+//! `systemctl`, whose state lives in systemd's memory). Tests replace all
+//! of them with fixed values through `ProbeCtx`.
 
+use super::ReadError;
+
+use std::io::Read;
 use std::net::IpAddr;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::process::{Command, Stdio};
+use std::time::{Duration, Instant};
 
 use serde::Serialize;
 
@@ -127,4 +133,71 @@ pub(crate) fn getifaddrs() -> Option<Vec<IfAddr>> {
 #[cfg(not(unix))]
 pub(crate) fn getifaddrs() -> Option<Vec<IfAddr>> {
     None
+}
+
+/// The only programs a probe may run.
+const ALLOWED: &[&str] = &["systemctl"];
+
+/// A program that takes longer is killed and reported unavailable.
+const TIMEOUT: Duration = Duration::from_millis(500);
+
+/// Runs `cmd` (an allowlisted program and fixed arguments, never user
+/// input), found through PATH. Returns its standard output, whatever the
+/// exit code: `systemctl is-system-running` exits with 1 when "degraded".
+pub(crate) fn run(cmd: &[&str]) -> Result<String, ReadError> {
+    let name = cmd[0];
+    if !ALLOWED.contains(&name) {
+        return Err(ReadError::Other(
+            name.to_string(),
+            "not allowed".to_string(),
+        ));
+    }
+    let path = find_in_path(name).ok_or_else(|| ReadError::Missing(name.to_string()))?;
+    let mut child = Command::new(path)
+        .args(&cmd[1..])
+        .env("SYSTEMD_COLORS", "0")
+        .env("LC_ALL", "C")
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .map_err(|e| ReadError::Other(name.to_string(), e.to_string()))?;
+    // Read in a thread: a full pipe would otherwise block the child.
+    let mut stdout = child.stdout.take().expect("piped");
+    let reader = std::thread::spawn(move || {
+        let mut out = String::new();
+        let _ = stdout.read_to_string(&mut out);
+        out
+    });
+    let start = Instant::now();
+    loop {
+        match child.try_wait() {
+            Ok(Some(_)) => break,
+            Ok(None) if start.elapsed() < TIMEOUT => std::thread::sleep(Duration::from_millis(5)),
+            _ => {
+                let _ = child.kill();
+                let _ = child.wait();
+                return Err(ReadError::Other(name.to_string(), "timed out".to_string()));
+            }
+        }
+    }
+    Ok(reader.join().unwrap_or_default())
+}
+
+#[cfg(not(unix))]
+fn find_in_path(_: &str) -> Option<PathBuf> {
+    None
+}
+
+#[cfg(unix)]
+fn find_in_path(name: &str) -> Option<PathBuf> {
+    use std::os::unix::fs::PermissionsExt;
+    let path = std::env::var_os("PATH")?;
+    std::env::split_paths(&path)
+        .filter(|dir| dir.is_absolute())
+        .map(|dir| dir.join(name))
+        .find(|p| {
+            p.metadata()
+                .is_ok_and(|m| m.is_file() && m.permissions().mode() & 0o111 != 0)
+        })
 }

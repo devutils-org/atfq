@@ -1,0 +1,39 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+11.2  Why a service won't start
+
+TL;DR
+  - systemctl status NAME shows the state and the last log lines.
+    journalctl -u NAME shows the whole log.
+  - Read the first error, not the last: later lines are often consequences.
+  - The usual causes: a typo in the configuration, a port already in use, a
+    missing file or permission, a dependency that failed first.
+
+      systemctl --failed
+      systemctl status nginx
+      journalctl -u nginx -b --no-pager | tail -50
+
+On your machine
+  State     degraded: some units failed
+  Failed    backup.service (Nightly backup)
+
+Pitfalls
+  - After several failures in a row, systemd stops retrying ("start request
+    repeated too quickly"). Fix the cause, then run
+    sudo systemctl reset-failed nginx.
+  - Many programs can check their own configuration: nginx -t, sshd -t,
+    apachectl configtest.
+  - A service runs as another user, with another environment than your shell
+    (PATH, HOME, permissions): a command that works in your terminal can fail
+    there.
+  - "degraded" from systemctl is-system-running means at least one unit failed;
+    systemctl --failed says which.
+
+Deep dive: 2 questions. Read them with idk 11.2 --why
+
+Related
+  Commands  systemctl, journalctl
+  See also  idk 11.1 Units and timers
+  See also  idk 8.1 Who listens on which port

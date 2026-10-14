@@ -5,7 +5,7 @@ title: The OOM killer
 aliases: [oom, oom killer, out of memory, oom_score, systemd-oomd, killed process]
 hubs: [memory]
 probes: [mem.summary]
-see_also: [memory.swap, proc.signals]
+see_also: [memory.swap, proc.signals, kernel.dmesg]
 commands: [journalctl, dmesg]
 paths: [/proc/PID/oom_score, /proc/PID/oom_score_adj]
 ---

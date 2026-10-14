@@ -11,6 +11,8 @@ Results for "swap"
               When RAM and swap are both used up, the kernel's OOM ("out of m…
   idk 5.1     free vs available
               available: what your apps can still get without swapping.
+  idk 10.1    sysctl
+              with dots instead of slashes: vm.swappiness is
   idk 1.2     /tmp vs /var/tmp
               swap under pressure, but a machine without swap has nowhere to…
   idk 1.3     /proc and /sys

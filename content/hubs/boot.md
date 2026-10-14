@@ -7,8 +7,8 @@ probes: [boot.info]
 commands:
   - { cmd: "systemd-analyze", desc: "how long the last boot took, by stage", card: boot.sequence }
   - { cmd: "systemd-analyze blame", desc: "services, slowest first" }
-  - { cmd: "journalctl -b -p err", desc: "errors logged since this boot" }
-  - { cmd: "systemctl get-default", desc: "the target the system boots into" }
+  - { cmd: "journalctl -b -p err", desc: "errors logged since this boot", card: systemd.failing }
+  - { cmd: "systemctl get-default", desc: "the target the system boots into", card: systemd.units }
   - { cmd: "efibootmgr", desc: "UEFI boot entries and their order" }
   - { cmd: "uname -r", desc: "the running kernel" }
 paths:

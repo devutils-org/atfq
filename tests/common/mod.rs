@@ -52,6 +52,18 @@ pub fn laptop() -> ProbeCtx {
         .with_addr("wlp0s20f3", "192.168.1.23/24")
         .with_addr("wlp0s20f3", "fe80::8ec6:81ff:fe2a:107f/64")
         .with_addr("docker0", "172.17.0.1/16")
+        .with_command(&["systemctl", "is-system-running"], "degraded\n")
+        .with_command(
+            &[
+                "systemctl",
+                "list-units",
+                "--state=failed",
+                "--no-legend",
+                "--plain",
+                "--no-pager",
+            ],
+            "backup.service loaded failed failed Nightly backup\n",
+        )
 }
 
 /// Renders a query the way `idk` prints it, against the laptop fixture.

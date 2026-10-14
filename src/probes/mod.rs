@@ -8,10 +8,12 @@
 mod boot;
 mod cpu;
 mod disk;
+mod kernel;
 mod mem;
 mod net;
 mod proc;
 mod sys;
+mod systemd;
 mod user;
 
 use std::collections::BTreeMap;
@@ -25,10 +27,12 @@ use serde::Serialize;
 pub use boot::{BootInfo, Firmware};
 pub use cpu::CpuSummary;
 pub use disk::{BlockDevice, DiskTree, Mount, Partition, TmpDir, TmpDirs};
+pub use kernel::{Modules, Sysctl, SysctlSetting, SysctlValue};
 pub use mem::MemSummary;
 pub use net::{DnsConfig, Interface, Listener, Listening, NetInterfaces};
 pub use proc::{ProcInfo, ProcStates};
 pub use sys::{FsSpace, IfAddr};
+pub use systemd::{DropIn, FailedUnit, Overrides, SystemdStatus};
 pub use user::Identity;
 
 /// How far a probe got.
@@ -58,6 +62,10 @@ pub enum ProbeData {
     Boot(BootInfo),
     User(Identity),
     Tmp(TmpDirs),
+    Sysctl(Sysctl),
+    Modules(Modules),
+    Systemd(SystemdStatus),
+    Overrides(Overrides),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -99,6 +107,8 @@ enum Calls {
     Fixed {
         space: BTreeMap<String, FsSpace>,
         addrs: Vec<IfAddr>,
+        /// Command line → output, for `run`.
+        commands: BTreeMap<String, String>,
     },
 }
 
@@ -137,6 +147,7 @@ impl ProbeCtx {
             calls: Calls::Fixed {
                 space: BTreeMap::new(),
                 addrs: Vec::new(),
+                commands: BTreeMap::new(),
             },
         }
     }
@@ -160,6 +171,26 @@ impl ProbeCtx {
             });
         }
         self
+    }
+
+    /// Sets what a fixture's `run` returns for a command line.
+    pub fn with_command(mut self, cmd: &[&str], output: &str) -> ProbeCtx {
+        if let Calls::Fixed { commands, .. } = &mut self.calls {
+            commands.insert(cmd.join(" "), output.to_string());
+        }
+        self
+    }
+
+    /// Runs an allowlisted program with fixed arguments (see [`sys::run`])
+    /// and returns what it printed, whatever its exit code.
+    pub(crate) fn run(&self, cmd: &[&str]) -> Result<String, ReadError> {
+        match &self.calls {
+            Calls::Fixed { commands, .. } => commands
+                .get(&cmd.join(" "))
+                .cloned()
+                .ok_or_else(|| ReadError::Missing(cmd[0].to_string())),
+            Calls::Live => sys::run(cmd),
+        }
     }
 
     /// `abs` (an absolute system path) inside the root.
@@ -286,6 +317,26 @@ pub const REGISTRY: &[ProbeInfo] = &[
         name: disk::TMP,
         description: "where /tmp and /var/tmp live: RAM (tmpfs) or disk",
         run: disk::tmp,
+    },
+    ProbeInfo {
+        name: kernel::SYSCTL,
+        description: "telling kernel settings, and those set in /etc/sysctl.d",
+        run: kernel::sysctl,
+    },
+    ProbeInfo {
+        name: kernel::MODULES,
+        description: "loaded kernel modules and taint flags",
+        run: kernel::modules,
+    },
+    ProbeInfo {
+        name: systemd::STATUS,
+        description: "systemd's overall state and failed units (runs systemctl)",
+        run: systemd::status,
+    },
+    ProbeInfo {
+        name: systemd::OVERRIDES,
+        description: "unit files and drop-ins changed in /etc/systemd/system",
+        run: systemd::overrides,
     },
 ];
 

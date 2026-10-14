@@ -5,7 +5,7 @@ title: From firmware to init
 aliases: [boot sequence, boot process, bootloader, grub, systemd-boot, initramfs, initrd, uefi, bios, secure boot]
 hubs: [boot]
 probes: [boot.info]
-see_also: [boot.cmdline]
+see_also: [boot.cmdline, systemd.units, kernel.modules]
 commands: [systemd-analyze, journalctl, efibootmgr]
 paths: [/boot, /boot/efi]
 ---

@@ -1,0 +1,4 @@
+nvidia 56344576 1 nvidia_modeset, Live 0x0000000000000000 (POE)
+nvidia_modeset 1564672 0 - Live 0x0000000000000000 (POE)
+iwlwifi 487424 1 iwlmvm, Live 0x0000000000000000
+snd_hda_intel 61440 2 - Live 0x0000000000000000

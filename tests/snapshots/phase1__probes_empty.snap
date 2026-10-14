@@ -51,3 +51,23 @@ fs.tmp  where /tmp and /var/tmp live: RAM (tmpfs) or disk
 
   not available on this system
   note: /proc/self/mountinfo: not found
+
+kernel.sysctl  telling kernel settings, and those set in /etc/sysctl.d
+
+  not available on this system
+  note: /proc/sys: not found
+
+kernel.modules  loaded kernel modules and taint flags
+
+  not available on this system
+  note: /proc/modules: not found
+
+systemd.status  systemd's overall state and failed units (runs systemctl)
+
+  not available on this system
+  note: systemctl: not found or not answering (is this a systemd system?)
+
+systemd.overrides  unit files and drop-ins changed in /etc/systemd/system
+
+  not available on this system
+  note: /etc/systemd/system: not found

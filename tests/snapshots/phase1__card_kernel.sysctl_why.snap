@@ -1,0 +1,60 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+10.1  sysctl
+
+TL;DR
+  - Kernel settings are files under /proc/sys. sysctl reads and writes them with
+    dots instead of slashes: vm.swappiness is /proc/sys/vm/swappiness.
+  - sysctl -w changes a setting until the next reboot.
+  - To keep a change, write it in a .conf file in /etc/sysctl.d/: it is applied
+    at every boot.
+
+      sysctl vm.swappiness
+      sudo sysctl -w vm.swappiness=10
+      sudo sysctl --system      # apply every file now
+
+On your machine
+  vm.swappiness                    60  how willing the kernel is to swap
+  vm.overcommit_memory              0  0 guess, 1 always say yes, 2 strict limit
+  kernel.dmesg_restrict             1  1: reading dmesg needs root
+  net.ipv4.ip_forward               1  1: this machine routes packets
+  kernel.sysrq                    176  0 off, 1 all, other: some Alt+SysRq keys
+  fs.inotify.max_user_watches  524288  files a user can watch for changes
+  Set in    vm.swappiness = 10 (/etc/sysctl.d/90-swap.conf)
+            fs.inotify.max_user_watches = 524288 (/etc/sysctl.d/99-inotify.conf)
+
+Pitfalls
+  - Files from /etc/sysctl.d/, /run/sysctl.d/ and /usr/lib/sysctl.d/ are applied
+    in file name order, and the last value wins: give yours a high number, like
+    90-swap.conf.
+  - A setting for a module that isn't loaded yet (such as net.bridge.*) fails at
+    boot: the file is read before the module loads.
+  - Inside a container, many settings are read-only, or only change the
+    container.
+  - Tuning lists copied from the web often do nothing, or harm: change one
+    setting at a time, for a reason you can measure.
+
+Deep dive
+
+  ▾ Why are kernel settings files?
+
+    Exposing them as files in /proc/sys lets any tool read and change them, from
+    cat to a configuration manager. sysctl is a convenience on top. There used
+    to be a sysctl() system call as well; it was rarely used and was removed in
+    kernel 5.5.
+
+  ▾ Which settings are worth knowing?
+
+    vm.swappiness (see 5.3) and vm.overcommit_memory (5.2) for memory.
+    kernel.dmesg_restrict (10.3) and kernel.yama.ptrace_scope (10.4) for what
+    regular users may inspect. net.ipv4.ip_forward lets the machine route
+    packets, which containers and VPN servers need. fs.inotify.max_user_watches
+    is the one to raise when an editor or a build tool runs out of file watches.
+
+Related
+  Commands  sysctl
+  Paths     /proc/sys, /etc/sysctl.d/
+  See also  idk 1.3 /proc and /sys
+  See also  idk 5.3 Swap and swappiness

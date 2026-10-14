@@ -3,5 +3,5 @@ source: tests/phase1.rs
 expression: "render::not_found(&l, PLAIN)"
 ---
 Nothing matches "overcomit".
-Related: idk 5.2 (The OOM killer)
+Related: idk 5.2 (The OOM killer), idk 10.1 (sysctl)
 Search every hub and card: idk search overcomit
