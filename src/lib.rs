@@ -2,6 +2,7 @@
 //! MCP) only call into this library.
 
 pub mod content;
+pub mod mcp;
 pub mod probes;
 pub mod prompt;
 pub mod render;

@@ -3,7 +3,7 @@
 
 use serde::Serialize;
 
-use crate::content::Library;
+use crate::content::{ChapterKind, Library};
 use crate::probes::{self, ProbeCtx, ProbeResult};
 use crate::resolve::{resolve, Resolved, Target, MAX_SUGGESTIONS};
 use crate::search::search;
@@ -91,5 +91,45 @@ pub fn lookup<'a>(lib: &'a Library, query: &str, ctx: &ProbeCtx) -> Lookup<'a> {
         also_card,
         suggestions,
         probes,
+    }
+}
+
+/// The table of contents, for JSON and MCP.
+#[derive(Debug, Serialize)]
+pub struct Toc {
+    pub hubs: Vec<Ref>,
+    pub chapters: Vec<TocChapter>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct TocChapter {
+    pub number: u32,
+    pub title: String,
+    /// The hub that serves as this chapter's page, if any.
+    pub hub: Option<String>,
+    pub cards: Vec<Ref>,
+}
+
+pub fn toc(lib: &Library) -> Toc {
+    Toc {
+        hubs: lib.hubs().map(|h| Target::Hub(h).into()).collect(),
+        chapters: lib
+            .chapters()
+            .iter()
+            .map(|ch| TocChapter {
+                number: ch.number,
+                title: ch.title.clone(),
+                hub: match &ch.kind {
+                    ChapterKind::Hub(id) => Some(id.clone()),
+                    ChapterKind::Plain => None,
+                },
+                cards: ch
+                    .cards
+                    .iter()
+                    .filter_map(|id| lib.card(id))
+                    .map(|c| Target::Card(c).into())
+                    .collect(),
+            })
+            .collect(),
     }
 }

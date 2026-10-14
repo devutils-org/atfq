@@ -9,7 +9,7 @@ use atfq::probes::{self, ProbeCtx};
 use atfq::prompt::{self, SystemInfo};
 use atfq::render::{self, Options};
 use atfq::search::search;
-use atfq::view::{lookup, Match};
+use atfq::view::{self, lookup, Match};
 use atfq::BIN_NAME;
 
 /// Short answers about Linux, from your terminal.
@@ -58,6 +58,8 @@ enum Command {
         #[arg(long)]
         redact: bool,
     },
+    /// Serve the knowledge and probes to AI agents over MCP (stdio, read-only)
+    Mcp,
     /// Browse interactively (also what `idk` alone does in a terminal)
     Tui {
         /// A page to open first
@@ -97,6 +99,15 @@ fn main() -> ExitCode {
     let tty = io::stdin().is_terminal() && io::stdout().is_terminal();
     let (out, code) = match cli.command {
         Some(Command::Tui { query }) => return tui(&lib, ctx, &query),
+        Some(Command::Mcp) => {
+            return match atfq::mcp::serve(lib, ctx) {
+                Ok(()) => ExitCode::SUCCESS,
+                Err(e) => {
+                    eprintln!("{BIN_NAME}: mcp: {e}");
+                    ExitCode::from(INTERNAL)
+                }
+            }
+        }
         None if cli.query.is_empty() && tty => return tui(&lib, ctx, &[]),
         None if cli.query.is_empty() => {
             // Not a terminal: print the help, as for a usage error.
@@ -116,7 +127,7 @@ fn main() -> ExitCode {
             (either(cli.json, &p, || p.text.clone()), ExitCode::SUCCESS)
         }
         Some(Command::Toc) => (
-            either(cli.json, lib.chapters(), || render::toc(&lib, opts)),
+            either(cli.json, &view::toc(&lib), || render::toc(&lib, opts)),
             ExitCode::SUCCESS,
         ),
         Some(Command::Search { words }) => {

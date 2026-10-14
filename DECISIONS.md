@@ -38,3 +38,8 @@ Decisions taken during development that ROADMAP.md does not cover, one line each
 - 2026-10-14 — `--redact` replaces the home directory with `~`, any other `/home/NAME` with `/home/<user>`, and the hostname and username (whole words only) with `<hostname>` / `<user>`. It applies to the whole prompt, the user's question included. — Probe data (mount points, process names) and the question can both leak them.
 - 2026-10-14 — The TUI's `?` shows the prompt for the current page without redaction; `M` frees the mouse to select it. — No clipboard access without a new dependency.
 - 2026-10-14 — Phases 2 and 3 are one commit. — The TUI's `?` key (phase 3) and the prompt builder were written together.
+- 2026-10-14 — MCP with `rmcp` 3.5 (features `server`, `transport-io`, `macros`) and `tokio` on a single-thread runtime, started only by `idk mcp`. — Section 4 names rmcp; the rest of `idk` stays synchronous.
+- 2026-10-14 — Every MCP tool returns its JSON as text content, with the same shapes as `--json` (`view::Lookup`, search hits, `ProbeResult`). — One structure per answer whatever the surface.
+- 2026-10-14 — MCP: `lookup` with no match is a normal result (`"match": "none"` plus suggestions); an unknown probe name is a tool error (`isError`) that lists the valid names. — An agent can recover from both without a protocol error.
+- 2026-10-14 — Every tool carries `readOnlyHint: true` and `openWorldHint: false`, and its description says "Read-only". — Section 8.4: the server must state that it never modifies the system.
+- 2026-10-14 — `idk toc --json` now prints `view::Toc` (hubs, then chapters with card references) instead of the raw `Chapter` list. — Same output as the MCP `toc` tool, and the cards come with titles.
