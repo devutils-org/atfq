@@ -1,0 +1,74 @@
+---
+id: proc.states
+kind: concept
+title: Process states and zombies
+aliases: [zombie, zombies, defunct, process state, process states, ps stat, uninterruptible]
+hubs: []
+probes: [proc.states]
+see_also: []
+commands: [ps, top]
+paths: [/proc/PID/stat, /proc/PID/status]
+---
+
+## TL;DR
+
+- Every process has a one-letter state: **R** running, **S** sleeping,
+  **D** waiting on I/O, **T** stopped, **Z** zombie.
+- Most processes are **S**, waiting for something. That's normal.
+- A **zombie** has already exited. Only its entry is left, until its parent
+  reads how it ended.
+- Zombies use no CPU and almost no memory, but each one holds a PID.
+- You can't kill a zombie: fix or restart its parent.
+
+```
+ps -eo pid,ppid,stat,comm | awk '$3 ~ /^Z/'
+```
+
+## Pitfalls
+
+- `kill -9` on a zombie does nothing: it's already dead. The `PPID` column
+  tells you which parent to look at.
+- A few zombies that come and go are normal. A count that keeps growing
+  means a parent that never collects its children.
+- A process in **D** usually ignores even `kill -9` until its I/O finishes.
+  Many of them at once often points to a slow disk or a hung network mount.
+- **D** processes count in the load average, so the load can be high while
+  the CPUs sit idle.
+- `ps` adds letters after the state: `s` session leader, `+` foreground,
+  `<` high priority, `N` low priority, `l` multithreaded.
+
+## Deep dive
+
+### Why do zombies exist at all?
+
+When a process exits, the kernel frees its memory and closes its files, but
+keeps a small record: its PID, its exit code and the resources it used. The
+parent collects that record with the `wait()` family of system calls. Until
+it does, the dead child shows up as a zombie (`<defunct>` in `ps`).
+
+Without this record, a parent couldn't learn whether its child succeeded,
+failed, or was killed by a signal. Once the parent reads it, the entry
+disappears: the child has been "reaped".
+
+### What happens to children when their parent dies?
+
+They become orphans and are adopted by PID 1 (usually systemd), or by the
+closest ancestor that registered itself as a "subreaper" (possible since
+kernel 3.4). PID 1 collects its adopted children, so their zombies vanish.
+That's why stopping the parent of a zombie gets rid of it.
+
+Containers are the classic trap: if your app runs as PID 1 and never calls
+`wait()`, zombies pile up. A tiny init such as `tini` (what `docker run
+--init` adds) fixes that.
+
+### What's the difference between S and D?
+
+Both are sleeping. In **S** (interruptible sleep), a signal wakes the
+process up: Ctrl-C works. In **D** (uninterruptible sleep), the kernel holds
+signals back, because stopping halfway through would leave something
+inconsistent, usually a disk read or write inside a driver.
+
+D normally lasts milliseconds. When it lasts minutes, the cause is below the
+process: an NFS server that stopped answering, a failing disk, or a driver
+bug. Since kernel 2.6.25 some waits are "killable": `kill -9` gets through,
+even though `ps` still shows D.
