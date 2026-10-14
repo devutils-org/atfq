@@ -93,3 +93,38 @@ bin.path  PATH folders, library path and the dynamic loaders present
 
   not available on this system
   note: /proc/self/environ: not found
+
+proc.top  processes using the most memory and CPU time
+
+  Memory    
+  CPU time  init (0 s, PID 1)
+
+proc.cgroup  cgroup version, your session's cgroup and its memory limit
+
+  not available on this system
+  note: /proc/self/cgroup: not found
+
+fs.fstab  what /etc/fstab mounts, and whether it is mounted now
+
+  not available on this system
+  note: /etc/fstab: not found
+
+dev.udev  local udev rules, next to the packaged ones
+
+  not available on this system
+  note: no udev rules folder: udev isn't used here
+
+net.firewall  firewalld, ufw and nftables services and their state
+
+  not available on this system
+  note: systemctl: no answer, service states unknown
+
+security.lsm  security modules: SELinux or AppArmor, and their mode
+
+  SELinux   enforcing: denials are blocked
+  At boot   SELINUX=enforcing
+
+pkg.manager  package managers in use and their package counts
+
+  not available on this system
+  note: no known package database found

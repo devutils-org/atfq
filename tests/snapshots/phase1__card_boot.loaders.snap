@@ -1,0 +1,45 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+9.3  GRUB vs systemd-boot vs UKI
+
+TL;DR
+  - GRUB is the classic bootloader: menus, many filesystems, BIOS and UEFI. Its
+    configuration is generated (grub.cfg).
+  - systemd-boot is a small UEFI-only menu that reads simple entry files from
+    the EFI partition; bootctl manages it.
+  - A UKI (unified kernel image) bundles kernel, initramfs and command line into
+    one .efi file, which UEFI or systemd-boot starts directly.
+
+      bootctl status
+      efibootmgr -v
+      ls /boot/efi/EFI
+
+On your machine
+  Firmware  UEFI · Secure Boot on
+  Kernel    6.12.48-amd64
+  Cmdline   BOOT_IMAGE=/vmlinuz-6.12.48-amd64
+            root=UUID=3f1c2a9e-8b7d-4e21-9c55-0a6b2d7e9f10 ro rootflags=subvol=@
+            quiet splash
+  Init      systemd · default target graphical.target
+  Loader    systemd-boot 256.4 · 1 unified kernel image(s)
+  Up        3 days, 4 h
+
+Pitfalls
+  - Never edit grub.cfg by hand: it is regenerated (see 9.2).
+  - systemd-boot needs the kernels on a partition UEFI can read, usually the EFI
+    partition: it must be big enough for several kernels.
+  - With a UKI, the command line is part of the signed image: changing it means
+    building the image again.
+  - In dual boot, a Windows update may change the boot order: fix it in the
+    firmware menu or with sudo efibootmgr -o.
+
+Deep dive: 2 questions. Read them with idk 9.3 --why
+
+Related
+  Commands  bootctl, efibootmgr
+  Paths     /boot/grub, /boot/efi/EFI
+  Hub       idk boot Boot
+  See also  idk 9.1 From firmware to init
+  See also  idk 9.2 The kernel command line

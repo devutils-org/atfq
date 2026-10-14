@@ -1,0 +1,51 @@
+---
+id: pkg.formats
+kind: concept
+title: Native packages vs Snap and Flatpak
+aliases: [snap, snaps, flatpak, flathub, appimage, deb, rpm, sandboxed apps]
+hubs: []
+probes: [pkg.manager]
+see_also: [pkg.owner]
+commands: [snap, flatpak]
+paths: [/var/lib/snapd, /var/lib/flatpak]
+---
+
+## TL;DR
+
+- Native packages (deb, rpm, pacman) come from your distro, share its
+  libraries, and are updated with the system.
+- Snap (from Canonical) and Flatpak (mostly from Flathub) ship apps with
+  their own runtime, in a sandbox, whatever the distro version.
+- Snaps update themselves; Flatpaks update with `flatpak update` or your
+  software center.
+
+```
+snap list
+flatpak list --app
+flatpak info --show-permissions org.gimp.GIMP
+```
+
+## Pitfalls
+
+- The same app installed twice (deb and Flatpak, say) gives two menu
+  entries, with separate settings.
+- Sandboxed apps only see part of your files: widen access with
+  `flatpak override` or the Flatseal app.
+- They take more disk space: each app bundles, or shares, a runtime.
+- On Ubuntu, some deb packages (firefox, chromium) only install the snap.
+
+## Deep dive
+
+### Why do they exist?
+
+A distro ships one version of each library for all its apps, so an app
+that needs a newer one waits for the next release. Snap and Flatpak cut
+apps loose from the distro: the developer builds once, and the app runs on
+many distros and versions.
+
+### Snap, Flatpak or AppImage?
+
+Snap has one store, run by Canonical, and also packages server tools and
+even the system itself (Ubuntu Core). Flatpak is for desktop apps, with
+Flathub as the main source. AppImage is a third way: one file you download
+and run, with no install and no sandbox by default.

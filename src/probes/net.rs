@@ -11,6 +11,15 @@ use super::{ProbeCtx, ProbeData, ProbeResult, Status};
 pub(crate) const INTERFACES: &str = "net.interfaces";
 pub(crate) const LISTENING: &str = "net.listening";
 pub(crate) const DNS: &str = "net.dns";
+pub(crate) const FIREWALL: &str = "net.firewall";
+
+const FIREWALL_UNITS: &[&str] = &[
+    "systemctl",
+    "is-active",
+    "firewalld.service",
+    "ufw.service",
+    "nftables.service",
+];
 
 /// The listening list keeps at most this many sockets.
 const LISTEN_MAX: usize = 30;
@@ -356,6 +365,60 @@ pub(crate) fn dns(ctx: &ProbeCtx) -> ProbeResult {
     r
 }
 
+// ----- net.firewall ----------------------------------------------------------
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct Firewall {
+    /// firewalld, ufw and nftables services, and their state.
+    pub services: Vec<(String, String)>,
+    /// `ENABLED=` in /etc/ufw/ufw.conf, when ufw is installed.
+    pub ufw_enabled: Option<bool>,
+}
+
+pub(crate) fn firewall(ctx: &ProbeCtx) -> ProbeResult {
+    let mut notes = Vec::new();
+    let services: Vec<(String, String)> = match ctx.run(FIREWALL_UNITS) {
+        Ok(out) => FIREWALL_UNITS[2..]
+            .iter()
+            .zip(out.lines())
+            .map(|(unit, state)| {
+                (
+                    unit.trim_end_matches(".service").to_string(),
+                    state.trim().to_string(),
+                )
+            })
+            .collect(),
+        Err(_) => {
+            notes.push("systemctl: no answer, service states unknown".to_string());
+            Vec::new()
+        }
+    };
+    let ufw_enabled = ctx.read("/etc/ufw/ufw.conf").ok().map(|t| {
+        t.lines()
+            .any(|l| l.trim().eq_ignore_ascii_case("ENABLED=yes"))
+    });
+    if services.is_empty() && ufw_enabled.is_none() {
+        let mut r = ProbeResult::new(FIREWALL, Status::Unavailable, None);
+        r.notes = notes;
+        return r;
+    }
+    let status = if notes.is_empty() {
+        Status::Ok
+    } else {
+        Status::Partial
+    };
+    let mut r = ProbeResult::new(
+        FIREWALL,
+        status,
+        Some(ProbeData::Firewall(Firewall {
+            services,
+            ufw_enabled,
+        })),
+    );
+    r.notes = notes;
+    r
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -456,6 +519,17 @@ mod tests {
         assert_eq!(l.sockets[0].user.as_deref(), Some("root"));
         assert_eq!(l.sockets[3].pid, Some(4100));
         assert_eq!(r.notes.len(), 1);
+    }
+
+    #[test]
+    fn firewall_state() {
+        let ctx = fixture("laptop").with_command(FIREWALL_UNITS, "inactive\nactive\ninactive\n");
+        let Some(ProbeData::Firewall(f)) = firewall(&ctx).data else {
+            panic!()
+        };
+        assert_eq!(f.services[1], ("ufw".to_string(), "active".to_string()));
+        assert_eq!(f.ufw_enabled, Some(true));
+        assert_eq!(firewall(&fixture("empty")).status, Status::Unavailable);
     }
 
     #[test]

@@ -1,0 +1,37 @@
+---
+source: tests/phase1.rs
+expression: page
+---
+3. Permissions  hub
+
+Who you are to the system, and what decides whether you may read, write or run
+something.
+
+On your machine
+  User      alice (uid 1000, gid 1000)
+  Groups    alice, wheel, docker, 4242
+  Admin     member of wheel: the group sudo usually trusts
+  Umask     0022: new files 644 (rw-r--r--), new folders 755
+
+  Modules   capability, landlock, yama, apparmor
+  AppArmor  enabled · profiles: 2 enforce, 1 complain
+
+Commands
+  id                      your user, your groups
+  ls -l file              owner, group and rights of a file
+  namei -l /path/to/file  rights of every folder on the way to a file
+  sudo -l                 what sudo lets you run
+  getfacl file            extra users and groups allowed (ACL)
+  getenforce              SELinux mode, on Fedora and RHEL
+
+Paths
+  /etc/passwd      accounts: uid, home folder, shell
+  /etc/group       groups and their members
+  /etc/sudoers.d/  who may use sudo, and for what
+
+Cards
+  idk 3.1  rwx, octal and umask
+  idk 3.2  setuid, setgid and sticky bit
+  idk 3.3  sudo and groups
+  idk 3.4  ACLs and capabilities
+  idk 3.5  SELinux and AppArmor

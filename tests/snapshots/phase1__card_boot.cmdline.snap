@@ -20,6 +20,7 @@ On your machine
             root=UUID=3f1c2a9e-8b7d-4e21-9c55-0a6b2d7e9f10 ro rootflags=subvol=@
             quiet splash
   Init      systemd · default target graphical.target
+  Loader    systemd-boot 256.4 · 1 unified kernel image(s)
   Up        3 days, 4 h
 
 Pitfalls

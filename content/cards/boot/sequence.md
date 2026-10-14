@@ -2,10 +2,10 @@
 id: boot.sequence
 kind: concept
 title: From firmware to init
-aliases: [boot sequence, boot process, bootloader, grub, systemd-boot, initramfs, initrd, uefi, bios, secure boot]
+aliases: [boot sequence, boot process, bootloader, initramfs, initrd, uefi, bios, secure boot]
 hubs: [boot]
 probes: [boot.info]
-see_also: [boot.cmdline, systemd.units, kernel.modules]
+see_also: [boot.loaders, boot.targets, boot.cmdline, kernel.modules]
 commands: [systemd-analyze, journalctl, efibootmgr]
 paths: [/boot, /boot/efi]
 ---

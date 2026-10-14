@@ -1,0 +1,40 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+5.4  The page cache
+
+TL;DR
+  - The page cache keeps file data in RAM after it has been read or written, so
+    the next access doesn't touch the disk.
+  - It uses spare memory and shrinks by itself when apps need more: there's
+    nothing to free by hand.
+  - Written data first lands in the cache ("dirty") and reaches the disk within
+    about 30 seconds; sync writes it now.
+
+      free -h
+      grep -E 'Dirty|Writeback' /proc/meminfo
+      sync
+
+On your machine
+  RAM       10.5 GiB available of 15.5 GiB (68%) · 1.1 GiB completely free
+  Cache     7.5 GiB in buff/cache, 604.0 MiB of it shared (tmpfs)
+  Swap      256.0 MiB used of 8.0 GiB · swappiness 60
+
+Pitfalls
+  - Emptying the cache (echo 3 > /proc/sys/vm/drop_caches, as root) is for
+    benchmarks only: the machine is slower afterwards, until it refills.
+  - Pulling out a USB drive right after a copy can lose data still in the cache:
+    eject it, or run sync, first.
+  - A big copy can fill RAM with dirty data, then make every program that writes
+    wait while it drains.
+  - Timing a disk twice in a row times the RAM the second time.
+
+Deep dive: 2 questions. Read them with idk 5.4 --why
+
+Related
+  Commands  free, sync
+  Paths     /proc/meminfo, /proc/sys/vm/drop_caches
+  Hub       idk memory Memory
+  See also  idk 5.1 free vs available
+  See also  idk 5.3 Swap and swappiness

@@ -67,3 +67,10 @@ Decisions taken during development that ROADMAP.md does not cover, one line each
 - 2026-10-14 — `bin.path` reports which dynamic loaders exist (glibc and musl, x86 and ARM) as "programs this system can run". — It is the live answer to "No such file or directory" for a binary that exists.
 - 2026-10-14 — Chapters follow the backlog's order: 12 Libraries & binaries, then 13 Environment & shell, each with its cards in backlog order.
 - 2026-10-14 — In the live block, a label wider than its column keeps one space after it. — `XDG_SESSION_TYPE` was glued to its value.
+- 2026-10-14 — Chapters 3 (Permissions) and 4 (Processes & scheduling) became hub chapters by pointing SUMMARY.md to the new hubs; their cards keep their numbers. — The roadmap's hub list asks for both; no address changes.
+- 2026-10-14 — The `permissions` hub shares its name with an alias of card 3.1: the hub wins and points to the card (the rule from section 7). — "permissions" is first a domain, then a question.
+- 2026-10-14 — The `grub` and `systemd-boot` aliases moved from 9.1 to the new 9.3 card. — The more precise card should answer the more precise word.
+- 2026-10-14 — Seven last probes: `proc.top`, `proc.cgroup`, `fs.fstab`, `dev.udev`, `net.firewall` (systemctl is-active, already allowlisted), `security.lsm`, `pkg.manager`; `boot.info` now reports the bootloader (systemd-boot's LoaderInfo EFI variable, else a GRUB config) and the unified kernel images. — One live answer per new card where the machine can give one.
+- 2026-10-14 — `proc.top` converts CPU ticks with USER_HZ = 100. — It is 100 on every mainstream architecture (x86, ARM); asking sysconf would need a system call per run for no change.
+- 2026-10-14 — ACLs/capabilities (3.4) has no probe. — Listing files with ACLs or capabilities means scanning extended attributes across the disk: too slow for a live block.
+- 2026-10-14 — Fixed a phase 0 bug: "Run" and the command after it were glued ("Runidk 3.1") in a hub that shares its name with a card. A test now covers it.

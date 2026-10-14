@@ -1,0 +1,40 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+3.5  SELinux and AppArmor
+
+TL;DR
+  - Both add a second set of rules on top of rwx: even a process running as root
+    can only do what its policy allows.
+  - SELinux (Fedora, RHEL) labels every file and process. AppArmor (Ubuntu,
+    Debian) gives profiles to programs, by path.
+  - A denial looks like a "Permission denied" that rwx can't explain: look in
+    the audit log.
+
+      getenforce                       # SELinux: Enforcing or Permissive
+      sudo aa-status                   # AppArmor: profiles and their mode
+      sudo ausearch -m avc -ts recent  # recent SELinux denials
+
+On your machine
+  Modules   capability, landlock, yama, apparmor
+  AppArmor  enabled · profiles: 2 enforce, 1 complain
+
+Pitfalls
+  - Don't turn SELinux off to fix a problem. Switch to permissive for a test
+    (sudo setenforce 0), find the denial, then fix the label or the policy.
+  - A file moved with mv keeps its old SELinux label; a copy gets the folder's.
+    sudo restorecon -Rv /path puts the expected labels back.
+  - Serving web files from an unusual folder needs the right SELinux label or
+    boolean (setsebool), on top of the usual rights.
+  - sudo aa-complain PROFILE makes one AppArmor profile log instead of block, to
+    debug a single program.
+
+Deep dive: 2 questions. Read them with idk 3.5 --why
+
+Related
+  Commands  getenforce, setenforce, aa-status, restorecon
+  Paths     /etc/selinux/config, /etc/apparmor.d/
+  Hub       idk permissions Permissions
+  See also  idk 3.1 rwx, octal and umask
+  See also  idk 3.4 ACLs and capabilities

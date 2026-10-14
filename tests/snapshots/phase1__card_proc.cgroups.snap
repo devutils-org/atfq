@@ -1,0 +1,41 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+4.4  cgroups
+
+TL;DR
+  - A cgroup is a group of processes that the kernel measures and limits
+    together: CPU, memory, disk I/O, number of processes.
+  - systemd puts every service and every login session in a cgroup of its own,
+    such as system.slice/nginx.service.
+  - Containers are built on them: a container's memory limit is a cgroup limit.
+
+      systemd-cgls                                   # the tree
+      systemd-cgtop                                  # usage per cgroup, live
+      sudo systemctl set-property nginx.service MemoryMax=1G
+
+On your machine
+  Version   cgroup v2
+  Yours     /user.slice/user-1000.slice/session-2.scope
+  Controls  cpu, memory, pids
+  Memory    limited to 8.0 GiB (set on /user.slice/user-1000.slice)
+
+Pitfalls
+  - A process that reaches its cgroup's memory limit is OOM-killed, even when
+    the machine has free RAM (see 5.2).
+  - systemctl set-property is permanent: add --runtime for a change that ends at
+    the next reboot.
+  - Killing a service's main process can leave its children running;
+    systemctl stop stops the whole cgroup.
+  - Most current distros use cgroup v2 only; some old container tools still
+    expect v1.
+
+Deep dive: 2 questions. Read them with idk 4.4 --why
+
+Related
+  Commands  systemd-cgls, systemd-cgtop, systemctl
+  Paths     /sys/fs/cgroup, /proc/self/cgroup
+  Hub       idk processes Processes & scheduling
+  See also  idk 5.2 The OOM killer
+  See also  idk 11.1 Units and timers

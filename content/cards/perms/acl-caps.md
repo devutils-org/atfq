@@ -1,0 +1,52 @@
+---
+id: perms.acl-caps
+kind: concept
+title: ACLs and capabilities
+aliases: [acl, acls, getfacl, setfacl, capabilities, capability, setcap, getcap, cap_net_bind_service]
+hubs: [permissions]
+probes: []
+see_also: [perms.rwx, perms.special]
+commands: [getfacl, setfacl, getcap, setcap]
+paths: []
+---
+
+## TL;DR
+
+- An ACL gives rights to more people than owner, group and others: "bob
+  may read this file too".
+- A `+` after the rights in `ls -l` means the file has an ACL.
+- Capabilities split root's power into pieces: a program can get one, such
+  as listening on ports under 1024, without running as root.
+
+```
+setfacl -m u:bob:r report.pdf
+getfacl report.pdf
+sudo setcap cap_net_bind_service=+ep ./server
+```
+
+## Pitfalls
+
+- On a file with an ACL, the group rights `ls -l` shows are the ACL's mask:
+  a `chmod g-w` there also takes write access away from every named user.
+- A default ACL on a folder (`setfacl -d -m …`) applies to files created
+  later, not to existing ones: add `-R` for those.
+- Copies drop ACLs unless asked: `cp -a`, `tar --acls`, `rsync -A`.
+- A file's capabilities are lost when the file is replaced, by a rebuild or
+  an update: set them again.
+
+## Deep dive
+
+### How does an ACL work?
+
+It adds entries next to the classic three: named users, named groups, and a
+mask that caps what they and the owning group can get. The kernel checks
+the owner first, then named users, then groups, then others. ext4, btrfs
+and XFS support ACLs without any special setting.
+
+### Which capabilities exist?
+
+About forty. `CAP_NET_BIND_SERVICE` opens ports under 1024,
+`CAP_NET_ADMIN` changes network settings, `CAP_DAC_OVERRIDE` ignores file
+rights, and `CAP_SYS_ADMIN` is a catch-all close to full root. `man 7
+capabilities` lists them all; `grep Cap /proc/self/status` shows the sets
+of a process, as hex numbers that `capsh --decode` translates.

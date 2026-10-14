@@ -30,6 +30,7 @@ fn queries_reach_the_right_page() {
         ("RAM", "5. Memory  hub"),
         ("Memory   Full", "5.1  free vs available"),
         ("proc.states", "4.1  Process states and zombies"),
+        ("processes", "4. Processes & scheduling  hub"),
     ] {
         let out = show(&lib, query, PLAIN);
         assert_eq!(out.lines().next(), Some(first_line), "query `{query}`");
@@ -45,6 +46,17 @@ fn unknown_queries_match_nothing() {
             "`{query}` should not match"
         );
     }
+}
+
+#[test]
+fn hub_points_to_card_sharing_its_name() {
+    // "permissions" is the hub's id and an alias of card 3.1: the hub wins.
+    let out = show(&lib(), "permissions", PLAIN);
+    assert!(
+        out.starts_with("Looking for \"rwx, octal and umask\"? Run idk 3.1\n"),
+        "{out}"
+    );
+    assert!(out.contains("3. Permissions  hub"));
 }
 
 #[test]
@@ -81,19 +93,25 @@ Chapters
       1.2  /tmp vs /var/tmp
       1.3  /proc and /sys
       1.4  Links, inodes and \"disk full\"
+      1.5  fstab and mount options
+      1.6  /dev and udev
    2. Disk  hub: idk disk
-   3. Permissions
+   3. Permissions  hub: idk permissions
       3.1  rwx, octal and umask
       3.2  setuid, setgid and sticky bit
       3.3  sudo and groups
-   4. Processes & scheduling
+      3.4  ACLs and capabilities
+      3.5  SELinux and AppArmor
+   4. Processes & scheduling  hub: idk processes
       4.1  Process states and zombies
       4.2  Signals
       4.3  nice and priorities
+      4.4  cgroups
    5. Memory  hub: idk memory
       5.1  free vs available
       5.2  The OOM killer
       5.3  Swap and swappiness
+      5.4  The page cache
    6. Finding and transforming
       6.1  find
       6.2  grep and regex
@@ -109,9 +127,13 @@ Chapters
    8. Network  hub: idk network
       8.1  Who listens on which port
       8.2  DNS resolution
+      8.3  Interfaces and routes
+      8.4  nftables vs iptables vs ufw
    9. Boot  hub: idk boot
       9.1  From firmware to init
       9.2  The kernel command line
+      9.3  GRUB vs systemd-boot vs UKI
+      9.4  systemd targets
   10. Kernel
       10.1  sysctl
       10.2  Kernel modules
@@ -130,6 +152,9 @@ Chapters
       13.2  Shell startup files
       13.3  Redirections and file descriptors
       13.4  Exit codes
+  14. Packages
+      14.1  Which package owns a file
+      14.2  Native packages vs Snap and Flatpak
 ";
     assert!(toc.ends_with(expected), "{toc}");
 }

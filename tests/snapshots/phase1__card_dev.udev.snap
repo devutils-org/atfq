@@ -1,0 +1,41 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+1.6  /dev and udev
+
+TL;DR
+  - /dev holds device files: /dev/sda (a disk), /dev/ttyUSB0 (a serial adapter),
+    /dev/null. Programs open them like files to talk to drivers.
+  - udev names them when hardware appears, sets their owner and rights, and runs
+    actions, following rules.
+  - /dev/disk/by-id/ and /dev/disk/by-uuid/ hold names that stay the same from
+    one boot to the next.
+
+      ls -l /dev/disk/by-id/
+      udevadm monitor          # plug something in, watch the events
+      udevadm info /dev/sda
+
+On your machine
+  Local     70-keyboard.rules
+  Packaged  2 rules files
+
+Pitfalls
+  - Your own rules go in /etc/udev/rules.d/, named like 70-keyboard.rules. A
+    file there with the same name as a packaged rule replaces it.
+  - After editing a rule, run sudo udevadm control --reload, then unplug and
+    plug the device back (or sudo udevadm trigger).
+  - "Permission denied" on a serial port or a USB device: join its group
+    (dialout or uucp, plugdev) instead of a chmod 666 that udev undoes at the
+    next plug.
+  - /dev/sda and /dev/sdb can swap places: scripts should use /dev/disk/by-id/.
+
+Deep dive: 2 questions. Read them with idk 1.6 --why
+
+Related
+  Commands  udevadm, lsblk
+  Paths     /dev, /dev/disk/by-id/, /etc/udev/rules.d/
+  Hub       idk disk Disk
+  See also  idk 1.5 fstab and mount options
+  See also  idk 10.2 Kernel modules
+  See also  idk 3.3 sudo and groups

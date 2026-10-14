@@ -1,0 +1,8 @@
+Package: bash
+Status: install ok installed
+
+Package: curl
+Status: install ok installed
+
+Package: old-tool
+Status: deinstall ok config-files

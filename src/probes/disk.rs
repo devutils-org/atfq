@@ -8,6 +8,8 @@ use super::{FsSpace, ProbeCtx, ProbeData, ProbeResult, Status};
 
 pub(crate) const NAME: &str = "disk.tree";
 pub(crate) const TMP: &str = "fs.tmp";
+pub(crate) const FSTAB: &str = "fs.fstab";
+pub(crate) const UDEV: &str = "dev.udev";
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct DiskTree {
@@ -183,6 +185,85 @@ pub(crate) fn tmp(ctx: &ProbeCtx) -> ProbeResult {
         })
         .collect();
     ProbeResult::new(TMP, Status::Ok, Some(ProbeData::Tmp(TmpDirs { dirs })))
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct Fstab {
+    pub entries: Vec<FstabEntry>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct FstabEntry {
+    /// `UUID=…`, `/dev/sda1`, `LABEL=…`, a server path…
+    pub source: String,
+    pub mount_point: String,
+    pub fstype: String,
+    pub options: String,
+    /// Whether it is mounted now; `None` for swap.
+    pub mounted: Option<bool>,
+}
+
+/// `fs.fstab`: what /etc/fstab asks for, and whether it is mounted now.
+pub(crate) fn fstab(ctx: &ProbeCtx) -> ProbeResult {
+    let text = match ctx.read("/etc/fstab") {
+        Ok(t) => t,
+        Err(e) => return ProbeResult::failed(FSTAB, e),
+    };
+    let mounts = ctx
+        .read("/proc/self/mountinfo")
+        .map(|t| parse_mountinfo(&t))
+        .ok();
+    let entries = text
+        .lines()
+        .map(str::trim)
+        .filter(|l| !l.is_empty() && !l.starts_with('#'))
+        .filter_map(|l| {
+            let f: Vec<&str> = l.split_whitespace().collect();
+            let (source, point, fstype) = (*f.first()?, *f.get(1)?, *f.get(2)?);
+            let point = unescape(point);
+            let mounted = (fstype != "swap")
+                .then(|| mounts.as_ref().map(|m| m.iter().any(|e| e.point == point)));
+            Some(FstabEntry {
+                source: unescape(source),
+                fstype: fstype.to_string(),
+                options: f.get(3).unwrap_or(&"defaults").to_string(),
+                mounted: mounted.flatten(),
+                mount_point: point,
+            })
+        })
+        .collect();
+    ProbeResult::new(FSTAB, Status::Ok, Some(ProbeData::Fstab(Fstab { entries })))
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct UdevRules {
+    /// Local rules, in /etc/udev/rules.d.
+    pub local: Vec<String>,
+    /// Rules installed by packages.
+    pub packaged: u32,
+}
+
+/// `dev.udev`: local udev rules, next to the packaged ones.
+pub(crate) fn udev(ctx: &ProbeCtx) -> ProbeResult {
+    let rules = |dir: &str| -> Option<Vec<String>> {
+        let list = ctx.list(dir).ok()?;
+        Some(list.into_iter().filter(|f| f.ends_with(".rules")).collect())
+    };
+    let packaged = ["/usr/lib/udev/rules.d", "/lib/udev/rules.d"]
+        .iter()
+        .find_map(|d| rules(d));
+    let local = rules("/etc/udev/rules.d");
+    if packaged.is_none() && local.is_none() {
+        let mut r = ProbeResult::new(UDEV, Status::Unavailable, None);
+        r.notes
+            .push("no udev rules folder: udev isn't used here".to_string());
+        return r;
+    }
+    let data = UdevRules {
+        local: local.unwrap_or_default(),
+        packaged: packaged.map_or(0, |p| p.len() as u32),
+    };
+    ProbeResult::new(UDEV, Status::Ok, Some(ProbeData::Udev(data)))
 }
 
 fn contains(mount_point: &str, path: &str) -> bool {
@@ -375,6 +456,38 @@ mod tests {
         assert!(contains("/", "/var/tmp"));
         assert!(!contains("/tm", "/tmp"));
         assert_eq!(tmp(&fixture("empty")).status, Status::Unavailable);
+    }
+
+    #[test]
+    fn fstab_against_mounts() {
+        let Some(ProbeData::Fstab(f)) = fstab(&laptop()).data else {
+            panic!()
+        };
+        let got: Vec<(&str, &str, Option<bool>)> = f
+            .entries
+            .iter()
+            .map(|e| (e.mount_point.as_str(), e.fstype.as_str(), e.mounted))
+            .collect();
+        assert_eq!(
+            got,
+            [
+                ("/", "btrfs", Some(true)),
+                ("/boot/efi", "vfat", Some(true)),
+                ("none", "swap", None),
+                ("/mnt/nas photos", "nfs", Some(false)),
+            ]
+        );
+        assert_eq!(fstab(&fixture("empty")).status, Status::Unavailable);
+    }
+
+    #[test]
+    fn udev_rules() {
+        let Some(ProbeData::Udev(u)) = udev(&laptop()).data else {
+            panic!()
+        };
+        assert_eq!(u.local, ["70-keyboard.rules"]);
+        assert_eq!(u.packaged, 2);
+        assert_eq!(udev(&fixture("empty")).status, Status::Unavailable);
     }
 
     #[test]

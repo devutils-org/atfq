@@ -1,0 +1,5 @@
+# <file system> <mount point> <type> <options> <dump> <pass>
+UUID=3f1c2a9e-8b7d-4e21-9c55-0a6b2d7e9f10 /               btrfs   subvol=@,noatime 0 0
+UUID=7A2C-1F3B                            /boot/efi       vfat    umask=0077       0 2
+/swapfile                                 none            swap    defaults         0 0
+nas:/photos                               /mnt/nas\040photos nfs   noauto,nofail    0 0

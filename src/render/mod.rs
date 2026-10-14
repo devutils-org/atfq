@@ -288,7 +288,7 @@ pub fn hub_doc(
     let mut page = Page::default();
     if let Some(c) = also_card {
         let spans = [
-            Span::plain(format!("Looking for \"{}\"? Run", c.title)),
+            Span::plain(format!("Looking for \"{}\"? Run ", c.title)),
             open(&c.number.to_string()),
         ];
         page.block(paragraph(&spans, w));

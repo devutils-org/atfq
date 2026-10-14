@@ -35,3 +35,5 @@ Paths
 Cards
   idk 8.1  Who listens on which port
   idk 8.2  DNS resolution
+  idk 8.3  Interfaces and routes
+  idk 8.4  nftables vs iptables vs ufw

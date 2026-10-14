@@ -5,11 +5,13 @@ expression: "render::toc(&lib(), PLAIN)"
 Contents
 
 Hubs
-  idk disk     Disk
-  idk memory   Memory
-  idk cpu      CPU
-  idk network  Network
-  idk boot     Boot
+  idk disk         Disk
+  idk permissions  Permissions
+  idk processes    Processes & scheduling
+  idk memory       Memory
+  idk cpu          CPU
+  idk network      Network
+  idk boot         Boot
 
 Chapters
    1. Filesystem
@@ -17,19 +19,25 @@ Chapters
       1.2  /tmp vs /var/tmp
       1.3  /proc and /sys
       1.4  Links, inodes and "disk full"
+      1.5  fstab and mount options
+      1.6  /dev and udev
    2. Disk  hub: idk disk
-   3. Permissions
+   3. Permissions  hub: idk permissions
       3.1  rwx, octal and umask
       3.2  setuid, setgid and sticky bit
       3.3  sudo and groups
-   4. Processes & scheduling
+      3.4  ACLs and capabilities
+      3.5  SELinux and AppArmor
+   4. Processes & scheduling  hub: idk processes
       4.1  Process states and zombies
       4.2  Signals
       4.3  nice and priorities
+      4.4  cgroups
    5. Memory  hub: idk memory
       5.1  free vs available
       5.2  The OOM killer
       5.3  Swap and swappiness
+      5.4  The page cache
    6. Finding and transforming
       6.1  find
       6.2  grep and regex
@@ -45,9 +53,13 @@ Chapters
    8. Network  hub: idk network
       8.1  Who listens on which port
       8.2  DNS resolution
+      8.3  Interfaces and routes
+      8.4  nftables vs iptables vs ufw
    9. Boot  hub: idk boot
       9.1  From firmware to init
       9.2  The kernel command line
+      9.3  GRUB vs systemd-boot vs UKI
+      9.4  systemd targets
   10. Kernel
       10.1  sysctl
       10.2  Kernel modules
@@ -66,3 +78,6 @@ Chapters
       13.2  Shell startup files
       13.3  Redirections and file descriptors
       13.4  Exit codes
+  14. Packages
+      14.1  Which package owns a file
+      14.2  Native packages vs Snap and Flatpak

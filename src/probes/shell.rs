@@ -51,7 +51,7 @@ fn environ(ctx: &ProbeCtx) -> Result<Vec<(String, String)>, super::ReadError> {
 }
 
 /// Our uid's login shell and home, from /proc/self/status and /etc/passwd.
-fn account(ctx: &ProbeCtx) -> (Option<String>, Option<String>) {
+pub(crate) fn account(ctx: &ProbeCtx) -> (Option<String>, Option<String>) {
     let uid = ctx.read("/proc/self/status").ok().and_then(|s| {
         s.lines()
             .find_map(|l| l.strip_prefix("Uid:"))

@@ -64,6 +64,16 @@ pub fn laptop() -> ProbeCtx {
             ],
             "backup.service loaded failed failed Nightly backup\n",
         )
+        .with_command(
+            &[
+                "systemctl",
+                "is-active",
+                "firewalld.service",
+                "ufw.service",
+                "nftables.service",
+            ],
+            "inactive\nactive\ninactive\n",
+        )
 }
 
 /// Renders a query the way `idk` prints it, against the laptop fixture.

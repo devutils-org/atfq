@@ -2,7 +2,9 @@
 
 use super::text::{wrap, Kind, Line, Span};
 use super::INDENT;
-use crate::probes::{BinPath, ShellEnv, Startup};
+use crate::probes::{
+    BinPath, CgroupInfo, Firewall, Fstab, Lsm, Packages, ShellEnv, Startup, TopProcesses, UdevRules,
+};
 use crate::probes::{
     BlockDevice, BootInfo, CpuSummary, DiskTree, DnsConfig, FsSpace, Identity, Listening,
     MemSummary, Modules, Mount, NetInterfaces, Overrides, ProbeData, ProbeResult, ProcInfo,
@@ -53,6 +55,13 @@ pub(crate) fn result(r: &ProbeResult, w: usize) -> Vec<Line> {
         (_, Some(ProbeData::Env(e))) => shell_env(e, w),
         (_, Some(ProbeData::Startup(s))) => startup(s, w),
         (_, Some(ProbeData::BinPath(p))) => bin_path(p, w),
+        (_, Some(ProbeData::Top(t))) => top(t, w),
+        (_, Some(ProbeData::Cgroup(c))) => cgroup(c, w),
+        (_, Some(ProbeData::Fstab(f))) => fstab(f, w),
+        (_, Some(ProbeData::Udev(u))) => udev(u, w),
+        (_, Some(ProbeData::Firewall(f))) => firewall(f, w),
+        (_, Some(ProbeData::Lsm(l))) => lsm(l, w),
+        (_, Some(ProbeData::Packages(p))) => packages(p, w),
         (_, None) => Vec::new(),
     };
     for note in &r.notes {
@@ -510,6 +519,13 @@ fn boot(b: &BootInfo, w: usize) -> Vec<Line> {
         };
         out.extend(row("Init", &text, w));
     }
+    if let Some(l) = &b.bootloader {
+        let mut text = l.clone();
+        if b.ukis > 0 {
+            text.push_str(&format!(" · {} unified kernel image(s)", b.ukis));
+        }
+        out.extend(row("Loader", &text, w));
+    }
     if let Some(u) = b.uptime_secs {
         out.extend(row("Up", &duration(u), w));
     }
@@ -808,6 +824,156 @@ fn bin_path(p: &BinPath, w: usize) -> Vec<Line> {
         },
         w,
     ));
+    out
+}
+
+fn top(t: &TopProcesses, w: usize) -> Vec<Line> {
+    let list = |entries: &[crate::probes::TopEntry], unit: &dyn Fn(u64) -> String| {
+        entries
+            .iter()
+            .map(|e| format!("{} ({}, PID {})", e.name, unit(e.amount), e.pid))
+            .collect::<Vec<_>>()
+            .join(", ")
+    };
+    let mut out = row("Memory", &list(&t.by_memory, &|b| size(b)), w);
+    out.extend(row("CPU time", &list(&t.by_cpu, &|s| duration_short(s)), w));
+    out
+}
+
+/// `42 s`, `3 min 5 s`, `2 h 4 min`.
+fn duration_short(secs: u64) -> String {
+    match secs {
+        0..60 => format!("{secs} s"),
+        60..3600 => format!("{} min {} s", secs / 60, secs % 60),
+        _ => format!("{} h {} min", secs / 3600, secs % 3600 / 60),
+    }
+}
+
+fn cgroup(c: &CgroupInfo, w: usize) -> Vec<Line> {
+    let mut out = row("Version", &format!("cgroup v{}", c.version), w);
+    out.extend(row("Yours", &c.path, w));
+    if !c.controllers.is_empty() {
+        out.extend(row("Controls", &c.controllers.join(", "), w));
+    }
+    out.extend(row(
+        "Memory",
+        &match &c.memory_limit {
+            Some((n, at)) => format!("limited to {} (set on {at})", size(*n)),
+            None => "no limit on your session".to_string(),
+        },
+        w,
+    ));
+    out
+}
+
+fn fstab(f: &Fstab, w: usize) -> Vec<Line> {
+    if f.entries.is_empty() {
+        return row(
+            "Entries",
+            "none: mounts come from systemd units or the initramfs",
+            w,
+        );
+    }
+    let mut out = Vec::new();
+    for (i, e) in f.entries.iter().enumerate() {
+        let state = match e.mounted {
+            Some(true) => "mounted",
+            Some(false) => "NOT mounted",
+            None => "swap",
+        };
+        let text = format!(
+            "{} ({}, {}) from {} · {state}",
+            e.mount_point, e.fstype, e.options, e.source
+        );
+        out.extend(row(if i == 0 { "Entries" } else { "" }, &text, w));
+    }
+    out
+}
+
+fn udev(u: &UdevRules, w: usize) -> Vec<Line> {
+    let mut out = row(
+        "Local",
+        &if u.local.is_empty() {
+            "no rules of your own in /etc/udev/rules.d".to_string()
+        } else {
+            u.local.join(", ")
+        },
+        w,
+    );
+    out.extend(row("Packaged", &format!("{} rules files", u.packaged), w));
+    out
+}
+
+fn firewall(f: &Firewall, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    for (name, state) in &f.services {
+        out.extend(row(name, state, w));
+    }
+    if let Some(on) = f.ufw_enabled {
+        out.extend(row(
+            "ufw.conf",
+            if on { "ENABLED=yes" } else { "ENABLED=no" },
+            w,
+        ));
+    }
+    let active = f.services.iter().any(|(_, s)| s == "active") || f.ufw_enabled == Some(true);
+    if !active {
+        out.extend(row(
+            "Summary",
+            "no firewall service active: rules, if any, were set another way",
+            w,
+        ));
+    }
+    out
+}
+
+fn lsm(l: &Lsm, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if !l.modules.is_empty() {
+        out.extend(row("Modules", &l.modules.join(", "), w));
+    }
+    match l.selinux_enforcing {
+        Some(true) => out.extend(row("SELinux", "enforcing: denials are blocked", w)),
+        Some(false) => out.extend(row("SELinux", "permissive: denials are only logged", w)),
+        None => {}
+    }
+    if let Some(c) = &l.selinux_config {
+        out.extend(row("At boot", &format!("SELINUX={c}"), w));
+    }
+    if l.apparmor {
+        let text = if l.apparmor_profiles.is_empty() {
+            "enabled".to_string()
+        } else {
+            let modes: Vec<String> = l
+                .apparmor_profiles
+                .iter()
+                .map(|(m, n)| format!("{n} {m}"))
+                .collect();
+            format!("enabled · profiles: {}", modes.join(", "))
+        };
+        out.extend(row("AppArmor", &text, w));
+    }
+    if l.selinux_enforcing.is_none() && !l.apparmor {
+        out.extend(row("MAC", "neither SELinux nor AppArmor is active", w));
+    }
+    out
+}
+
+fn packages(p: &Packages, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    for (name, count) in &p.native {
+        let text = match count {
+            Some(n) => format!("{n} packages"),
+            None => "installed (count with: rpm -qa | wc -l)".to_string(),
+        };
+        out.extend(row(name, &text, w));
+    }
+    if let Some(n) = p.snaps {
+        out.extend(row("Snap", &format!("{n} snaps"), w));
+    }
+    if let Some(n) = p.flatpaks {
+        out.extend(row("Flatpak", &format!("{n} apps"), w));
+    }
     out
 }
 

@@ -193,8 +193,10 @@ fn clicking_a_pane_focuses_it() {
 fn keyboard_only() {
     let lib = lib();
     let mut t = Tui::new(&lib);
-    // TOC: first entry is the Disk hub, then Memory.
-    t.key(KeyCode::Down);
+    // TOC hubs: Disk, Permissions, Processes, Memory…
+    for _ in 0..3 {
+        t.key(KeyCode::Down);
+    }
     t.key(KeyCode::Enter);
     assert_eq!(t.app.current(), Some("memory"));
 

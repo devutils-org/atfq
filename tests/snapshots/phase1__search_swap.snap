@@ -9,6 +9,8 @@ Results for "swap"
               free -h: RAM and swap, in human units
   idk 5.2     The OOM killer
               When RAM and swap are both used up, the kernel's OOM ("out of m…
+  idk 1.6     /dev and udev
+              /dev/sda and /dev/sdb can swap places: scripts should use
   idk 5.1     free vs available
               available: what your apps can still get without swapping.
   idk 10.1    sysctl

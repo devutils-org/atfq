@@ -11,7 +11,9 @@ mod disk;
 mod kernel;
 mod mem;
 mod net;
+mod pkg;
 mod proc;
+mod security;
 mod shell;
 mod sys;
 mod systemd;
@@ -28,10 +30,14 @@ use serde::Serialize;
 pub use boot::{BootInfo, Firmware};
 pub use cpu::CpuSummary;
 pub use disk::{BlockDevice, DiskTree, Mount, Partition, TmpDir, TmpDirs};
+pub use disk::{Fstab, FstabEntry, UdevRules};
 pub use kernel::{Modules, Sysctl, SysctlSetting, SysctlValue};
 pub use mem::MemSummary;
+pub use net::Firewall;
 pub use net::{DnsConfig, Interface, Listener, Listening, NetInterfaces};
-pub use proc::{ProcInfo, ProcStates};
+pub use pkg::Packages;
+pub use proc::{CgroupInfo, ProcInfo, ProcStates, TopEntry, TopProcesses};
+pub use security::Lsm;
 pub use shell::{BinPath, PathEntry, ShellEnv, Startup};
 pub use sys::{FsSpace, IfAddr};
 pub use systemd::{DropIn, FailedUnit, Overrides, SystemdStatus};
@@ -71,6 +77,13 @@ pub enum ProbeData {
     Env(ShellEnv),
     Startup(Startup),
     BinPath(BinPath),
+    Top(TopProcesses),
+    Cgroup(CgroupInfo),
+    Fstab(Fstab),
+    Udev(UdevRules),
+    Firewall(Firewall),
+    Lsm(Lsm),
+    Packages(Packages),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -357,6 +370,41 @@ pub const REGISTRY: &[ProbeInfo] = &[
         name: shell::PATH,
         description: "PATH folders, library path and the dynamic loaders present",
         run: shell::path,
+    },
+    ProbeInfo {
+        name: proc::TOP,
+        description: "processes using the most memory and CPU time",
+        run: proc::top,
+    },
+    ProbeInfo {
+        name: proc::CGROUP,
+        description: "cgroup version, your session's cgroup and its memory limit",
+        run: proc::cgroup,
+    },
+    ProbeInfo {
+        name: disk::FSTAB,
+        description: "what /etc/fstab mounts, and whether it is mounted now",
+        run: disk::fstab,
+    },
+    ProbeInfo {
+        name: disk::UDEV,
+        description: "local udev rules, next to the packaged ones",
+        run: disk::udev,
+    },
+    ProbeInfo {
+        name: net::FIREWALL,
+        description: "firewalld, ufw and nftables services and their state",
+        run: net::firewall,
+    },
+    ProbeInfo {
+        name: security::LSM,
+        description: "security modules: SELinux or AppArmor, and their mode",
+        run: security::lsm,
+    },
+    ProbeInfo {
+        name: pkg::NAME,
+        description: "package managers in use and their package counts",
+        run: pkg::probe,
     },
 ];
 

@@ -1,0 +1,39 @@
+---
+source: tests/phase1.rs
+expression: page
+---
+4. Processes & scheduling  hub
+
+What's running, who started it, what it costs, and how to stop it.
+
+On your machine
+  Total     8 processes: 1 running, 3 sleeping, 1 waiting on I/O (D), 1 idle
+            kernel thread, 2 zombies
+  Zombies   PID 4242 worker (old), parent 4100 supervisor
+            PID 4300 orphan-job, parent 9999
+  Waiting   PID 5000 rsync, parent 1 systemd
+
+  Memory    supervisor (793.0 MiB, PID 4100), rsync (239.3 MiB, PID 5000),
+            systemd (11.7 MiB, PID 1)
+  CPU time  rsync (1 min 35 s, PID 5000), supervisor (25 s, PID 4100), systemd
+            (5 s, PID 1), kthreadd (0 s, PID 2), kworker/0:0-events (0 s, PID 3)
+
+Commands
+  ps aux --sort=-%mem | head  processes using the most memory
+  top                         live view; press M for memory, P for CPU
+  pgrep -a nginx              find processes by name, with their command
+  pstree -p                   who started whom, with PIDs
+  kill 1234                   ask a process to stop
+  systemd-cgls                processes grouped by service and session
+
+Paths
+  /proc/PID/        everything about one process
+  /proc/PID/status  state, memory, threads, owner
+
+Cards
+  idk 4.1  Process states and zombies
+  idk 4.2  Signals
+  idk 4.3  nice and priorities
+  idk 4.4  cgroups
+  idk 7.1  Load average
+  idk 5.2  The OOM killer
