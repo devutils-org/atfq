@@ -901,12 +901,19 @@ fn welcome(lib: &Library, width: usize) -> Doc {
         width,
     ));
     lines.push(Line::default());
+    let left = lib
+        .hubs()
+        .map(|h| render::width(&h.id) + BIN_NAME.len() + 1)
+        .max()
+        .unwrap_or(0);
     for h in lib.hubs() {
         let open = Action::Open(h.id.clone());
+        let cmd = format!("{BIN_NAME} {}", h.id);
+        let pad = left - render::width(&cmd) + 2;
         lines.push(Line::new(vec![
             Span::plain("  "),
-            Span::new(format!("{BIN_NAME} {}", h.id), Kind::Code).with(open.clone()),
-            Span::plain("  "),
+            Span::new(cmd, Kind::Code).with(open.clone()),
+            Span::plain(" ".repeat(pad)),
             Span::plain(&h.title).with(open),
         ]));
     }

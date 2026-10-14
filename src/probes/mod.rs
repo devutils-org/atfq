@@ -21,9 +21,7 @@ mod user;
 
 use std::collections::BTreeMap;
 use std::io;
-#[cfg(test)]
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 
@@ -213,7 +211,61 @@ impl ProbeCtx {
 
     /// `abs` (an absolute system path) inside the root.
     pub(crate) fn path(&self, abs: &str) -> PathBuf {
-        self.root.join(abs.trim_start_matches('/'))
+        if self.root == Path::new("/") {
+            return PathBuf::from(abs);
+        }
+        self.resolve(abs, true)
+    }
+
+    /// `abs` inside the root, following symbolic links the way a chroot
+    /// would: an absolute target starts again from the root, never from the
+    /// host's `/`. With `follow_last` false, the last component stays a link
+    /// (for `read_link`).
+    fn resolve(&self, abs: &str, follow_last: bool) -> PathBuf {
+        /// Like the kernel's limit, so a loop of links ends.
+        const MAX_LINKS: usize = 40;
+        let mut todo: Vec<String> = abs
+            .split('/')
+            .filter(|c| !c.is_empty())
+            .rev()
+            .map(str::to_string)
+            .collect();
+        let mut done: Vec<String> = Vec::new();
+        let mut links = 0;
+        while let Some(part) = todo.pop() {
+            match part.as_str() {
+                "." => continue,
+                ".." => {
+                    done.pop();
+                    continue;
+                }
+                _ => {}
+            }
+            let here: PathBuf = std::iter::once(self.root.clone())
+                .chain(done.iter().chain(std::iter::once(&part)).map(PathBuf::from))
+                .collect();
+            let is_last = todo.is_empty();
+            match std::fs::read_link(&here) {
+                Ok(target) if (follow_last || !is_last) && links < MAX_LINKS => {
+                    links += 1;
+                    let target = target.to_string_lossy().into_owned();
+                    if target.starts_with('/') {
+                        done.clear();
+                    }
+                    todo.extend(
+                        target
+                            .split('/')
+                            .filter(|c| !c.is_empty())
+                            .rev()
+                            .map(str::to_string),
+                    );
+                }
+                _ => done.push(part),
+            }
+        }
+        std::iter::once(self.root.clone())
+            .chain(done.into_iter().map(PathBuf::from))
+            .collect()
     }
 
     pub(crate) fn read(&self, abs: &str) -> Result<String, ReadError> {
@@ -226,7 +278,12 @@ impl ProbeCtx {
 
     /// Where a symbolic link points, as written in the link.
     pub(crate) fn read_link(&self, abs: &str) -> Option<String> {
-        std::fs::read_link(self.path(abs))
+        let path = if self.root == Path::new("/") {
+            PathBuf::from(abs)
+        } else {
+            self.resolve(abs, false)
+        };
+        std::fs::read_link(path)
             .ok()
             .map(|p| p.to_string_lossy().into_owned())
     }
@@ -499,6 +556,39 @@ mod tests {
                 [Status::NeedsRoot, Status::NeedsRoot, Status::Unavailable]
             );
         }
+    }
+
+    #[test]
+    fn links_stay_inside_the_root() {
+        use std::fs;
+        use std::os::unix::fs::symlink;
+
+        let root = std::env::temp_dir().join(format!("atfq-links-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(root.join("etc/authselect")).unwrap();
+        fs::create_dir_all(root.join("usr/lib")).unwrap();
+        fs::write(root.join("etc/authselect/nsswitch.conf"), "hosts: files dns\n").unwrap();
+        fs::write(root.join("usr/lib/os-release"), "ID=test\n").unwrap();
+        // Absolute, relative, and through a linked folder.
+        symlink("/etc/authselect/nsswitch.conf", root.join("etc/nsswitch.conf")).unwrap();
+        symlink("../usr/lib/os-release", root.join("etc/os-release")).unwrap();
+        symlink("usr/lib", root.join("lib")).unwrap();
+        symlink("/etc/passwd", root.join("etc/host-passwd")).unwrap();
+        symlink("loop", root.join("loop")).unwrap();
+
+        let ctx = ProbeCtx::fixture(&root);
+        let read = |p: &str| ctx.read(p).ok();
+        assert_eq!(read("/etc/nsswitch.conf").as_deref(), Some("hosts: files dns\n"));
+        assert_eq!(read("/etc/os-release").as_deref(), Some("ID=test\n"));
+        assert_eq!(read("/lib/os-release").as_deref(), Some("ID=test\n"));
+        // Never the host's /etc/passwd.
+        assert_eq!(read("/etc/host-passwd"), None);
+        assert_eq!(read("/loop"), None);
+        assert_eq!(
+            ctx.read_link("/etc/nsswitch.conf").as_deref(),
+            Some("/etc/authselect/nsswitch.conf")
+        );
+        fs::remove_dir_all(&root).unwrap();
     }
 
     #[test]
