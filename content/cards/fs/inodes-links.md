@@ -2,7 +2,7 @@
 id: fs.inodes-links
 kind: concept
 title: Links, inodes and "disk full"
-aliases: [inode, inodes, hard link, symlink, symbolic link, ln, links, no space left, disk full, df -i]
+aliases: [inode, inodes, hard link, symlink, symbolic link, ln, links, no space left, no space left on device, disk full, df -i]
 hubs: [disk]
 probes: [disk.tree]
 see_also: [fs.hierarchy]

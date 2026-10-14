@@ -21,6 +21,7 @@ paths: []
 find . -name '*.log'                   # by name, here and below
 find ~/Downloads -type f -size +100M   # files over 100 MiB
 find /var/log -type f -mtime -1        # changed in the last 24 hours
+find . -name '*.tmp' -delete           # only after checking the list
 ```
 
 ## Pitfalls

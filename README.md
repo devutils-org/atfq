@@ -108,6 +108,11 @@ binary, as `which idk` prints it):
 - The environment can hold secrets: probes only read a short list of
   well-known variables.
 
+## Showing it to someone
+
+`docs/demo.md` is a ten-minute demo script: what to type, what to say, and
+what to check each answer against.
+
 ## Development
 
 ```

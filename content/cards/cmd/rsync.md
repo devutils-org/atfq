@@ -23,6 +23,7 @@ paths: []
 ```
 rsync -av --dry-run src/ backup/
 rsync -av src/ backup/
+rsync -av --delete src/ backup/     # an exact mirror: removes extra files
 rsync -avz photos/ alice@nas:/data/photos/
 ```
 

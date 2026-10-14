@@ -15,6 +15,8 @@ TL;DR
 
       rsync -av --dry-run src/ backup/
       rsync -av src/ backup/
+      rsync -av --delete src/ backup/     # an exact mirror: removes extra files
+      ⚠ changes or deletes data: check what it targets first
       rsync -avz photos/ alice@nas:/data/photos/
 
 Pitfalls
