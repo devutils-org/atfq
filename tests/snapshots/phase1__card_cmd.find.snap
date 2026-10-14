@@ -1,0 +1,35 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+6.1  find
+
+TL;DR
+  - find walks a folder and everything under it, and prints each path that
+    matches your tests.
+  - Give the folder first, then the tests: -name, -type, -size, -mtime.
+  - Put patterns in quotes so your shell leaves them alone.
+
+      find . -name '*.log'                   # by name, here and below
+      find ~/Downloads -type f -size +100M   # files over 100 MiB
+      find /var/log -type f -mtime -1        # changed in the last 24 hours
+
+Pitfalls
+  - Without quotes, *.log is expanded by your shell before find sees it, and you
+    get wrong results or a "paths must precede expression" error.
+  - -delete has no undo. Run the command without it first and check the list.
+    Put it last: find . -delete -name '*.tmp' deletes everything.
+  - -size -1M matches only empty files, because sizes are rounded up to the
+    unit. Use -size -1024k instead.
+  - -name looks at the file name only. Use -path to match the whole path, and
+    -iname to ignore case.
+  - Piping into xargs breaks on names with spaces. Use -exec ... {} +, or
+    -print0 | xargs -0.
+  - Add 2>/dev/null to hide "Permission denied" noise, knowing it hides real
+    errors too.
+
+Deep dive: 3 questions. Read them with idk 6.1 --why
+
+Related
+  Commands  find, xargs
+  Hub       idk disk Disk

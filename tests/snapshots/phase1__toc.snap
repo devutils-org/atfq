@@ -1,0 +1,20 @@
+---
+source: tests/phase1.rs
+expression: "render::toc(&lib(), PLAIN)"
+---
+Contents
+
+Hubs
+  idk disk    Disk
+  idk memory  Memory
+
+Chapters
+  1. Filesystem
+  2. Disk  hub: idk disk
+  3. Permissions
+  4. Processes & scheduling
+     4.1  Process states and zombies
+  5. Memory  hub: idk memory
+     5.1  free vs available
+  6. Finding and transforming
+     6.1  find

@@ -1,33 +1,14 @@
 //! Phase 0 acceptance: the embedded content is valid, every query from the
 //! roadmap lands on the right page, and the CLI behaves.
 
+mod common;
+
 use std::process::Command;
 
-use atfq::content::Library;
-use atfq::render::{self, Options};
+use atfq::probes::run_all;
+use atfq::render;
 use atfq::resolve::{resolve, Resolved};
-
-const PLAIN: Options = Options {
-    why: false,
-    color: false,
-};
-const WHY: Options = Options {
-    why: true,
-    color: false,
-};
-
-fn lib() -> Library {
-    Library::embedded().unwrap_or_else(|e| panic!("{e}"))
-}
-
-/// Renders a query the way `idk` prints it.
-fn show(lib: &Library, query: &str, opts: Options) -> String {
-    match resolve(lib, query) {
-        Resolved::Hub { hub, also_card } => render::hub(lib, hub, also_card, opts),
-        Resolved::Card(card) => render::card(lib, card, opts),
-        Resolved::NotFound => panic!("`{query}` matched nothing"),
-    }
-}
+use common::{laptop, lib, show, PLAIN, WHY};
 
 #[test]
 fn embedded_content_is_valid() {
@@ -79,9 +60,13 @@ fn deep_dive_only_with_why() {
 }
 
 #[test]
-fn live_block_is_a_placeholder_for_now() {
+fn live_block_shows_probe_results() {
     let lib = lib();
-    assert!(show(&lib, "free", PLAIN).contains("probes: not implemented yet (mem.summary)"));
+    let out = show(&lib, "free", PLAIN);
+    assert!(
+        out.contains("On your machine\n  RAM      10.5 GiB available of 15.5 GiB"),
+        "{out}"
+    );
     // `find` has no probe: no live block at all.
     assert!(!show(&lib, "find", PLAIN).contains("On your machine"));
 }
@@ -107,9 +92,16 @@ Chapters
 #[test]
 fn output_fits_80_columns_and_has_no_prompt_signs() {
     let lib = lib();
+    let ctx = laptop();
     let mut pages = vec![render::toc(&lib, WHY)];
-    pages.extend(lib.hubs().map(|h| render::hub(&lib, h, None, WHY)));
-    pages.extend(lib.cards().map(|c| render::card(&lib, c, WHY)));
+    pages.extend(
+        lib.hubs()
+            .map(|h| render::hub(&lib, h, None, &run_all(&h.probes, &ctx), WHY)),
+    );
+    pages.extend(
+        lib.cards()
+            .map(|c| render::card(&lib, c, &run_all(&c.probes, &ctx), WHY)),
+    );
     for page in pages {
         for line in page.lines() {
             assert!(line.chars().count() <= 80, "too wide: {line:?}");
@@ -128,7 +120,7 @@ fn dangerous_commands_are_marked() {
     // Not in the card itself, so check through a rendered snippet.
     let mut card = find.clone();
     card.tldr = "```\nfind . -name '*.tmp' -delete\n```".into();
-    let out = render::card(&lib, &card, PLAIN);
+    let out = render::card(&lib, &card, &[], PLAIN);
     assert!(out.contains("⚠ changes or deletes data"), "{out}");
 }
 

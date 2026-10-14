@@ -1,0 +1,34 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+5.1  free vs available
+
+TL;DR
+  - free: memory nobody is using at all, not even as cache.
+  - available: what your apps can still get without swapping.
+  - Look at available, not free: the available column of the Mem: line in
+    free -h.
+
+      free -h
+
+On your machine
+  RAM      10.5 GiB available of 15.5 GiB (68%) · 1.1 GiB completely free
+  Cache    7.5 GiB in buff/cache, 604.0 MiB of it shared (tmpfs)
+  Swap     256.0 MiB used of 8.0 GiB · swappiness 60
+
+Pitfalls
+  - "free" near zero is normal: Linux fills spare RAM with page cache (file data
+    kept in RAM so it doesn't have to be read from disk again).
+  - That cache is handed back as soon as an app needs the memory.
+  - Not all of buff/cache can be handed back: files in tmpfs, like /dev/shm,
+    live there too. "available" already accounts for that.
+  - A little swap in use is not a problem by itself. What hurts is constant
+    swapping: watch the si and so columns of vmstat 1.
+
+Deep dive: 3 questions. Read them with idk 5.1 --why
+
+Related
+  Commands  free, vmstat
+  Paths     /proc/meminfo
+  Hub       idk memory Memory

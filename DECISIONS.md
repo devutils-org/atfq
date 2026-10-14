@@ -16,3 +16,15 @@ Decisions taken during development that ROADMAP.md does not cover, one line each
 - 2026-10-14 — `build.rs` with `rerun-if-changed=content`. — `include_dir!` does not see new files without it.
 - 2026-10-14 — A hub page lists its own chapter's cards first, then its `cards` field. — Otherwise the Memory hub would not link to 5.1.
 - 2026-10-14 — Text width = number of chars, without `unicode-width`. — Content is mostly ASCII; avoids a dependency.
+- 2026-10-14 — Added `libc` for `statvfs` (one small `unsafe` call). — std has no statvfs; `nix` or `rustix` would be much bigger for a single call.
+- 2026-10-14 — Added `serde_json` (JSON output) and `insta` (snapshots, dev only). — Both listed in section 4.
+- 2026-10-14 — `ProbeCtx` takes filesystem space from a fixed table in tests instead of statvfs. — statvfs on a fixture dir would return the host's numbers, and snapshots would change from machine to machine.
+- 2026-10-14 — `disk.tree` matches mounts by device number, or else by source path (`/dev/vdb1`, `/dev/mapper/NAME`). — btrfs subvolumes report an anonymous device number (0:NN), as on the dev VM.
+- 2026-10-14 — `disk.tree` hides loop and ram devices and devices of size 0, and says how many it hid. — Snaps and container tools create dozens of them.
+- 2026-10-14 — buff/cache = Buffers + Cached + SReclaimable. — Same formula as procps-ng `free`; checked against `free -k` on the dev VM.
+- 2026-10-14 — Rotational disks are shown as "rotational", not "HDD". — Virtual disks often report rotational=1; "HDD" would be wrong there.
+- 2026-10-14 — Fuzzy matching: edit distance with transpositions on ids, aliases and titles; allowed distance 1 (≤4 letters), 2 (≤8), 3 beyond, plus typed prefixes; nothing under 3 letters. The closest page is shown with a note. — `memroy` → Memory, while a random short word doesn't open a random page.
+- 2026-10-14 — When nothing matches, the suggestions come from `search` (which tolerates one typo in words of 5+ letters). — `idk swapiness` then points to Memory and 5.1.
+- 2026-10-14 — `--json` works on every command (`toc`, `search`, `probe`), not only on queries. — Cheap, and the MCP server (phase 4) needs the same structures.
+- 2026-10-14 — `idk probe` without a name lists the probes. `idk search` without a match exits with 1, like a query. — Discoverability; consistent exit codes.
+- 2026-10-14 — `view::Lookup` (query, match kind, entry, suggestions, probe results) is the view model shared by text, JSON and later surfaces. — Section 5 data flow.

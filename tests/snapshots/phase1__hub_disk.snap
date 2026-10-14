@@ -1,0 +1,36 @@
+---
+source: tests/phase1.rs
+expression: page
+---
+2. Disk  hub
+
+Everything about storage devices: what's plugged in, how full it is, how it's
+mounted.
+
+On your machine
+  nvme0n1         476.9 GiB  SSD · Samsung SSD 980 PRO 500GB
+    nvme0n1p1     512.0 MiB  vfat   /boot/efi   256.0 MiB free (50%)
+    nvme0n1p2     476.4 GiB  btrfs  / (+2)      120.0 GiB free (30%)
+    nvme0n1p10      1.0 MiB
+  sda              30.0 GiB  rotational · removable · USB DISK 3.0
+    (whole disk)             exfat  /media/usb
+  zram0             8.0 GiB  SSD · swap
+  2 loop or empty devices not shown
+
+Commands
+  lsblk                      tree of disks and partitions
+  df -h                      free space per mounted filesystem
+  du -sh *                   size of each item in this folder
+  findmnt                    mount points and their options
+  find / -xdev -type f -size +1G 2>/dev/null
+                             files over 1 GiB on the root filesystem
+  iostat -x 1                live disk activity (package sysstat)
+  sudo smartctl -a /dev/sda  disk health (package smartmontools)
+
+Paths
+  /dev/disk/by-uuid/     stable names for disks and partitions
+  /sys/block/DEV/queue/  I/O scheduler, rotational flag
+  /etc/fstab             what gets mounted at boot
+
+Cards
+  idk 6.1  find

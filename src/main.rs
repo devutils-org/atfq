@@ -2,10 +2,13 @@ use std::io::{self, IsTerminal, Write};
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
+use serde::Serialize;
 
 use atfq::content::Library;
+use atfq::probes::{self, ProbeCtx};
 use atfq::render::{self, Options};
-use atfq::resolve::{resolve, Resolved};
+use atfq::search::search;
+use atfq::view::{lookup, Match};
 use atfq::BIN_NAME;
 
 /// Short answers about Linux, from your terminal.
@@ -25,6 +28,10 @@ struct Cli {
     #[arg(long)]
     why: bool,
 
+    /// Print structured JSON instead of text
+    #[arg(long, global = true)]
+    json: bool,
+
     #[command(subcommand)]
     command: Option<Command>,
 }
@@ -33,11 +40,27 @@ struct Cli {
 enum Command {
     /// Show the table of contents
     Toc,
+    /// Search the text of every hub and card
+    Search {
+        #[arg(required = true, value_name = "WORDS")]
+        words: Vec<String>,
+    },
+    /// Run one probe and show what it found; without a name, list the probes
+    Probe { name: Option<String> },
 }
 
 /// Exit codes: 0 success, 1 no match, 2 usage error (clap), 3 internal error.
 const NO_MATCH: u8 = 1;
 const INTERNAL: u8 = 3;
+
+/// Results shown by `idk search`.
+const SEARCH_LIMIT: usize = 10;
+
+/// What to print, and where.
+enum Out {
+    Stdout(String),
+    Stderr(String),
+}
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
@@ -52,31 +75,91 @@ fn main() -> ExitCode {
         why: cli.why,
         color: color_enabled(),
     };
+    let ctx = ProbeCtx::system();
 
-    let (text, code) = match cli.command {
-        Some(Command::Toc) => (render::toc(&lib, opts), ExitCode::SUCCESS),
+    let (out, code) = match cli.command {
+        Some(Command::Toc) => (
+            either(cli.json, lib.chapters(), || render::toc(&lib, opts)),
+            ExitCode::SUCCESS,
+        ),
+        Some(Command::Search { words }) => {
+            let query = words.join(" ");
+            let hits = search(&lib, &query, SEARCH_LIMIT);
+            let code = exit(!hits.is_empty());
+            (
+                either(cli.json, &hits, || render::search(&query, &hits, opts)),
+                code,
+            )
+        }
+        Some(Command::Probe { name: None }) => (
+            either(cli.json, probes::REGISTRY, || {
+                render::probe_list(probes::REGISTRY, opts)
+            }),
+            ExitCode::SUCCESS,
+        ),
+        Some(Command::Probe { name: Some(name) }) => match probes::find(&name) {
+            Some(info) => {
+                let r = info.run(&ctx);
+                (
+                    either(cli.json, &r, || render::probe(info, &r, opts)),
+                    ExitCode::SUCCESS,
+                )
+            }
+            None => (
+                Out::Stderr(format!(
+                    "No probe named \"{name}\".\n{}",
+                    render::probe_list(probes::REGISTRY, opts)
+                )),
+                exit(false),
+            ),
+        },
         None => {
             let query = cli.query.join(" ");
-            match resolve(&lib, &query) {
-                Resolved::Hub { hub, also_card } => {
-                    (render::hub(&lib, hub, also_card, opts), ExitCode::SUCCESS)
+            let l = lookup(&lib, &query, &ctx);
+            let found = l.matched != Match::None;
+            let out = if cli.json {
+                Out::Stdout(json(&l))
+            } else {
+                match render::lookup(&lib, &l, opts) {
+                    Some(page) => Out::Stdout(page),
+                    None => Out::Stderr(render::not_found(&l, opts)),
                 }
-                Resolved::Card(card) => (render::card(&lib, card, opts), ExitCode::SUCCESS),
-                Resolved::NotFound => {
-                    eprint!("{}", render::not_found(&query, opts));
-                    return ExitCode::from(NO_MATCH);
-                }
-            }
+            };
+            (out, exit(found))
         }
     };
+
+    let written = match out {
+        Out::Stdout(s) => io::stdout().lock().write_all(s.as_bytes()),
+        Out::Stderr(s) => io::stderr().lock().write_all(s.as_bytes()),
+    };
     // A closed pipe (`idk find | head`) is not an error worth reporting.
-    match io::stdout().lock().write_all(text.as_bytes()) {
+    match written {
         Err(e) if e.kind() != io::ErrorKind::BrokenPipe => {
             eprintln!("{BIN_NAME}: {e}");
             ExitCode::from(INTERNAL)
         }
         _ => code,
     }
+}
+
+fn exit(found: bool) -> ExitCode {
+    if found {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::from(NO_MATCH)
+    }
+}
+
+fn either<T: Serialize + ?Sized>(as_json: bool, value: &T, text: impl FnOnce() -> String) -> Out {
+    Out::Stdout(if as_json { json(value) } else { text() })
+}
+
+fn json<T: Serialize + ?Sized>(value: &T) -> String {
+    // Serializing plain structs and strings can't fail.
+    let mut s = serde_json::to_string_pretty(value).expect("serializable");
+    s.push('\n');
+    s
 }
 
 /// Colors only on a terminal, and never when NO_COLOR is set (no-color.org).

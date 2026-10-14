@@ -1,0 +1,21 @@
+---
+source: tests/phase1.rs
+expression: out
+---
+mem.summary  RAM and swap: total, free, available, cache, swappiness
+
+  RAM      2.0 GiB total · 500.0 MiB completely free
+  Cache    800.8 MiB in buff/cache
+  Swap     none
+  note: no MemAvailable in /proc/meminfo (kernel older than 3.14)
+  note: /proc/sys/vm/swappiness: can't read it
+
+disk.tree  disks, partitions, mount points and free space
+
+  sda  20.0 GiB
+  note: /proc/self/mountinfo: can't read it, mount points unknown
+
+proc.states  number of processes in each state, zombies included
+
+  Total    1 process: 1 sleeping
+  Zombies  none

@@ -8,7 +8,7 @@ pub mod danger;
 
 use std::fmt;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize, Serializer};
 
 pub use library::{Chapter, ChapterKind, Library, LoadError};
 
@@ -19,6 +19,12 @@ pub struct Number {
     pub section: u32,
 }
 
+impl Serialize for Number {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        s.collect_str(self)
+    }
+}
+
 impl fmt::Display for Number {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}.{}", self.chapter, self.section)
@@ -26,7 +32,7 @@ impl fmt::Display for Number {
 }
 
 /// A concept card: one precise question, answered.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Card {
     pub id: String,
     pub title: String,
@@ -48,14 +54,14 @@ pub struct Card {
 }
 
 /// A deep dive question and its Markdown answer.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Question {
     pub title: String,
     pub body: String,
 }
 
 /// A hub: the entry point for a device or a domain.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Hub {
     pub id: String,
     pub title: String,
@@ -72,14 +78,14 @@ pub struct Hub {
     pub source: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct HubCommand {
     pub cmd: String,
     pub desc: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct HubPath {
     pub path: String,

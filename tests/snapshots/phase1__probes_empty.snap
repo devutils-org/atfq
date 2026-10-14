@@ -1,0 +1,18 @@
+---
+source: tests/phase1.rs
+expression: out
+---
+mem.summary  RAM and swap: total, free, available, cache, swappiness
+
+  not available on this system
+  note: /proc/meminfo: not found
+
+disk.tree  disks, partitions, mount points and free space
+
+  not available on this system
+  note: /sys/block: not found
+
+proc.states  number of processes in each state, zombies included
+
+  not available on this system
+  note: /proc: not found

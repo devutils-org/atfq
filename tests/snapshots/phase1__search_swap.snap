@@ -1,0 +1,9 @@
+---
+source: tests/phase1.rs
+expression: "render::search(\"swap\", &search(&lib, \"swap\", 10), PLAIN)"
+---
+Results for "swap"
+  idk memory  Memory
+              free -h: RAM and swap, in human units
+  idk 5.1     free vs available
+              available: what your apps can still get without swapping.

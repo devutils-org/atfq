@@ -5,6 +5,7 @@ use std::collections::{BTreeMap, HashMap};
 use std::fmt;
 
 use include_dir::{include_dir, Dir};
+use serde::Serialize;
 
 use super::entry::{self, Entry};
 use super::summary;
@@ -20,7 +21,7 @@ const SUMMARY: &str = "SUMMARY.md";
 const RESERVED: &[&str] = &["toc", "search", "probe", "ask", "tui", "mcp", "help"];
 
 /// A chapter of the table of contents.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Chapter {
     pub number: u32,
     pub title: String,
@@ -29,7 +30,8 @@ pub struct Chapter {
     pub cards: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(tag = "kind", content = "hub", rename_all = "snake_case")]
 pub enum ChapterKind {
     /// A plain chapter: a title grouping cards.
     Plain,

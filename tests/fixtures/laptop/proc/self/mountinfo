@@ -1,0 +1,9 @@
+23 1 0:31 /@ / rw,relatime shared:1 - btrfs /dev/nvme0n1p2 rw,ssd,subvol=/@
+24 23 0:31 /@home /home rw,relatime shared:2 - btrfs /dev/nvme0n1p2 rw,ssd,subvol=/@home
+25 23 0:31 /@data /var/lib/my\040data rw,relatime shared:3 - btrfs /dev/nvme0n1p2 rw,ssd
+26 23 259:1 / /boot/efi rw,relatime shared:4 - vfat /dev/nvme0n1p1 rw
+27 23 0:5 / /dev rw,nosuid shared:5 - devtmpfs devtmpfs rw
+28 23 0:22 / /proc rw,nosuid shared:6 - proc proc rw
+29 23 8:0 / /media/usb rw,nosuid shared:7 - exfat /dev/sda rw
+30 23 0:31 /@home /home rw,relatime shared:2 - btrfs /dev/nvme0n1p2 rw
+not a mountinfo line
