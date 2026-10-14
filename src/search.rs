@@ -134,10 +134,11 @@ fn term_score(term: &str, text: &str) -> u32 {
     best
 }
 
-/// The first body line that holds a query word, cleaned of Markdown marks.
+/// The first line that holds a query word, cleaned of Markdown marks: from
+/// the text first (TL;DR, pitfalls, deep dive), then commands and paths.
 fn snippet(terms: &[String], fields: &Fields) -> Option<String> {
     let mut body: Vec<&(u32, String)> = fields.iter().filter(|(w, _)| *w < KEYS).collect();
-    body.sort_by_key(|f| Reverse(f.0));
+    body.sort_by_key(|&&(w, _)| (w == REFS, Reverse(w)));
     let line = body
         .iter()
         .flat_map(|(_, text)| text.lines())

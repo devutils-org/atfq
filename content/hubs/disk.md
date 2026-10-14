@@ -16,7 +16,7 @@ paths:
   - { path: "/dev/disk/by-uuid/", desc: "stable names for disks and partitions" }
   - { path: "/sys/block/DEV/queue/", desc: "I/O scheduler, rotational flag" }
   - { path: "/etc/fstab", desc: "what gets mounted at boot" }
-cards: [cmd.find]
+cards: [fs.tmp, fs.inodes-links, cmd.find]
 ---
 
 Everything about storage devices: what's plugged in, how full it is, how it's

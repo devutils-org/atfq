@@ -1,0 +1,29 @@
+---
+source: tests/phase1.rs
+expression: page
+---
+7. CPU  hub
+
+What your processor is, how busy it is, and who keeps it busy.
+
+On your machine
+  CPU       11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz · 8 logical CPUs
+  Load      1.25, 0.90, 0.62 over 1, 5 and 15 minutes, for 8 CPUs
+  Tasks     2 running right now, 1043 in all
+  Governor  powersave
+
+Commands
+  nproc            number of CPUs you can use
+  lscpu            model, cores, threads and caches
+  uptime           load average over 1, 5 and 15 minutes
+  top              busiest processes; press 1 for one line per CPU
+  mpstat -P ALL 1  usage of each CPU every second (package sysstat)
+
+Paths
+  /proc/cpuinfo             one block per logical CPU
+  /proc/loadavg             load average and task counts
+  /sys/devices/system/cpu/  online CPUs, frequency, governor
+
+Cards
+  idk 7.1  Load average
+  idk 4.3  nice and priorities

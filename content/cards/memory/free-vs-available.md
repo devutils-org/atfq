@@ -5,7 +5,7 @@ title: free vs available
 aliases: [free, available, ram usage, meminfo, memory full, buff/cache]
 hubs: [memory]
 probes: [mem.summary]
-see_also: []
+see_also: [memory.swap, memory.oom-killer]
 commands: [free, vmstat]
 paths: [/proc/meminfo]
 ---

@@ -7,3 +7,4 @@
 29 23 8:0 / /media/usb rw,nosuid shared:7 - exfat /dev/sda rw
 30 23 0:31 /@home /home rw,relatime shared:2 - btrfs /dev/nvme0n1p2 rw
 not a mountinfo line
+31 23 0:28 / /tmp rw,nosuid,nodev shared:8 - tmpfs tmpfs rw,size=8159112k,nr_inodes=1048576

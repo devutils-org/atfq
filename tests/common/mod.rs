@@ -32,23 +32,26 @@ pub fn fixture(name: &str) -> ProbeCtx {
     )
 }
 
-/// The `laptop` fixture, with filesystem space for its mounts.
+fn space(total: u64, available: u64, inodes_total: u64, inodes_free: u64) -> FsSpace {
+    FsSpace {
+        total,
+        available,
+        inodes_total,
+        inodes_free,
+    }
+}
+
+/// The `laptop` fixture, with filesystem space and IP addresses.
 pub fn laptop() -> ProbeCtx {
     fixture("laptop")
-        .with_space(
-            "/",
-            FsSpace {
-                total: 400 * GIB,
-                available: 120 * GIB,
-            },
-        )
-        .with_space(
-            "/boot/efi",
-            FsSpace {
-                total: GIB / 2,
-                available: GIB / 4,
-            },
-        )
+        .with_space("/", space(400 * GIB, 120 * GIB, 0, 0))
+        .with_space("/boot/efi", space(GIB / 2, GIB / 4, 0, 0))
+        .with_space("/tmp", space(8 * GIB, 7 * GIB, 2_000_000, 1_998_000))
+        .with_addr("lo", "127.0.0.1/8")
+        .with_addr("lo", "::1/128")
+        .with_addr("wlp0s20f3", "192.168.1.23/24")
+        .with_addr("wlp0s20f3", "fe80::8ec6:81ff:fe2a:107f/64")
+        .with_addr("docker0", "172.17.0.1/16")
 }
 
 /// Renders a query the way `idk` prints it, against the laptop fixture.

@@ -33,4 +33,6 @@ Paths
   /etc/fstab             what gets mounted at boot
 
 Cards
+  idk 1.2  /tmp vs /var/tmp
+  idk 1.4  Links, inodes and "disk full"
   idk 6.1  find

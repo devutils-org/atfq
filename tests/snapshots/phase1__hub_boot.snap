@@ -1,0 +1,33 @@
+---
+source: tests/phase1.rs
+expression: page
+---
+9. Boot  hub
+
+From power button to login prompt: firmware, bootloader, kernel, init.
+
+On your machine
+  Firmware  UEFI · Secure Boot on
+  Kernel    6.12.48-amd64
+  Cmdline   BOOT_IMAGE=/vmlinuz-6.12.48-amd64
+            root=UUID=3f1c2a9e-8b7d-4e21-9c55-0a6b2d7e9f10 ro rootflags=subvol=@
+            quiet splash
+  Init      systemd · default target graphical.target
+  Up        3 days, 4 h
+
+Commands
+  systemd-analyze        how long the last boot took, by stage
+  systemd-analyze blame  services, slowest first
+  journalctl -b -p err   errors logged since this boot
+  systemctl get-default  the target the system boots into
+  efibootmgr             UEFI boot entries and their order
+  uname -r               the running kernel
+
+Paths
+  /proc/cmdline      options the kernel was started with
+  /boot              kernels and initramfs images
+  /etc/default/grub  GRUB settings, kernel options included
+
+Cards
+  idk 9.1  From firmware to init
+  idk 9.2  The kernel command line

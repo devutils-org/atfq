@@ -7,6 +7,7 @@ use serde::Serialize;
 use super::{FsSpace, ProbeCtx, ProbeData, ProbeResult, Status};
 
 pub(crate) const NAME: &str = "disk.tree";
+pub(crate) const TMP: &str = "fs.tmp";
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct DiskTree {
@@ -144,6 +145,54 @@ pub(crate) fn probe(ctx: &ProbeCtx) -> ProbeResult {
     r
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct TmpDirs {
+    pub dirs: Vec<TmpDir>,
+}
+
+/// Where a temporary directory lives.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct TmpDir {
+    pub path: String,
+    /// The mount that holds it: itself when it is a separate mount.
+    pub mount_point: String,
+    pub fstype: String,
+    pub space: Option<FsSpace>,
+}
+
+/// `fs.tmp`: is /tmp in RAM (tmpfs) or on disk, and how much room it has.
+pub(crate) fn tmp(ctx: &ProbeCtx) -> ProbeResult {
+    let mounts = match ctx.read("/proc/self/mountinfo") {
+        Ok(t) => parse_mountinfo(&t),
+        Err(e) => return ProbeResult::failed(TMP, e),
+    };
+    let dirs = ["/tmp", "/var/tmp"]
+        .iter()
+        .filter_map(|path| {
+            // The deepest mount point that contains the path holds it.
+            let m = mounts
+                .iter()
+                .filter(|m| contains(&m.point, path))
+                .max_by_key(|m| m.point.len())?;
+            Some(TmpDir {
+                path: path.to_string(),
+                mount_point: m.point.clone(),
+                fstype: m.fstype.clone(),
+                space: ctx.space(&m.point),
+            })
+        })
+        .collect();
+    ProbeResult::new(TMP, Status::Ok, Some(ProbeData::Tmp(TmpDirs { dirs })))
+}
+
+fn contains(mount_point: &str, path: &str) -> bool {
+    mount_point == "/"
+        || path == mount_point
+        || path
+            .strip_prefix(mount_point)
+            .is_some_and(|rest| rest.starts_with('/'))
+}
+
 /// Size in bytes. sysfs counts in 512-byte sectors, whatever the hardware.
 fn sectors(ctx: &ProbeCtx, dir: &str) -> u64 {
     ctx.read_trimmed(&format!("{dir}/size"))
@@ -221,20 +270,23 @@ mod tests {
 
     fn laptop() -> ProbeCtx {
         fixture("laptop")
-            .with_space(
-                "/",
-                FsSpace {
-                    total: 400 * GIB,
-                    available: 120 * GIB,
-                },
-            )
-            .with_space(
-                "/boot/efi",
-                FsSpace {
-                    total: GIB / 2,
-                    available: GIB / 4,
-                },
-            )
+            .with_space("/", space(400 * GIB, 120 * GIB, 0, 0))
+            .with_space("/boot/efi", space(GIB / 2, GIB / 4, 0, 0))
+            .with_space("/tmp", space(8 * GIB, 7 * GIB, 2_000_000, 1_998_000))
+            .with_addr("lo", "127.0.0.1/8")
+            .with_addr("lo", "::1/128")
+            .with_addr("wlp0s20f3", "192.168.1.23/24")
+            .with_addr("wlp0s20f3", "fe80::8ec6:81ff:fe2a:107f/64")
+            .with_addr("docker0", "172.17.0.1/16")
+    }
+
+    fn space(total: u64, available: u64, inodes_total: u64, inodes_free: u64) -> FsSpace {
+        FsSpace {
+            total,
+            available,
+            inodes_total,
+            inodes_free,
+        }
     }
 
     fn tree(ctx: &ProbeCtx) -> DiskTree {
@@ -307,6 +359,22 @@ mod tests {
         let r = probe(&fixture("empty"));
         assert_eq!(r.status, Status::Unavailable);
         assert_eq!(r.notes, ["/sys/block: not found"]);
+    }
+
+    #[test]
+    fn finds_where_tmp_lives() {
+        let Some(ProbeData::Tmp(t)) = tmp(&laptop()).data else {
+            panic!()
+        };
+        let got: Vec<(&str, &str, &str)> = t
+            .dirs
+            .iter()
+            .map(|d| (d.path.as_str(), d.mount_point.as_str(), d.fstype.as_str()))
+            .collect();
+        assert_eq!(got, [("/tmp", "/tmp", "tmpfs"), ("/var/tmp", "/", "btrfs")]);
+        assert!(contains("/", "/var/tmp"));
+        assert!(!contains("/tm", "/tmp"));
+        assert_eq!(tmp(&fixture("empty")).status, Status::Unavailable);
     }
 
     #[test]

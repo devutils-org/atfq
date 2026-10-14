@@ -1,0 +1,30 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+4.3  nice and priorities
+
+TL;DR
+  - Niceness goes from -20 (greedy) to 19 (polite). The default is 0.
+  - A higher niceness gives a process a smaller share of the CPUs when they are
+    busy. When they're idle, it changes nothing.
+  - Anyone can make their own process nicer; making it greedier needs root.
+
+      nice -n 10 make -j8          # start a build at low priority
+      renice -n 5 -p 1234          # change a running process
+      ionice -c3 rsync -a src/ dst/  # use the disk only when idle
+
+Pitfalls
+  - Niceness only shares the CPU: a nice process can still fill the RAM or keep
+    the disk busy.
+  - ionice only has an effect with an I/O scheduler that honors priorities, such
+    as BFQ: check /sys/block/DEV/queue/scheduler.
+  - In top, NI is the niceness and PR the kernel's priority: 20 + niceness for
+    normal processes.
+
+Deep dive: 2 questions. Read them with idk 4.3 --why
+
+Related
+  Commands  nice, renice, ionice, chrt
+  Hub       idk cpu CPU
+  See also  idk 7.1 Load average

@@ -14,5 +14,40 @@ disk.tree  disks, partitions, mount points and free space
 
 proc.states  number of processes in each state, zombies included
 
-  Total    1 process: 1 sleeping
-  Zombies  none
+  Total     1 process: 1 sleeping
+  Zombies   none
+
+cpu.summary  CPU model and count, load average, frequency governor
+
+  not available on this system
+  note: /proc/cpuinfo: not found
+
+net.interfaces  network interfaces, their addresses, and the default route
+
+  not available on this system
+  note: /sys/class/net: not found
+
+net.listening  TCP and UDP ports open for connections, and who owns them
+
+  not available on this system
+  note: /proc/net/tcp: not found
+
+net.dns  DNS servers, search domains and name lookup order
+
+  not available on this system
+  note: /etc/resolv.conf: not found
+
+boot.info  firmware, Secure Boot, kernel command line, init, uptime
+
+  not available on this system
+  note: /proc: no kernel, command line or uptime
+
+user.identity  current user, groups and umask
+
+  not available on this system
+  note: /proc/self/status: not found
+
+fs.tmp  where /tmp and /var/tmp live: RAM (tmpfs) or disk
+
+  not available on this system
+  note: /proc/self/mountinfo: not found

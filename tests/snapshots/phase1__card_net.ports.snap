@@ -1,0 +1,43 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+8.1  Who listens on which port
+
+TL;DR
+  - A program that accepts connections listens on a port: 22 for SSH, 443 for
+    HTTPS.
+  - On 0.0.0.0 or [::], it accepts connections from every network. On 127.0.0.1
+    or [::1], only from this machine.
+  - ss lists them. Seeing which process owns another user's port needs root.
+
+      ss -tulpn          # TCP, UDP, listening, with processes, numeric
+      sudo ss -tulpn
+
+On your machine
+  TCP       0.0.0.0:22      all interfaces     user root
+  TCP       [::]:22         all interfaces     user root
+  TCP       127.0.0.1:631   this machine only  user root
+  TCP       127.0.0.1:8080  this machine only  supervisor (PID 4100)
+  UDP       0.0.0.0:5353    all interfaces     user avahi
+  note: the process of a socket owned by another user needs root: sudo ss -tulpn
+
+Pitfalls
+  - netstat is the old tool (package net-tools), often not installed: ss
+    replaced it.
+  - Listening on 0.0.0.0 doesn't mean reachable from the Internet: a firewall or
+    your router can still block it.
+  - Ports published by Docker bypass ufw rules, because Docker writes its own
+    firewall rules.
+  - Listening on a port under 1024 needs root or the CAP_NET_BIND_SERVICE
+    capability.
+  - "Address already in use" means another process holds the port: find it with
+    sudo ss -ltnp 'sport = :8080'.
+
+Deep dive: 2 questions. Read them with idk 8.1 --why
+
+Related
+  Commands  ss
+  Paths     /proc/net/tcp
+  Hub       idk network Network
+  See also  idk 3.2 setuid, setgid and sticky bit

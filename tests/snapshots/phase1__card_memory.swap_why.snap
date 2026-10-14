@@ -1,0 +1,54 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+5.3  Swap and swappiness
+
+TL;DR
+  - Swap is disk space the kernel uses as overflow for RAM: app memory that is
+    rarely touched moves there.
+  - A little swap in use is fine. Constant swapping in and out is what makes a
+    machine slow.
+  - zram is swap in compressed RAM: no disk involved. Fedora uses it by default.
+
+      swapon --show
+      vmstat 1        # si and so: swapped in and out, per second
+
+On your machine
+  RAM       10.5 GiB available of 15.5 GiB (68%) · 1.1 GiB completely free
+  Cache     7.5 GiB in buff/cache, 604.0 MiB of it shared (tmpfs)
+  Swap      256.0 MiB used of 8.0 GiB · swappiness 60
+
+Pitfalls
+  - No swap at all doesn't make a machine faster: the kernel can then only drop
+    file cache, and the OOM killer comes sooner.
+  - Hibernation writes the RAM to swap: it needs a swap partition or file large
+    enough for the RAM in use. zram can't be used for it.
+  - A swap file on btrfs needs special settings (no copy-on-write, no
+    compression): create it with btrfs filesystem mkswapfile.
+  - swapoff -a on a busy machine pulls everything back into RAM, and can wake
+    the OOM killer.
+
+Deep dive
+
+  ▾ Why swap out when RAM is still free?
+
+    The kernel balances two uses of RAM: app memory and file cache. An app page
+    nobody touched for hours is worth less than file data in active use, so
+    moving it out makes the machine faster overall. vm.swappiness sets that
+    balance (see 5.1).
+
+  ▾ Swap partition, swap file or zram?
+
+    A partition is the classic setup. A swap file performs as well on current
+    kernels and is easier to resize. zram keeps compressed pages in RAM, often
+    at about half their size: it suits laptops and small machines, and it costs
+    some CPU instead of disk time. Some setups combine zram first and a disk
+    swap behind it.
+
+Related
+  Commands  swapon, vmstat
+  Paths     /proc/swaps, /proc/sys/vm/swappiness
+  Hub       idk memory Memory
+  See also  idk 5.1 free vs available
+  See also  idk 5.2 The OOM killer

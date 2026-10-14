@@ -1,0 +1,39 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+3.3  sudo and groups
+
+TL;DR
+  - sudo runs one command as root, if /etc/sudoers (or a file in
+    /etc/sudoers.d/) allows it.
+  - Usually one group gets that right: sudo on Debian and Ubuntu, wheel on
+    Fedora. On Arch, you enable the wheel line yourself.
+  - Group changes apply at your next login, not in shells already open.
+
+      id                              # your user and groups
+      sudo -l                         # what sudo lets you run
+      sudo usermod -aG docker alice   # add alice to the docker group
+
+On your machine
+  User      alice (uid 1000, gid 1000)
+  Groups    alice, wheel, docker, 4242
+  Admin     member of wheel: the group sudo usually trusts
+  Umask     0022: new files 644 (rw-r--r--), new folders 755
+
+Pitfalls
+  - usermod -G without -a replaces all your extra groups. Always -aG.
+  - Edit sudoers with visudo: it checks the syntax, and a broken sudoers can
+    lock everyone out of sudo.
+  - Being in the docker group is as good as being root: whoever can talk to the
+    Docker daemon can mount the whole disk into a container.
+  - sudo echo x > /etc/file fails: the redirection runs in your shell, not as
+    root. Use echo x | sudo tee /etc/file.
+  - To use a new group without logging out, run newgrp docker in that shell.
+
+Deep dive: 2 questions. Read them with idk 3.3 --why
+
+Related
+  Commands  sudo, id, usermod, visudo
+  Paths     /etc/sudoers, /etc/sudoers.d/, /etc/group
+  See also  idk 3.1 rwx, octal and umask

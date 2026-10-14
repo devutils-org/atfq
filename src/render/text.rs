@@ -169,7 +169,12 @@ pub(crate) fn wrap(spans: &[Span], first: &Line, rest: &Line, max: usize) -> Vec
     let mut len = first.width();
     let mut empty = true;
     let mut prev_action: Option<Action> = None;
-    for word in words(spans) {
+    // A word longer than a whole line (a token, a hash) is cut; code isn't.
+    let room = max.saturating_sub(rest.width()).max(1);
+    let words = words(spans)
+        .into_iter()
+        .flat_map(|word| split_long(word, room));
+    for word in words {
         let w: usize = word.iter().map(|s| width(&s.text)).sum();
         if !empty && len + 1 + w > max {
             lines.push(std::mem::replace(&mut line, rest.clone()).trim_end());
@@ -195,6 +200,24 @@ pub(crate) fn wrap(spans: &[Span], first: &Line, rest: &Line, max: usize) -> Vec
         lines.push(line.trim_end());
     }
     lines
+}
+
+/// Cuts a one-style, non-code word that is wider than `room` into pieces.
+fn split_long(word: Vec<Span>, room: usize) -> Vec<Vec<Span>> {
+    let w: usize = word.iter().map(|s| width(&s.text)).sum();
+    if w <= room || word.len() != 1 || word[0].kind == Kind::Code {
+        return vec![word];
+    }
+    let chars: Vec<char> = word[0].text.chars().collect();
+    chars
+        .chunks(room)
+        .map(|c| {
+            vec![Span {
+                text: c.iter().collect(),
+                ..word[0].clone()
+            }]
+        })
+        .collect()
 }
 
 /// Splits spans into words. A word can mix styles (`**free**:`).
@@ -262,6 +285,25 @@ mod tests {
         ];
         let lines = wrap(&spans, &Line::default(), &Line::default(), 9);
         assert_eq!(texts(&lines), ["run", "free -h,", "then look"]);
+    }
+
+    #[test]
+    fn cuts_overlong_words_but_not_code() {
+        let long = "x".repeat(25);
+        let lines = wrap(
+            &[Span::plain(format!("a {long}"))],
+            &Line::default(),
+            &Line::spaces(2),
+            12,
+        );
+        assert_eq!(texts(&lines), ["a xxxxxxxxxx", "  xxxxxxxxxx", "  xxxxx"]);
+        let code = wrap(
+            &[Span::new(long.clone(), Kind::Code)],
+            &Line::default(),
+            &Line::default(),
+            12,
+        );
+        assert_eq!(texts(&code), [long]);
     }
 
     #[test]

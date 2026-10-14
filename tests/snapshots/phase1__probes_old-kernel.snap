@@ -4,9 +4,9 @@ expression: out
 ---
 mem.summary  RAM and swap: total, free, available, cache, swappiness
 
-  RAM      2.0 GiB total · 500.0 MiB completely free
-  Cache    800.8 MiB in buff/cache
-  Swap     none
+  RAM       2.0 GiB total · 500.0 MiB completely free
+  Cache     800.8 MiB in buff/cache
+  Swap      none
   note: no MemAvailable in /proc/meminfo (kernel older than 3.14)
   note: /proc/sys/vm/swappiness: can't read it
 
@@ -17,5 +17,45 @@ disk.tree  disks, partitions, mount points and free space
 
 proc.states  number of processes in each state, zombies included
 
-  Total    1 process: 1 sleeping
-  Zombies  none
+  Total     1 process: 1 sleeping
+  Zombies   none
+
+cpu.summary  CPU model and count, load average, frequency governor
+
+  CPU       4 logical CPUs (the kernel reports no model name)
+  note: /proc/loadavg: can't read it
+
+net.interfaces  network interfaces, their addresses, and the default route
+
+  not available on this system
+  note: /sys/class/net: not found
+
+net.listening  TCP and UDP ports open for connections, and who owns them
+
+  not available on this system
+  note: /proc/net/tcp: not found
+
+net.dns  DNS servers, search domains and name lookup order
+
+  not available on this system
+  note: /etc/resolv.conf: not found
+
+boot.info  firmware, Secure Boot, kernel command line, init, uptime
+
+  Firmware  device tree (no UEFI)
+  Kernel    4.4.302
+  Cmdline   console=ttyS0,115200 root=/dev/mmcblk0p2 rootwait
+  Init      init
+  Up        20 min
+
+user.identity  current user, groups and umask
+
+  User      (no name) (uid 1001, gid 100)
+  Groups    100
+  Admin     not in sudo, wheel or admin
+  note: no Umask in /proc/self/status (kernel older than 4.7)
+
+fs.tmp  where /tmp and /var/tmp live: RAM (tmpfs) or disk
+
+  not available on this system
+  note: /proc/self/mountinfo: not found

@@ -1,0 +1,38 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+8.2  DNS resolution
+
+TL;DR
+  - Programs ask the system resolver to turn a name into an address. It tries
+    the sources on the hosts: line of /etc/nsswitch.conf, in order.
+  - files means /etc/hosts; dns means the servers in /etc/resolv.conf.
+  - With nameserver 127.0.0.53, systemd-resolved does the work: ask it with
+    resolvectl.
+
+      getent hosts example.com    # the answer your programs get
+      resolvectl status           # the real DNS servers, per interface
+      dig example.com             # ask a DNS server directly
+
+On your machine
+  Servers   127.0.0.53 (systemd-resolved: see resolvectl status for the real
+            servers)
+  Search    home.lan
+  Order     mymachines → resolve → files → myhostname → dns
+
+Pitfalls
+  - dig and nslookup skip /etc/hosts and nsswitch: they can disagree with your
+    browser. getent hosts gives the system's answer.
+  - Don't edit /etc/resolv.conf when systemd-resolved or NetworkManager manages
+    it: your change gets overwritten.
+  - Old answers can stay cached after a change: resolvectl flush-caches.
+  - Browsers may use their own DNS over HTTPS and skip the system resolver.
+
+Deep dive: 2 questions. Read them with idk 8.2 --why
+
+Related
+  Commands  getent, resolvectl, dig
+  Paths     /etc/resolv.conf, /etc/nsswitch.conf, /etc/hosts
+  Hub       idk network Network
+  See also  idk 8.1 Who listens on which port

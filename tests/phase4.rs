@@ -160,7 +160,10 @@ fn every_other_tool_returns_json() {
     assert_eq!(hits[0]["id"], "proc.states");
 
     let probes = c.call_json("list_probes", json!({}));
-    assert_eq!(probes.as_array().unwrap().len(), 3);
+    assert_eq!(
+        probes.as_array().unwrap().len(),
+        atfq::probes::REGISTRY.len()
+    );
     assert!(probes[0]["description"].is_string());
 }
 

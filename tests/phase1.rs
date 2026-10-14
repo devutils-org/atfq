@@ -79,6 +79,7 @@ fn fuzzy_matches_aliases_and_prefixes() {
         ("zomb", "proc.states"),
         ("dsik", "disk"),
         ("free vs avialable", "memory.free-vs-available"),
+        ("swapiness", "memory.swap"),
     ] {
         let l = lookup(&lib, query, &laptop());
         assert_eq!(l.matched, Match::Closest, "{query}");
@@ -89,18 +90,20 @@ fn fuzzy_matches_aliases_and_prefixes() {
 #[test]
 fn no_match_suggests_from_search() {
     let lib = lib();
-    let l = lookup(&lib, "swapiness", &laptop());
+    // Not an id, alias or title, but one typo away from a word of the
+    // OOM killer card.
+    let l = lookup(&lib, "overcomit", &laptop());
     assert_eq!(l.matched, Match::None);
     assert!(l.entry.is_none() && l.probes.is_empty());
     let ids: Vec<&str> = l.suggestions.iter().map(|r| r.id.as_str()).collect();
-    assert!(ids.contains(&"memory.free-vs-available"), "{ids:?}");
-    assert_snapshot!("not_found_swapiness", render::not_found(&l, PLAIN));
+    assert_eq!(ids, ["memory.oom-killer"]);
+    assert_snapshot!("not_found_overcomit", render::not_found(&l, PLAIN));
 }
 
 #[test]
 fn search_ranks_and_snippets() {
     let lib = lib();
-    let hits = search(&lib, "delete files", 10);
+    let hits = search(&lib, "delete matches", 10);
     assert_eq!(hits[0].id, "cmd.find");
     assert_snapshot!(
         "search_swap",

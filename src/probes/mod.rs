@@ -5,19 +5,31 @@
 //! fixture directory in tests. Probes return structured data and a status;
 //! they never render and never panic on a missing or unreadable file.
 
+mod boot;
+mod cpu;
 mod disk;
 mod mem;
+mod net;
 mod proc;
+mod sys;
+mod user;
 
 use std::collections::BTreeMap;
 use std::io;
-use std::path::{Path, PathBuf};
+#[cfg(test)]
+use std::path::Path;
+use std::path::PathBuf;
 
 use serde::Serialize;
 
-pub use disk::{BlockDevice, DiskTree, Mount, Partition};
+pub use boot::{BootInfo, Firmware};
+pub use cpu::CpuSummary;
+pub use disk::{BlockDevice, DiskTree, Mount, Partition, TmpDir, TmpDirs};
 pub use mem::MemSummary;
+pub use net::{DnsConfig, Interface, Listener, Listening, NetInterfaces};
 pub use proc::{ProcInfo, ProcStates};
+pub use sys::{FsSpace, IfAddr};
+pub use user::Identity;
 
 /// How far a probe got.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -39,6 +51,13 @@ pub enum ProbeData {
     Mem(MemSummary),
     Disk(DiskTree),
     Proc(ProcStates),
+    Cpu(CpuSummary),
+    Net(NetInterfaces),
+    Listening(Listening),
+    Dns(DnsConfig),
+    Boot(BootInfo),
+    User(Identity),
+    Tmp(TmpDirs),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -72,18 +91,15 @@ impl ProbeResult {
     }
 }
 
-/// Space on a mounted filesystem, as `df` reports it.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-pub struct FsSpace {
-    pub total: u64,
-    /// Free for normal users (excludes the blocks reserved for root).
-    pub available: u64,
-}
-
+/// Where answers that need a system call (statvfs, getifaddrs) come from.
 #[derive(Debug, Clone)]
-enum SpaceSource {
-    Statvfs,
-    Fixed(BTreeMap<String, FsSpace>),
+enum Calls {
+    Live,
+    /// Fixtures: fixed answers, so tests don't depend on the host.
+    Fixed {
+        space: BTreeMap<String, FsSpace>,
+        addrs: Vec<IfAddr>,
+    },
 }
 
 /// Where probes read from.
@@ -91,11 +107,11 @@ enum SpaceSource {
 pub struct ProbeCtx {
     root: PathBuf,
     supported: bool,
-    space: SpaceSource,
+    calls: Calls,
 }
 
 /// Why a read failed, with the path as the user knows it (`/proc/meminfo`).
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) enum ReadError {
     Missing(String),
     NeedsRoot(String),
@@ -108,23 +124,40 @@ impl ProbeCtx {
         ProbeCtx {
             root: PathBuf::from("/"),
             supported: cfg!(target_os = "linux"),
-            space: SpaceSource::Statvfs,
+            calls: Calls::Live,
         }
     }
 
-    /// A fake tree, for tests. Filesystem space comes from [`Self::with_space`].
+    /// A fake tree, for tests. Filesystem space and IP addresses come from
+    /// [`Self::with_space`] and [`Self::with_addr`].
     pub fn fixture(root: impl Into<PathBuf>) -> ProbeCtx {
         ProbeCtx {
             root: root.into(),
             supported: true,
-            space: SpaceSource::Fixed(BTreeMap::new()),
+            calls: Calls::Fixed {
+                space: BTreeMap::new(),
+                addrs: Vec::new(),
+            },
         }
     }
 
     /// Sets the space a fixture reports for `mount_point`.
-    pub fn with_space(mut self, mount_point: &str, space: FsSpace) -> ProbeCtx {
-        if let SpaceSource::Fixed(map) = &mut self.space {
-            map.insert(mount_point.to_string(), space);
+    pub fn with_space(mut self, mount_point: &str, fs: FsSpace) -> ProbeCtx {
+        if let Calls::Fixed { space, .. } = &mut self.calls {
+            space.insert(mount_point.to_string(), fs);
+        }
+        self
+    }
+
+    /// Adds an address a fixture reports, such as `("eth0", "192.168.1.20/24")`.
+    pub fn with_addr(mut self, iface: &str, cidr: &str) -> ProbeCtx {
+        if let Calls::Fixed { addrs, .. } = &mut self.calls {
+            let (ip, prefix) = cidr.split_once('/').expect("address/prefix");
+            addrs.push(IfAddr {
+                iface: iface.to_string(),
+                addr: ip.parse().expect("IP address"),
+                prefix: prefix.parse().expect("prefix length"),
+            });
         }
         self
     }
@@ -135,11 +168,22 @@ impl ProbeCtx {
     }
 
     pub(crate) fn read(&self, abs: &str) -> Result<String, ReadError> {
-        std::fs::read_to_string(self.path(abs)).map_err(|e| match e.kind() {
-            io::ErrorKind::NotFound => ReadError::Missing(abs.to_string()),
-            io::ErrorKind::PermissionDenied => ReadError::NeedsRoot(abs.to_string()),
-            _ => ReadError::Other(abs.to_string(), e.to_string()),
-        })
+        std::fs::read_to_string(self.path(abs)).map_err(|e| read_error(abs, e))
+    }
+
+    pub(crate) fn read_bytes(&self, abs: &str) -> Result<Vec<u8>, ReadError> {
+        std::fs::read(self.path(abs)).map_err(|e| read_error(abs, e))
+    }
+
+    /// Where a symbolic link points, as written in the link.
+    pub(crate) fn read_link(&self, abs: &str) -> Option<String> {
+        std::fs::read_link(self.path(abs))
+            .ok()
+            .map(|p| p.to_string_lossy().into_owned())
+    }
+
+    pub(crate) fn exists(&self, abs: &str) -> bool {
+        self.path(abs).exists()
     }
 
     /// Reads a small file and trims it; `None` on any error.
@@ -149,11 +193,7 @@ impl ProbeCtx {
 
     /// Names of the entries of a directory, sorted.
     pub(crate) fn list(&self, abs: &str) -> Result<Vec<String>, ReadError> {
-        let dir = std::fs::read_dir(self.path(abs)).map_err(|e| match e.kind() {
-            io::ErrorKind::NotFound => ReadError::Missing(abs.to_string()),
-            io::ErrorKind::PermissionDenied => ReadError::NeedsRoot(abs.to_string()),
-            _ => ReadError::Other(abs.to_string(), e.to_string()),
-        })?;
+        let dir = std::fs::read_dir(self.path(abs)).map_err(|e| read_error(abs, e))?;
         let mut names: Vec<String> = dir
             .filter_map(|e| e.ok())
             .map(|e| e.file_name().to_string_lossy().into_owned())
@@ -164,39 +204,27 @@ impl ProbeCtx {
 
     /// Space of the filesystem mounted at `mount_point`.
     pub(crate) fn space(&self, mount_point: &str) -> Option<FsSpace> {
-        match &self.space {
-            SpaceSource::Fixed(map) => map.get(mount_point).copied(),
-            SpaceSource::Statvfs => statvfs(&self.path(mount_point)),
+        match &self.calls {
+            Calls::Fixed { space, .. } => space.get(mount_point).copied(),
+            Calls::Live => sys::statvfs(&self.path(mount_point)),
+        }
+    }
+
+    /// IP addresses of every interface; `None` if they can't be listed.
+    pub(crate) fn addrs(&self) -> Option<Vec<IfAddr>> {
+        match &self.calls {
+            Calls::Fixed { addrs, .. } => Some(addrs.clone()),
+            Calls::Live => sys::getifaddrs(),
         }
     }
 }
 
-#[cfg(unix)]
-#[allow(clippy::unnecessary_cast)] // statvfs field types differ between platforms
-fn statvfs(path: &Path) -> Option<FsSpace> {
-    use std::ffi::CString;
-    use std::os::unix::ffi::OsStrExt;
-
-    let c = CString::new(path.as_os_str().as_bytes()).ok()?;
-    let mut st = std::mem::MaybeUninit::<libc::statvfs>::uninit();
-    // SAFETY: `c` is a valid NUL-terminated path and `st` is a valid out
-    // pointer; statvfs only writes to it, and we read it only on success.
-    let rc = unsafe { libc::statvfs(c.as_ptr(), st.as_mut_ptr()) };
-    if rc != 0 {
-        return None;
+fn read_error(abs: &str, e: io::Error) -> ReadError {
+    match e.kind() {
+        io::ErrorKind::NotFound => ReadError::Missing(abs.to_string()),
+        io::ErrorKind::PermissionDenied => ReadError::NeedsRoot(abs.to_string()),
+        _ => ReadError::Other(abs.to_string(), e.to_string()),
     }
-    // SAFETY: statvfs returned 0, so it filled the struct.
-    let st = unsafe { st.assume_init() };
-    let frsize = st.f_frsize as u64;
-    Some(FsSpace {
-        total: st.f_blocks as u64 * frsize,
-        available: st.f_bavail as u64 * frsize,
-    })
-}
-
-#[cfg(not(unix))]
-fn statvfs(_: &Path) -> Option<FsSpace> {
-    None
 }
 
 /// A probe known to the registry.
@@ -223,6 +251,41 @@ pub const REGISTRY: &[ProbeInfo] = &[
         name: proc::NAME,
         description: "number of processes in each state, zombies included",
         run: proc::probe,
+    },
+    ProbeInfo {
+        name: cpu::NAME,
+        description: "CPU model and count, load average, frequency governor",
+        run: cpu::probe,
+    },
+    ProbeInfo {
+        name: net::INTERFACES,
+        description: "network interfaces, their addresses, and the default route",
+        run: net::interfaces,
+    },
+    ProbeInfo {
+        name: net::LISTENING,
+        description: "TCP and UDP ports open for connections, and who owns them",
+        run: net::listening,
+    },
+    ProbeInfo {
+        name: net::DNS,
+        description: "DNS servers, search domains and name lookup order",
+        run: net::dns,
+    },
+    ProbeInfo {
+        name: boot::NAME,
+        description: "firmware, Secure Boot, kernel command line, init, uptime",
+        run: boot::probe,
+    },
+    ProbeInfo {
+        name: user::NAME,
+        description: "current user, groups and umask",
+        run: user::probe,
+    },
+    ProbeInfo {
+        name: disk::TMP,
+        description: "where /tmp and /var/tmp live: RAM (tmpfs) or disk",
+        run: disk::tmp,
     },
 ];
 
@@ -311,8 +374,9 @@ mod tests {
         }
         fs::remove_dir_all(&dir).unwrap();
         if !as_root {
+            // mem.summary, disk.tree, proc.states: the others find nothing.
             assert_eq!(
-                statuses,
+                statuses[..3],
                 [Status::NeedsRoot, Status::NeedsRoot, Status::Unavailable]
             );
         }

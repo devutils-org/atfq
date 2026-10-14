@@ -1,0 +1,56 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+1.1  The hierarchy in 2 minutes
+
+TL;DR
+  - /etc: system-wide settings, as plain text files.
+  - /home: one folder per user. /root is root's home.
+  - /usr: installed programs and their files, owned by the package manager.
+  - /var: data that changes: logs (/var/log), caches, databases.
+  - /tmp: scratch space anyone can use.
+  - /opt and /usr/local: software installed by hand.
+  - /dev, /proc, /sys: devices and views of the kernel, not real files.
+  - /boot: kernels and what the bootloader needs.
+
+      man hier
+
+Pitfalls
+  - On most current distros /bin, /sbin and /lib are links into /usr ("merged
+    /usr"): the same program shows up in two places.
+  - Don't put your own files in /usr: the package manager owns it and an update
+    can overwrite them. Use /usr/local or /opt.
+  - Changing a file in /etc usually needs root, and often a restart of the
+    service that reads it.
+  - /var fills up quietly (logs, caches, container images): look there first
+    when a disk is full.
+
+Deep dive
+
+  ▾ Where does this layout come from?
+
+    Most of it dates back to early Unix, and the Filesystem Hierarchy Standard
+    (FHS) now writes it down. Distros follow it, with small differences.
+
+    Some names are accidents of history. In early Unix, /usr held the users'
+    home folders; when the first disk filled up, system programs spilled onto
+    that second disk too. Home folders later moved to /home, and the programs
+    stayed in /usr.
+
+  ▾ What is the merged /usr?
+
+    Distros moved the content of /bin, /sbin and /lib into /usr and left links
+    behind. Fedora did it first (release 17, 2012); Arch and Debian followed
+    (Debian completed it in release 12, 2023).
+
+    The split had lost its purpose: it existed so a small root partition could
+    boot before /usr was mounted, which the initramfs now handles. With all the
+    operating system in /usr, it can be mounted read-only or shared.
+
+Related
+  Commands  ls
+  Paths     /etc, /usr, /var, /home
+  Hub       idk disk Disk
+  See also  idk 1.2 /tmp vs /var/tmp
+  See also  idk 1.3 /proc and /sys

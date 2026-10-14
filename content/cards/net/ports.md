@@ -1,0 +1,54 @@
+---
+id: net.ports
+kind: concept
+title: Who listens on which port
+aliases: [ports, port, open ports, listening, listening ports, ss, netstat, address already in use]
+hubs: [network]
+probes: [net.listening]
+see_also: [perms.special]
+commands: [ss]
+paths: [/proc/net/tcp]
+---
+
+## TL;DR
+
+- A program that accepts connections listens on a port: 22 for SSH, 443 for
+  HTTPS.
+- On `0.0.0.0` or `[::]`, it accepts connections from every network. On
+  `127.0.0.1` or `[::1]`, only from this machine.
+- `ss` lists them. Seeing which process owns another user's port needs root.
+
+```
+ss -tulpn          # TCP, UDP, listening, with processes, numeric
+sudo ss -tulpn
+```
+
+## Pitfalls
+
+- `netstat` is the old tool (package net-tools), often not installed: `ss`
+  replaced it.
+- Listening on `0.0.0.0` doesn't mean reachable from the Internet: a
+  firewall or your router can still block it.
+- Ports published by Docker bypass ufw rules, because Docker writes its own
+  firewall rules.
+- Listening on a port under 1024 needs root or the `CAP_NET_BIND_SERVICE`
+  capability.
+- "Address already in use" means another process holds the port: find it
+  with `sudo ss -ltnp 'sport = :8080'`.
+
+## Deep dive
+
+### TCP or UDP?
+
+A TCP socket that waits for connections is in the LISTEN state, and each
+client then gets a connection of its own. UDP has no connections: a bound
+socket just receives packets from anyone. So for UDP, "listening" means
+bound and not connected to a single peer. DHCP clients (port 68) and mDNS
+(port 5353) are typical.
+
+### Where does the information come from?
+
+`/proc/net/tcp`, `tcp6`, `udp` and `udp6` list every socket with its owner
+and an inode number. To find the process, you look for that inode among the
+open files in `/proc/PID/fd`, which only root may read for other users'
+processes. `ss` asks the kernel directly over netlink instead.

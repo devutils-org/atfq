@@ -89,6 +89,17 @@ impl<'a> Tui<'a> {
         self.mouse(MouseEventKind::Down(MouseButton::Right), 40, 10);
     }
 
+    /// Wheels down over the TOC until the entry for `handle` is on screen.
+    fn toc_entry(&mut self, handle: &str) -> Rect {
+        for _ in 0..30 {
+            if let Some(r) = self.app.toc_region(handle) {
+                return r;
+            }
+            self.mouse(MouseEventKind::ScrollDown, 2, 10);
+        }
+        panic!("{handle} never showed up in the TOC:\n{}", self.screen());
+    }
+
     /// Wheels down over the content pane until `action` is on screen.
     fn scroll_to(&mut self, action: &Action) -> Rect {
         for _ in 0..30 {
@@ -114,7 +125,7 @@ fn scripted_clicks() {
     let mut t = Tui::new(&lib);
 
     // A TOC entry: the first click selects, the second opens.
-    let entry = t.app.toc_region("5.1").expect("5.1 in the TOC");
+    let entry = t.toc_entry("5.1");
     t.click(entry);
     assert_eq!(t.app.current(), None);
     t.click(entry);
@@ -240,11 +251,11 @@ fn mouse_toggle() {
     let lib = lib();
     let mut t = Tui::new(&lib);
     assert!(t.screen().contains("mouse:on"));
+    let entry = t.toc_entry("5.1");
     t.key(KeyCode::Char('M'));
     assert!(!t.app.mouse_captured());
     assert!(t.screen().contains("mouse:off"));
     // With the mouse off, clicks are ignored.
-    let entry = t.app.toc_region("5.1").unwrap();
     t.double(entry);
     assert_eq!(t.app.current(), None);
     t.key(KeyCode::Char('M'));

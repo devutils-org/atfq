@@ -1,0 +1,41 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+3.1  rwx, octal and umask
+
+TL;DR
+  - Every file has an owner, a group, and three sets of rights: for the owner,
+    for the group, for everyone else.
+  - r read, w write, x execute. On a folder, x means "may enter".
+  - In octal, r=4, w=2, x=1, added per set: 644 is rw-r--r--, 755 is rwxr-xr-x.
+  - The umask removes rights from new files: with 022, files get 644 and folders
+    755.
+
+      ls -l notes.txt
+      chmod 640 notes.txt     # owner rw, group r, others nothing
+      chmod u+x deploy.sh     # let the owner run it
+
+On your machine
+  User      alice (uid 1000, gid 1000)
+  Groups    alice, wheel, docker, 4242
+  Admin     member of wheel: the group sudo usually trusts
+  Umask     0022: new files 644 (rw-r--r--), new folders 755
+
+Pitfalls
+  - On a folder, r lists the names and x lets you open what's inside: with r but
+    no x, you see names you can't open.
+  - Deleting a file depends on the folder's w, not on the file's rights.
+  - chmod -R 777 "fixes" an error by letting everyone write everything. Fix the
+    owner or the group instead.
+  - Root ignores read and write rights, but still needs some x bit to run a
+    file.
+  - The umask never adds rights: new files start from 666, folders from 777, so
+    a new file is never executable.
+
+Deep dive: 2 questions. Read them with idk 3.1 --why
+
+Related
+  Commands  chmod, chown, umask
+  See also  idk 3.2 setuid, setgid and sticky bit
+  See also  idk 3.3 sudo and groups

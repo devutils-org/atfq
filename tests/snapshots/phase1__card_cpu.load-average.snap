@@ -1,0 +1,39 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+7.1  Load average
+
+TL;DR
+  - Load average: the number of tasks running or waiting for a CPU, plus those
+    waiting on disk (D state), averaged over 1, 5 and 15 minutes.
+  - Compare it with the number of CPUs: on 8 CPUs, a load of 8 means fully busy,
+    and 16 means tasks are queuing.
+  - A high load with idle CPUs points to I/O: a slow disk or network storage.
+
+      uptime
+      nproc
+
+On your machine
+  CPU       11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz · 8 logical CPUs
+  Load      1.25, 0.90, 0.62 over 1, 5 and 15 minutes, for 8 CPUs
+  Tasks     2 running right now, 1043 in all
+  Governor  powersave
+
+Pitfalls
+  - It's not a percentage: 2.0 overloads a 1-CPU machine and barely touches a
+    32-CPU one.
+  - Linux counts tasks waiting on disk, most other Unixes don't: the same work
+    shows a higher load on Linux.
+  - The values decay gradually, they aren't plain averages: the 1-minute value
+    still carries part of older spikes.
+  - To see what keeps the CPUs busy, run top and press 1 for one line per CPU.
+
+Deep dive: 2 questions. Read them with idk 7.1 --why
+
+Related
+  Commands  uptime, nproc, top
+  Paths     /proc/loadavg
+  Hub       idk cpu CPU
+  See also  idk 4.1 Process states and zombies
+  See also  idk 4.3 nice and priorities

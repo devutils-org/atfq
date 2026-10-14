@@ -3,11 +3,13 @@
 use super::text::{wrap, Kind, Line, Span};
 use super::INDENT;
 use crate::probes::{
-    BlockDevice, DiskTree, MemSummary, Mount, ProbeData, ProbeResult, ProcInfo, ProcStates, Status,
+    BlockDevice, BootInfo, CpuSummary, DiskTree, DnsConfig, FsSpace, Identity, Listening,
+    MemSummary, Mount, NetInterfaces, ProbeData, ProbeResult, ProcInfo, ProcStates, Status,
+    TmpDirs,
 };
 
 /// Width of the label column (`RAM`, `Swap`, `Zombies`…).
-const LABEL: usize = 9;
+const LABEL: usize = 10;
 
 /// Most processes listed under Zombies or Waiting.
 const SHOW_PROCS: usize = 5;
@@ -36,6 +38,13 @@ pub(crate) fn result(r: &ProbeResult, w: usize) -> Vec<Line> {
         (_, Some(ProbeData::Mem(m))) => mem(m, w),
         (_, Some(ProbeData::Disk(d))) => disk(d, w),
         (_, Some(ProbeData::Proc(p))) => procs(p, w),
+        (_, Some(ProbeData::Cpu(c))) => cpu(c, w),
+        (_, Some(ProbeData::Net(n))) => net(n, w),
+        (_, Some(ProbeData::Listening(l))) => listening(l, w),
+        (_, Some(ProbeData::Dns(d))) => dns(d, w),
+        (_, Some(ProbeData::Boot(b))) => boot(b, w),
+        (_, Some(ProbeData::User(u))) => user(u, w),
+        (_, Some(ProbeData::Tmp(t))) => tmp(t, w),
         (_, None) => Vec::new(),
     };
     for note in &r.notes {
@@ -58,6 +67,17 @@ fn row(label: &str, text: &str, w: usize) -> Vec<Line> {
         lines.push(first);
     }
     lines
+}
+
+/// Like [`row`], but keeps the spacing of `text` (aligned columns) when the
+/// line fits; wraps it like any text otherwise.
+fn row_aligned(label: &str, text: &str, w: usize) -> Vec<Line> {
+    if INDENT + LABEL + text.chars().count() > w {
+        return row(label, text, w);
+    }
+    vec![Line::spaces(INDENT)
+        .then(Line::styled(format!("{label:<LABEL$}"), Kind::Bold))
+        .then(Line::plain(text))]
 }
 
 /// Binary units, like `free -h`: `15.5 GiB`.
@@ -300,14 +320,7 @@ fn mount_line(depth: usize, name: String, size_text: String, m: &Mount, count: u
     if count > 1 {
         mount.push_str(&format!(" (+{})", count - 1));
     }
-    let detail = match m.space {
-        Some(s) => format!(
-            "{} free ({}%)",
-            size(s.available),
-            percent(s.available, s.total)
-        ),
-        None => String::new(),
-    };
+    let detail = m.space.map(free_text).unwrap_or_default();
     Row {
         depth,
         name,
@@ -316,6 +329,253 @@ fn mount_line(depth: usize, name: String, size_text: String, m: &Mount, count: u
         mount,
         detail,
     }
+}
+
+/// `120.0 GiB free (30%)`, plus inode use when the filesystem counts them.
+fn free_text(s: FsSpace) -> String {
+    let mut t = format!(
+        "{} free ({}%)",
+        size(s.available),
+        percent(s.available, s.total)
+    );
+    if s.inodes_total > 0 {
+        let used = s.inodes_total.saturating_sub(s.inodes_free);
+        t.push_str(&format!(
+            " · inodes {}% used",
+            percent(used, s.inodes_total)
+        ));
+    }
+    t
+}
+
+fn cpu(c: &CpuSummary, w: usize) -> Vec<Line> {
+    let n = c.logical;
+    let cpus = format!("{n} logical CPU{}", if n == 1 { "" } else { "s" });
+    let mut out = row(
+        "CPU",
+        &match &c.model {
+            Some(m) => format!("{m} · {cpus}"),
+            None => format!("{cpus} (the kernel reports no model name)"),
+        },
+        w,
+    );
+    if let Some([a, b, z]) = c.load {
+        out.extend(row(
+            "Load",
+            &format!("{a:.2}, {b:.2}, {z:.2} over 1, 5 and 15 minutes, for {n} CPUs"),
+            w,
+        ));
+    }
+    if let (Some(r), Some(t)) = (c.running, c.tasks) {
+        out.extend(row(
+            "Tasks",
+            &format!("{r} running right now, {t} in all"),
+            w,
+        ));
+    }
+    if let Some(g) = &c.governor {
+        out.extend(row("Governor", g, w));
+    }
+    out
+}
+
+fn net(n: &NetInterfaces, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    for i in &n.interfaces {
+        let mut facts = vec![i.state.clone()];
+        facts.extend(i.kind.map(str::to_string));
+        if let Some(s) = i.speed_mbps {
+            facts.push(if s >= 1000 && s % 1000 == 0 {
+                format!("{} Gbit/s", s / 1000)
+            } else {
+                format!("{s} Mbit/s")
+            });
+        }
+        if let Some(m) = &i.mac {
+            facts.push(format!("MAC {m}"));
+        }
+        out.extend(row(&i.name, &facts.join(" · "), w));
+        if !i.addrs.is_empty() {
+            out.extend(row("", &i.addrs.join(", "), w));
+        }
+    }
+    match &n.default_route {
+        Some(r) => out.extend(row(
+            "Route",
+            &format!("default via {} on {}", r.gateway, r.iface),
+            w,
+        )),
+        None => out.extend(row(
+            "Route",
+            "no default route: no way out to the Internet",
+            w,
+        )),
+    }
+    out
+}
+
+fn listening(l: &Listening, w: usize) -> Vec<Line> {
+    if l.sockets.is_empty() {
+        return row("Ports", "nothing is waiting for connections", w);
+    }
+    let addr_w = l
+        .sockets
+        .iter()
+        .map(|s| s.addr.chars().count() + 1 + s.port.to_string().len())
+        .max()
+        .unwrap_or(0);
+    let mut out = Vec::new();
+    for s in &l.sockets {
+        let reach = match s.reach {
+            "all" => "all interfaces",
+            "local" => "this machine only",
+            _ => "that address only",
+        };
+        let owner = match (&s.process, s.pid, &s.user) {
+            (Some(p), Some(pid), _) => format!("{p} (PID {pid})"),
+            (_, _, Some(u)) => format!("user {u}"),
+            _ => String::new(),
+        };
+        let addr = format!("{}:{}", s.addr, s.port);
+        let text = format!("{addr:<addr_w$}  {reach:<17}  {owner}");
+        out.extend(row_aligned(&s.proto.to_uppercase(), text.trim_end(), w));
+    }
+    if l.total as usize > l.sockets.len() {
+        out.extend(row(
+            "",
+            &format!("and {} more", l.total as usize - l.sockets.len()),
+            w,
+        ));
+    }
+    out
+}
+
+fn dns(d: &DnsConfig, w: usize) -> Vec<Line> {
+    let mut servers = if d.nameservers.is_empty() {
+        "none listed in /etc/resolv.conf".to_string()
+    } else {
+        d.nameservers.join(", ")
+    };
+    if let Some(r) = d.local_resolver {
+        servers.push_str(&format!(
+            " ({r}: see resolvectl status for the real servers)"
+        ));
+    }
+    let mut out = row("Servers", &servers, w);
+    if !d.search.is_empty() {
+        out.extend(row("Search", &d.search.join(", "), w));
+    }
+    if !d.hosts_order.is_empty() {
+        out.extend(row("Order", &d.hosts_order.join(" → "), w));
+    }
+    out
+}
+
+fn boot(b: &BootInfo, w: usize) -> Vec<Line> {
+    use crate::probes::Firmware;
+    let mut out = Vec::new();
+    if let Some(f) = b.firmware {
+        let mut text = match f {
+            Firmware::Uefi => "UEFI".to_string(),
+            Firmware::Bios => "BIOS (legacy boot)".to_string(),
+            Firmware::DeviceTree => "device tree (no UEFI)".to_string(),
+        };
+        match b.secure_boot {
+            Some(true) => text.push_str(" · Secure Boot on"),
+            Some(false) => text.push_str(" · Secure Boot off"),
+            None => {}
+        }
+        out.extend(row("Firmware", &text, w));
+    }
+    if let Some(k) = &b.kernel {
+        out.extend(row("Kernel", k, w));
+    }
+    if let Some(c) = &b.cmdline {
+        out.extend(row("Cmdline", c, w));
+    }
+    if let Some(i) = &b.init {
+        let text = match &b.default_target {
+            Some(t) => format!("{i} · default target {t}"),
+            None => i.clone(),
+        };
+        out.extend(row("Init", &text, w));
+    }
+    if let Some(u) = b.uptime_secs {
+        out.extend(row("Up", &duration(u), w));
+    }
+    out
+}
+
+/// `3 days, 4 h` / `2 h 5 min` / `42 min`.
+fn duration(secs: u64) -> String {
+    let (d, h, m) = (secs / 86_400, secs % 86_400 / 3600, secs % 3600 / 60);
+    match (d, h) {
+        (0, 0) => format!("{m} min"),
+        (0, _) => format!("{h} h {m} min"),
+        (1, _) => format!("1 day, {h} h"),
+        _ => format!("{d} days, {h} h"),
+    }
+}
+
+fn user(u: &Identity, w: usize) -> Vec<Line> {
+    let name = u.user.clone().unwrap_or_else(|| "(no name)".to_string());
+    let mut out = row("User", &format!("{name} (uid {}, gid {})", u.uid, u.gid), w);
+    out.extend(row("Groups", &u.groups.join(", "), w));
+    out.extend(row(
+        "Admin",
+        &match &u.admin_group {
+            Some(g) => format!("member of {g}: the group sudo usually trusts"),
+            None => "not in sudo, wheel or admin".to_string(),
+        },
+        w,
+    ));
+    if let Some(mask) = &u.umask {
+        if let Ok(m) = u32::from_str_radix(mask, 8) {
+            let (f, d) = (0o666 & !m, 0o777 & !m);
+            out.extend(row(
+                "Umask",
+                &format!(
+                    "{mask}: new files {f:03o} ({}), new folders {d:03o}",
+                    rwx(f)
+                ),
+                w,
+            ));
+        }
+    }
+    out
+}
+
+/// `0o644` → `rw-r--r--`.
+fn rwx(mode: u32) -> String {
+    (0..9)
+        .map(|i| {
+            let bit = 1 << (8 - i);
+            if mode & bit == 0 {
+                '-'
+            } else {
+                ['r', 'w', 'x'][i % 3]
+            }
+        })
+        .collect()
+}
+
+fn tmp(t: &TmpDirs, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    for d in &t.dirs {
+        let place = if d.fstype == "tmpfs" {
+            "in RAM (tmpfs), emptied at every boot".to_string()
+        } else if d.mount_point == d.path {
+            format!("on disk ({}), its own filesystem", d.fstype)
+        } else {
+            format!("on disk ({}), part of {}", d.fstype, d.mount_point)
+        };
+        let mut text = place;
+        if let Some(s) = d.space {
+            text.push_str(&format!(" · {}", free_text(s)));
+        }
+        out.extend(row(&d.path, &text, w));
+    }
+    out
 }
 
 #[cfg(test)]
@@ -328,6 +588,15 @@ mod tests {
         assert_eq!(size(1023), "1023 B");
         assert_eq!(size(1536), "1.5 KiB");
         assert_eq!(size(16_264_712 * 1024), "15.5 GiB");
+    }
+
+    #[test]
+    fn modes_and_durations() {
+        assert_eq!(rwx(0o644), "rw-r--r--");
+        assert_eq!(rwx(0o750), "rwxr-x---");
+        assert_eq!(duration(42 * 60), "42 min");
+        assert_eq!(duration(2 * 3600 + 300), "2 h 5 min");
+        assert_eq!(duration(273_912), "3 days, 4 h");
     }
 
     #[test]

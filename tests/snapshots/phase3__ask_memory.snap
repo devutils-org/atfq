@@ -1,5 +1,6 @@
 ---
 source: tests/phase3.rs
+assertion_line: 28
 expression: p.text
 ---
 I have a question about my Linux machine.
@@ -30,9 +31,9 @@ Useful commands:
 ## What my machine shows right now
 
 ```
-  RAM      10.5 GiB available of 15.5 GiB (68%) · 1.1 GiB completely free
-  Cache    7.5 GiB in buff/cache, 604.0 MiB of it shared (tmpfs)
-  Swap     256.0 MiB used of 8.0 GiB · swappiness 60
+  RAM       10.5 GiB available of 15.5 GiB (68%) · 1.1 GiB completely free
+  Cache     7.5 GiB in buff/cache, 604.0 MiB of it shared (tmpfs)
+  Swap      256.0 MiB used of 8.0 GiB · swappiness 60
 ```
 
 ## How to answer

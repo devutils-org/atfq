@@ -5,7 +5,7 @@ title: Process states and zombies
 aliases: [zombie, zombies, defunct, process state, process states, ps stat, uninterruptible]
 hubs: []
 probes: [proc.states]
-see_also: []
+see_also: [proc.signals, cpu.load-average]
 commands: [ps, top]
 paths: [/proc/PID/stat, /proc/PID/status]
 ---

@@ -64,7 +64,7 @@ fn live_block_shows_probe_results() {
     let lib = lib();
     let out = show(&lib, "free", PLAIN);
     assert!(
-        out.contains("On your machine\n  RAM      10.5 GiB available of 15.5 GiB"),
+        out.contains("On your machine\n  RAM       10.5 GiB available of 15.5 GiB"),
         "{out}"
     );
     // `find` has no probe: no live block at all.
@@ -77,14 +77,33 @@ fn toc_follows_summary() {
     let expected = "\
 Chapters
   1. Filesystem
+     1.1  The hierarchy in 2 minutes
+     1.2  /tmp vs /var/tmp
+     1.3  /proc and /sys
+     1.4  Links, inodes and \"disk full\"
   2. Disk  hub: idk disk
   3. Permissions
+     3.1  rwx, octal and umask
+     3.2  setuid, setgid and sticky bit
+     3.3  sudo and groups
   4. Processes & scheduling
      4.1  Process states and zombies
+     4.2  Signals
+     4.3  nice and priorities
   5. Memory  hub: idk memory
      5.1  free vs available
+     5.2  The OOM killer
+     5.3  Swap and swappiness
   6. Finding and transforming
      6.1  find
+  7. CPU  hub: idk cpu
+     7.1  Load average
+  8. Network  hub: idk network
+     8.1  Who listens on which port
+     8.2  DNS resolution
+  9. Boot  hub: idk boot
+     9.1  From firmware to init
+     9.2  The kernel command line
 ";
     assert!(toc.ends_with(expected), "{toc}");
 }

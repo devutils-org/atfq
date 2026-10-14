@@ -16,11 +16,11 @@ TL;DR
       ps -eo pid,ppid,stat,comm | awk '$3 ~ /^Z/'
 
 On your machine
-  Total    8 processes: 1 running, 3 sleeping, 1 waiting on I/O (D), 1 idle
-           kernel thread, 2 zombies
-  Zombies  PID 4242 worker (old), parent 4100 supervisor
-           PID 4300 orphan-job, parent 9999
-  Waiting  PID 5000 rsync, parent 1 systemd
+  Total     8 processes: 1 running, 3 sleeping, 1 waiting on I/O (D), 1 idle
+            kernel thread, 2 zombies
+  Zombies   PID 4242 worker (old), parent 4100 supervisor
+            PID 4300 orphan-job, parent 9999
+  Waiting   PID 5000 rsync, parent 1 systemd
 
 Pitfalls
   - kill -9 on a zombie does nothing: it's already dead. The PPID column tells
@@ -39,3 +39,5 @@ Deep dive: 3 questions. Read them with idk 4.1 --why
 Related
   Commands  ps, top
   Paths     /proc/PID/stat, /proc/PID/status
+  See also  idk 4.2 Signals
+  See also  idk 7.1 Load average
