@@ -1,11 +1,12 @@
 use std::io::{self, IsTerminal, Write};
 use std::process::ExitCode;
 
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, Parser, Subcommand};
 use serde::Serialize;
 
 use atfq::content::Library;
 use atfq::probes::{self, ProbeCtx};
+use atfq::prompt::{self, SystemInfo};
 use atfq::render::{self, Options};
 use atfq::search::search;
 use atfq::view::{lookup, Match};
@@ -16,8 +17,7 @@ use atfq::BIN_NAME;
 #[command(
     name = BIN_NAME,
     version,
-    args_conflicts_with_subcommands = true,
-    arg_required_else_help = true
+    args_conflicts_with_subcommands = true
 )]
 struct Cli {
     /// A hub, a topic, a command or a chapter number: `memory`, `zombie`, `5.1`
@@ -47,10 +47,27 @@ enum Command {
     },
     /// Run one probe and show what it found; without a name, list the probes
     Probe { name: Option<String> },
+    /// Print a prompt to paste into an AI assistant, with your machine's data
+    Ask {
+        /// What the question is about: a hub, a topic or a chapter number
+        query: String,
+        /// Your question, in your own words
+        #[arg(value_name = "QUESTION")]
+        text: Vec<String>,
+        /// Leave out the hostname, the username and home directory paths
+        #[arg(long)]
+        redact: bool,
+    },
+    /// Browse interactively (also what `idk` alone does in a terminal)
+    Tui {
+        /// A page to open first
+        query: Vec<String>,
+    },
 }
 
 /// Exit codes: 0 success, 1 no match, 2 usage error (clap), 3 internal error.
 const NO_MATCH: u8 = 1;
+const USAGE: u8 = 2;
 const INTERNAL: u8 = 3;
 
 /// Results shown by `idk search`.
@@ -77,7 +94,27 @@ fn main() -> ExitCode {
     };
     let ctx = ProbeCtx::system();
 
+    let tty = io::stdin().is_terminal() && io::stdout().is_terminal();
     let (out, code) = match cli.command {
+        Some(Command::Tui { query }) => return tui(&lib, ctx, &query),
+        None if cli.query.is_empty() && tty => return tui(&lib, ctx, &[]),
+        None if cli.query.is_empty() => {
+            // Not a terminal: print the help, as for a usage error.
+            let _ = Cli::command().write_help(&mut io::stderr());
+            return ExitCode::from(USAGE);
+        }
+        Some(Command::Ask {
+            query,
+            text,
+            redact,
+        }) => {
+            let l = lookup(&lib, &query, &ctx);
+            let sys = SystemInfo::collect(&ctx);
+            let text = text.join(" ");
+            let p = prompt::build(&l, Some(&text), &sys, redact);
+            eprintln!("{}", prompt::summary(&p, &l));
+            (either(cli.json, &p, || p.text.clone()), ExitCode::SUCCESS)
+        }
         Some(Command::Toc) => (
             either(cli.json, lib.chapters(), || render::toc(&lib, opts)),
             ExitCode::SUCCESS,
@@ -140,6 +177,18 @@ fn main() -> ExitCode {
             ExitCode::from(INTERNAL)
         }
         _ => code,
+    }
+}
+
+fn tui(lib: &Library, ctx: ProbeCtx, query: &[String]) -> ExitCode {
+    let sys = SystemInfo::collect(&ctx);
+    let start = (!query.is_empty()).then(|| query.join(" "));
+    match atfq::tui::run(lib, ctx, sys, start.as_deref()) {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(e) => {
+            eprintln!("{BIN_NAME}: terminal error: {e}");
+            ExitCode::from(INTERNAL)
+        }
     }
 }
 

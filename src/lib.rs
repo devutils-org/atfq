@@ -1,11 +1,13 @@
-//! atfq: the core behind the `idk` command. Surfaces (CLI, and later TUI and
+//! atfq: the core behind the `idk` command. Surfaces (CLI, TUI, and later
 //! MCP) only call into this library.
 
 pub mod content;
 pub mod probes;
+pub mod prompt;
 pub mod render;
 pub mod resolve;
 pub mod search;
+pub mod tui;
 pub mod view;
 
 /// The command users type. Help texts use this, never a literal.

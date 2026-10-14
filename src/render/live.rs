@@ -1,7 +1,7 @@
 //! The "On your machine" block: probe results as short lines.
 
-use super::text::{wrap, Kind, Prefix, Span, Style};
-use super::{INDENT, WIDTH};
+use super::text::{wrap, Kind, Line, Span};
+use super::INDENT;
 use crate::probes::{
     BlockDevice, DiskTree, MemSummary, Mount, ProbeData, ProbeResult, ProcInfo, ProcStates, Status,
 };
@@ -12,52 +12,50 @@ const LABEL: usize = 9;
 /// Most processes listed under Zombies or Waiting.
 const SHOW_PROCS: usize = 5;
 
-pub(crate) fn block(results: &[ProbeResult], st: Style) -> Vec<String> {
+pub(crate) fn block(results: &[ProbeResult], w: usize) -> Vec<Line> {
     let mut out = Vec::new();
     for (i, r) in results.iter().enumerate() {
         if i > 0 {
-            out.push(String::new());
+            out.push(Line::default());
         }
-        out.extend(result(r, st));
+        out.extend(result(r, w));
     }
     out
 }
 
-pub(crate) fn result(r: &ProbeResult, st: Style) -> Vec<String> {
-    let pad = " ".repeat(INDENT);
+pub(crate) fn result(r: &ProbeResult, w: usize) -> Vec<Line> {
+    let pad = || Line::spaces(INDENT);
     let mut out = match (&r.status, &r.data) {
-        (Status::NeedsRoot, _) => vec![format!("{pad}{}", st.warn("needs root"))],
+        (Status::NeedsRoot, _) => vec![pad().then(Line::styled("needs root", Kind::Warn))],
         (Status::Unavailable, None) => {
-            vec![format!("{pad}{}", st.dim("not available on this system"))]
+            vec![pad().then(Line::styled("not available on this system", Kind::Dim))]
         }
-        (Status::Unsupported, _) => vec![format!("{pad}{}", st.dim("not supported on this OS"))],
-        (_, Some(ProbeData::Mem(m))) => mem(m, st),
-        (_, Some(ProbeData::Disk(d))) => disk(d, st),
-        (_, Some(ProbeData::Proc(p))) => procs(p, st),
+        (Status::Unsupported, _) => {
+            vec![pad().then(Line::styled("not supported on this OS", Kind::Dim))]
+        }
+        (_, Some(ProbeData::Mem(m))) => mem(m, w),
+        (_, Some(ProbeData::Disk(d))) => disk(d, w),
+        (_, Some(ProbeData::Proc(p))) => procs(p, w),
         (_, None) => Vec::new(),
     };
     for note in &r.notes {
-        let spans = [Span::new(format!("note: {note}"), Kind::Plain)];
-        let p = Prefix::spaces(INDENT);
-        out.extend(wrap(&spans, &p, &p, WIDTH, st).iter().map(|l| st.dim(l)));
+        let spans = [Span::plain(format!("note: {note}"))];
+        out.extend(
+            wrap(&spans, &pad(), &pad(), w)
+                .into_iter()
+                .map(Line::dimmed),
+        );
     }
     out
 }
 
 /// `  Label    text`, wrapped under the text.
-fn row(label: &str, text: &str, st: Style) -> Vec<String> {
-    let first = Prefix {
-        text: format!(
-            "{}{}",
-            " ".repeat(INDENT),
-            st.bold(&format!("{label:<LABEL$}"))
-        ),
-        width: INDENT + LABEL,
-    };
-    let rest = Prefix::spaces(INDENT + LABEL);
-    let mut lines = wrap(&[Span::new(text, Kind::Plain)], &first, &rest, WIDTH, st);
+fn row(label: &str, text: &str, w: usize) -> Vec<Line> {
+    let first = Line::spaces(INDENT).then(Line::styled(format!("{label:<LABEL$}"), Kind::Bold));
+    let rest = Line::spaces(INDENT + LABEL);
+    let mut lines = wrap(&[Span::plain(text)], &first, &rest, w);
     if lines.is_empty() {
-        lines.push(first.text);
+        lines.push(first);
     }
     lines
 }
@@ -85,7 +83,7 @@ fn percent(part: u64, total: u64) -> u64 {
     }
 }
 
-fn mem(m: &MemSummary, st: Style) -> Vec<String> {
+fn mem(m: &MemSummary, w: usize) -> Vec<Line> {
     let mut out = Vec::new();
     let ram = match m.available {
         Some(a) => format!(
@@ -97,7 +95,7 @@ fn mem(m: &MemSummary, st: Style) -> Vec<String> {
         ),
         None => format!("{} total · {} completely free", size(m.total), size(m.free)),
     };
-    out.extend(row("RAM", &ram, st));
+    out.extend(row("RAM", &ram, w));
     let cache = if m.shared > 0 {
         format!(
             "{} in buff/cache, {} of it shared (tmpfs)",
@@ -107,7 +105,7 @@ fn mem(m: &MemSummary, st: Style) -> Vec<String> {
     } else {
         format!("{} in buff/cache", size(m.buff_cache))
     };
-    out.extend(row("Cache", &cache, st));
+    out.extend(row("Cache", &cache, w));
     let mut swap = if m.swap_total == 0 {
         "none".to_string()
     } else {
@@ -117,7 +115,7 @@ fn mem(m: &MemSummary, st: Style) -> Vec<String> {
     if let Some(s) = m.swappiness {
         swap.push_str(&format!(" · swappiness {s}"));
     }
-    out.extend(row("Swap", &swap, st));
+    out.extend(row("Swap", &swap, w));
     out
 }
 
@@ -132,7 +130,7 @@ const STATES: &[(&str, &str, &str)] = &[
     ("Z", "zombie", "zombies"),
 ];
 
-fn procs(p: &ProcStates, st: Style) -> Vec<String> {
+fn procs(p: &ProcStates, w: usize) -> Vec<Line> {
     let mut parts = Vec::new();
     for (letter, one, many) in STATES {
         let n = p.counts.get(*letter).copied().unwrap_or(0);
@@ -149,23 +147,23 @@ fn procs(p: &ProcStates, st: Style) -> Vec<String> {
     let mut out = row(
         "Total",
         &format!("{} {total}: {}", p.total, parts.join(", ")),
-        st,
+        w,
     );
 
     let zombies = p.counts.get("Z").copied().unwrap_or(0) as usize;
     if zombies == 0 {
-        out.extend(row("Zombies", "none", st));
+        out.extend(row("Zombies", "none", w));
     } else {
-        out.extend(proc_list("Zombies", &p.zombies, zombies, st));
+        out.extend(proc_list("Zombies", &p.zombies, zombies, w));
     }
     let waiting = p.counts.get("D").copied().unwrap_or(0) as usize;
     if waiting > 0 {
-        out.extend(proc_list("Waiting", &p.waiting, waiting, st));
+        out.extend(proc_list("Waiting", &p.waiting, waiting, w));
     }
     out
 }
 
-fn proc_list(label: &str, list: &[ProcInfo], total: usize, st: Style) -> Vec<String> {
+fn proc_list(label: &str, list: &[ProcInfo], total: usize, w: usize) -> Vec<Line> {
     let mut out = Vec::new();
     for (i, p) in list.iter().take(SHOW_PROCS).enumerate() {
         let parent = match &p.parent {
@@ -173,17 +171,17 @@ fn proc_list(label: &str, list: &[ProcInfo], total: usize, st: Style) -> Vec<Str
             None => format!("parent {}", p.ppid),
         };
         let text = format!("PID {} {}, {parent}", p.pid, p.comm);
-        out.extend(row(if i == 0 { label } else { "" }, &text, st));
+        out.extend(row(if i == 0 { label } else { "" }, &text, w));
     }
     let shown = list.len().min(SHOW_PROCS);
     if total > shown {
-        out.extend(row("", &format!("and {} more", total - shown), st));
+        out.extend(row("", &format!("and {} more", total - shown), w));
     }
     out
 }
 
-/// One line of the disk table.
-struct Line {
+/// One row of the disk table.
+struct Row {
     depth: usize,
     name: String,
     size: String,
@@ -192,7 +190,7 @@ struct Line {
     detail: String,
 }
 
-fn disk(d: &DiskTree, st: Style) -> Vec<String> {
+fn disk(d: &DiskTree, w: usize) -> Vec<Line> {
     let mut lines = Vec::new();
     for dev in &d.devices {
         lines.push(device_line(dev));
@@ -214,7 +212,7 @@ fn disk(d: &DiskTree, st: Style) -> Vec<String> {
                     m,
                     p.mounts.len(),
                 )),
-                None => lines.push(Line {
+                None => lines.push(Row {
                     depth: 1,
                     name: p.name.clone(),
                     size: size(p.size),
@@ -226,52 +224,49 @@ fn disk(d: &DiskTree, st: Style) -> Vec<String> {
         }
     }
 
-    let w = |f: &dyn Fn(&Line) -> usize| lines.iter().map(f).max().unwrap_or(0);
-    let name_w = w(&|l| l.depth * 2 + l.name.chars().count());
-    let size_w = w(&|l| l.size.chars().count());
-    let fs_w = w(&|l| l.fstype.chars().count());
-    let mount_w = w(&|l| l.mount.chars().count());
+    let col = |f: &dyn Fn(&Row) -> usize| lines.iter().map(f).max().unwrap_or(0);
+    let name_w = col(&|l| l.depth * 2 + l.name.chars().count());
+    let size_w = col(&|l| l.size.chars().count());
+    let fs_w = col(&|l| l.fstype.chars().count());
+    let mount_w = col(&|l| l.mount.chars().count());
 
-    let pad = " ".repeat(INDENT);
     let mut out = Vec::new();
     for l in &lines {
         let name = format!("{:<name_w$}", format!("{}{}", "  ".repeat(l.depth), l.name));
-        let styled = if l.depth == 0 {
-            st.bold(&name)
+        let kind = if l.depth == 0 {
+            Kind::Bold
         } else {
-            name.clone()
+            Kind::Plain
         };
         let mut cells = format!("  {:>size_w$}", l.size);
         if !l.mount.is_empty() {
             cells.push_str(&format!("  {:<fs_w$}  {:<mount_w$}", l.fstype, l.mount));
         }
         let used = INDENT + name_w + cells.chars().count();
-        let mut line = format!("{pad}{styled}{}", cells.trim_end());
-        if !l.detail.is_empty() {
-            if used + 2 + l.detail.chars().count() <= WIDTH {
-                line = format!("{pad}{styled}{cells}  {}", l.detail);
-            } else {
-                out.push(line);
-                line = format!("{}{}", " ".repeat(INDENT + name_w + 2), l.detail);
-            }
+        let start = Line::spaces(INDENT).then(Line::styled(name, kind));
+        if l.detail.is_empty() {
+            out.push(start.then(Line::plain(cells.trim_end())));
+        } else if used + 2 + l.detail.chars().count() <= w {
+            out.push(start.then(Line::plain(format!("{cells}  {}", l.detail))));
+        } else {
+            out.push(start.then(Line::plain(cells.trim_end())));
+            out.push(Line::spaces(INDENT + name_w + 2).then(Line::plain(&l.detail)));
         }
-        out.push(line);
     }
     if d.hidden > 0 {
         let what = if d.hidden == 1 { "device" } else { "devices" };
-        out.push(st.dim(&format!(
-            "{}{} loop or empty {what} not shown",
-            " ".repeat(INDENT),
-            d.hidden
+        out.push(Line::spaces(INDENT).then(Line::styled(
+            format!("{} loop or empty {what} not shown", d.hidden),
+            Kind::Dim,
         )));
     }
     if out.is_empty() {
-        out.push(format!("{}no disks found", " ".repeat(INDENT)));
+        out.push(Line::spaces(INDENT).then(Line::plain("no disks found")));
     }
     out
 }
 
-fn device_line(dev: &BlockDevice) -> Line {
+fn device_line(dev: &BlockDevice) -> Row {
     let mut detail = Vec::new();
     match dev.rotational {
         Some(false) => detail.push("SSD".to_string()),
@@ -290,7 +285,7 @@ fn device_line(dev: &BlockDevice) -> Line {
     if let Some(m) = &dev.model {
         detail.push(m.clone());
     }
-    Line {
+    Row {
         depth: 0,
         name: dev.name.clone(),
         size: size(dev.size),
@@ -300,7 +295,7 @@ fn device_line(dev: &BlockDevice) -> Line {
     }
 }
 
-fn mount_line(depth: usize, name: String, size_text: String, m: &Mount, count: usize) -> Line {
+fn mount_line(depth: usize, name: String, size_text: String, m: &Mount, count: usize) -> Row {
     let mut mount = m.point.clone();
     if count > 1 {
         mount.push_str(&format!(" (+{})", count - 1));
@@ -313,7 +308,7 @@ fn mount_line(depth: usize, name: String, size_text: String, m: &Mount, count: u
         ),
         None => String::new(),
     };
-    Line {
+    Row {
         depth,
         name,
         size: size_text,

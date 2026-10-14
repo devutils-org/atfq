@@ -1,0 +1,28 @@
+---
+source: tests/phase2.rs
+expression: t.screen()
+---
+"┌ Contents ──────────────┐┌ 5.1 free vs available ─────────────────────────────┐"
+"│Hubs                    ││                                                    │"
+"│  Disk                  ││  ▾ Why is unused RAM wasted RAM?                   │"
+"│  Memory                ││                                                    │"
+"│Chapters                ││    RAM is much faster than any disk. When a program│"
+"│1. Filesystem           ││    reads a file, Linux keeps a copy in the page    │"
+"│2. Disk                 ││    cache, so the next read comes straight from     │"
+"│3. Permissions          ││    memory. Empty RAM does nothing for you, so the  │"
+"│4. Processes & scheduli…││    kernel fills it with cache and takes it back    │"
+"│  4.1 Process states an…││    when programs ask for memory.                   │"
+"│5. Memory               ││                                                    │"
+"│  5.1 free vs available ││    Taking cache back is cheap when the data is     │"
+"│6. Finding and transfor…││    unchanged: it's still on disk, the kernel can   │"
+"│  6.1 find              ││    drop it. Changed ("dirty") data must be written │"
+"│                        ││    to disk first, which is slower.                 │"
+"│                        ││  ▸ How is "available" calculated?                  │"
+"│                        ││  ▸ What is swappiness and when should I change it? │"
+"│                        ││                                                    │"
+"│                        ││Related                                             │"
+"│                        ││  Commands  free, vmstat                            │"
+"│                        ││  Paths     /proc/meminfo                           │"
+"│                        ││  Hub       idk memory Memory                       │"
+"└────────────────────────┘└────────────────────────────────────────────────────┘"
+"q quit  ↑↓ move  tab link  ⏎ open  ⌫ back  / search  ? ask AI  M mouse:on       "

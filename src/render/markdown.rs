@@ -5,16 +5,15 @@
 
 use pulldown_cmark::{Event, Parser, Tag, TagEnd};
 
-use super::text::{wrap, Kind, Prefix, Span, Style};
+use super::text::{wrap, Kind, Line, Span};
 use super::warning;
 use crate::content::danger::is_dangerous;
 
 /// Code blocks sit this many columns right of the surrounding text.
 const CODE_INDENT: usize = 4;
 
-pub(crate) fn render(src: &str, indent: usize, width: usize, st: Style) -> Vec<String> {
+pub(crate) fn render(src: &str, indent: usize, width: usize) -> Vec<Line> {
     let mut md = Md {
-        st,
         width,
         out: Vec::new(),
         spans: Vec::new(),
@@ -33,9 +32,8 @@ pub(crate) fn render(src: &str, indent: usize, width: usize, st: Style) -> Vec<S
 }
 
 struct Md {
-    st: Style,
     width: usize,
-    out: Vec<String>,
+    out: Vec<Line>,
     /// Inline text waiting to be wrapped.
     spans: Vec<Span>,
     /// Open inline styles, innermost last.
@@ -133,12 +131,12 @@ impl Md {
         self.indents.last().copied().unwrap_or(0)
     }
 
-    fn push_lines(&mut self, lines: Vec<String>) {
+    fn push_lines(&mut self, lines: Vec<Line>) {
         if lines.is_empty() {
             return;
         }
         if self.blank && !self.out.is_empty() {
-            self.out.push(String::new());
+            self.out.push(Line::default());
         }
         self.blank = false;
         self.out.extend(lines);
@@ -150,23 +148,20 @@ impl Md {
             return;
         }
         let spans = std::mem::take(&mut self.spans);
-        let rest = Prefix::spaces(self.indent());
-        let first = self
-            .marker
-            .take()
-            .map_or(rest.clone(), |m| Prefix::plain(&m));
-        let lines = wrap(&spans, &first, &rest, self.width, self.st);
+        let rest = Line::spaces(self.indent());
+        let first = self.marker.take().map_or(rest.clone(), Line::plain);
+        let lines = wrap(&spans, &first, &rest, self.width);
         self.push_lines(lines);
     }
 
     /// Code is never wrapped. Dangerous lines get a warning under them.
     fn code_block(&mut self, code: &str) {
-        let pad = " ".repeat(self.indent() + CODE_INDENT);
+        let pad = self.indent() + CODE_INDENT;
         let mut lines = Vec::new();
         for line in code.trim_end_matches('\n').lines() {
-            lines.push(format!("{pad}{}", self.st.code(line)));
+            lines.push(Line::spaces(pad).then(Line::styled(line, Kind::Code)));
             if is_dangerous(line) {
-                lines.push(format!("{pad}{}", warning(self.st)));
+                lines.push(Line::spaces(pad).then(warning()));
             }
         }
         self.push_lines(lines);
@@ -178,7 +173,8 @@ mod tests {
     use super::*;
 
     fn md(src: &str) -> String {
-        render(src, 2, 40, Style::new(false)).join("\n")
+        let lines: Vec<String> = render(src, 2, 40).iter().map(Line::text).collect();
+        lines.join("\n")
     }
 
     #[test]

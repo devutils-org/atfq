@@ -1,0 +1,28 @@
+---
+source: tests/phase2.rs
+expression: t.screen()
+---
+"┌ Contents ──────────────┐┌ Search ────────────────────────────────────────────┐"
+"│Hubs                    ││/ zomb█                                             │"
+"│  Disk                  ││                                                    │"
+"│  Memory                ││Results for "zomb"                                  │"
+"│Chapters                ││  idk 4.1  Process states and zombies               │"
+"│1. Filesystem           ││           D waiting on I/O, T stopped, Z zombie.   │"
+"│2. Disk                 ││                                                    │"
+"│3. Permissions          ││                                                    │"
+"│4. Processes & scheduli…││                                                    │"
+"│  4.1 Process states an…││                                                    │"
+"│5. Memory               ││                                                    │"
+"│  5.1 free vs available ││                                                    │"
+"│6. Finding and transfor…││                                                    │"
+"│  6.1 find              ││                                                    │"
+"│                        ││                                                    │"
+"│                        ││                                                    │"
+"│                        ││                                                    │"
+"│                        ││                                                    │"
+"│                        ││                                                    │"
+"│                        ││                                                    │"
+"│                        ││                                                    │"
+"│                        ││                                                    │"
+"└────────────────────────┘└────────────────────────────────────────────────────┘"
+"esc close  ↑↓ result  ⏎ open  ⌫ erase  M mouse:on                               "

@@ -1,0 +1,28 @@
+---
+source: tests/phase2.rs
+expression: t.screen()
+---
+"┌ Contents ──────────────┐┌ idk ───────────────────────────────────────────────┐"
+"│Hubs                    ││Welcome to idk                                      │"
+"│  Disk                  ││                                                    │"
+"│  Memory                ││Pick a hub or a chapter on the left, or press / to  │"
+"│Chapters                ││search. Hubs are the best place to start:           │"
+"│1. Filesystem           ││                                                    │"
+"│2. Disk                 ││  idk disk  Disk                                    │"
+"│3. Permissions          ││  idk memory  Memory                                │"
+"│4. Processes & scheduli…││                                                    │"
+"│  4.1 Process states an…││                                                    │"
+"│5. Memory               ││                                                    │"
+"│  5.1 free vs available ││                                                    │"
+"│6. Finding and transfor…││                                                    │"
+"│  6.1 find              ││                                                    │"
+"│                        ││                                                    │"
+"│                        ││                                                    │"
+"│                        ││                                                    │"
+"│                        ││                                                    │"
+"│                        ││                                                    │"
+"│                        ││                                                    │"
+"│                        ││                                                    │"
+"│                        ││                                                    │"
+"└────────────────────────┘└────────────────────────────────────────────────────┘"
+"q quit  ↑↓ move  tab link  ⏎ open  ⌫ back  / search  ? ask AI  M mouse:on       "

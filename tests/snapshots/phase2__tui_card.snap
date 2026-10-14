@@ -1,0 +1,28 @@
+---
+source: tests/phase2.rs
+expression: t.screen()
+---
+"┌ Contents ──────────────┐┌ 5.1 free vs available ─────────────────────────────┐"
+"│Hubs                    ││5.1  free vs available                              │"
+"│  Disk                  ││                                                    │"
+"│  Memory                ││TL;DR                                               │"
+"│Chapters                ││  - free: memory nobody is using at all, not even as│"
+"│1. Filesystem           ││    cache.                                          │"
+"│2. Disk                 ││  - available: what your apps can still get without │"
+"│3. Permissions          ││    swapping.                                       │"
+"│4. Processes & scheduli…││  - Look at available, not free: the available      │"
+"│  4.1 Process states an…││    column of the Mem: line in free -h.             │"
+"│5. Memory               ││                                                    │"
+"│  5.1 free vs available ││      free -h                                       │"
+"│6. Finding and transfor…││                                                    │"
+"│  6.1 find              ││On your machine                                     │"
+"│                        ││  RAM      10.5 GiB available of 15.5 GiB (68%) ·   │"
+"│                        ││           1.1 GiB completely free                  │"
+"│                        ││  Cache    7.5 GiB in buff/cache, 604.0 MiB of it   │"
+"│                        ││           shared (tmpfs)                           │"
+"│                        ││  Swap     256.0 MiB used of 8.0 GiB · swappiness 60│"
+"│                        ││                                                    │"
+"│                        ││Pitfalls                                            │"
+"│                        ││  - "free" near zero is normal: Linux fills spare   │"
+"└────────────────────────┘└────────────────────────────────────────────────────┘"
+"q quit  ↑↓ move  tab link  ⏎ open  ⌫ back  / search  ? ask AI  M mouse:on       "

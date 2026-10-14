@@ -1,12 +1,14 @@
-//! Plain text rendering for the CLI.
+//! Pages as [`Doc`]s: the CLI prints them as text, the TUI draws them.
 
 mod live;
 mod markdown;
 mod text;
 
-pub use text::Style;
+use std::collections::BTreeSet;
 
-use text::{wrap, Kind, Prefix, Span};
+pub use text::{width, Action, Doc, Kind, Line, Span};
+
+pub(crate) use text::wrap;
 
 use crate::content::danger::is_dangerous;
 use crate::content::{Card, ChapterKind, Hub, Library};
@@ -16,7 +18,7 @@ use crate::search::Hit;
 use crate::view::{Lookup, Match, Ref};
 use crate::BIN_NAME;
 
-/// Output never goes wider than this.
+/// CLI output never goes wider than this.
 pub const WIDTH: usize = 80;
 
 /// Body text sits this far right of section headings.
@@ -26,6 +28,7 @@ const INDENT: usize = 2;
 /// description moves to its own line.
 const MAX_LEFT: usize = 30;
 
+/// CLI options.
 #[derive(Debug, Clone, Copy)]
 pub struct Options {
     /// Expand the deep dive.
@@ -33,99 +36,140 @@ pub struct Options {
     pub color: bool,
 }
 
-pub(crate) fn warning(st: Style) -> String {
-    st.warn("⚠ changes or deletes data: check what it targets first")
+/// How to lay a page out.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Layout {
+    pub width: usize,
+    pub deep_dive: DeepDive,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DeepDive {
+    /// A one-line hint pointing to `--why`.
+    Hint,
+    /// Every question with its answer.
+    All,
+    /// Every question as a toggle; the answers of these are shown.
+    Toggle(BTreeSet<usize>),
+}
+
+impl Layout {
+    pub fn cli(opts: Options) -> Layout {
+        Layout {
+            width: WIDTH,
+            deep_dive: if opts.why {
+                DeepDive::All
+            } else {
+                DeepDive::Hint
+            },
+        }
+    }
+}
+
+pub(crate) fn warning() -> Line {
+    Line::styled(
+        "⚠ changes or deletes data: check what it targets first",
+        Kind::Warn,
+    )
 }
 
 /// Lines grouped in blocks separated by one blank line.
 #[derive(Default)]
 struct Page {
-    lines: Vec<String>,
+    lines: Vec<Line>,
 }
 
 impl Page {
-    fn block(&mut self, lines: Vec<String>) {
+    fn block(&mut self, lines: Vec<Line>) {
         if lines.is_empty() {
             return;
         }
         if !self.lines.is_empty() {
-            self.lines.push(String::new());
+            self.lines.push(Line::default());
         }
         self.lines.extend(lines);
     }
 
-    fn section(&mut self, st: Style, heading: &str, body: Vec<String>) {
+    fn section(&mut self, heading: &str, body: Vec<Line>) {
         if body.is_empty() {
             return;
         }
-        let mut lines = vec![st.bold(heading)];
+        let mut lines = vec![Line::styled(heading, Kind::Bold)];
         lines.extend(body);
         self.block(lines);
     }
 
-    fn finish(self) -> String {
-        let mut s = self.lines.join("\n");
-        s.push('\n');
-        s
+    fn finish(self) -> Doc {
+        Doc { lines: self.lines }
     }
-}
-
-fn md(src: &str, indent: usize, st: Style) -> Vec<String> {
-    markdown::render(src, indent, WIDTH, st)
 }
 
 fn command(s: &str) -> String {
     format!("{BIN_NAME} {s}")
 }
 
-pub fn card(lib: &Library, card: &Card, live: &[ProbeResult], opts: Options) -> String {
-    let st = Style::new(opts.color);
+/// `idk <handle>`, opening the page when activated.
+fn open(handle: &str) -> Span {
+    Span::new(command(handle), Kind::Code).with(Action::Open(handle.to_string()))
+}
+
+fn paragraph(spans: &[Span], width: usize) -> Vec<Line> {
+    wrap(spans, &Line::default(), &Line::default(), width)
+}
+
+pub fn card_doc(lib: &Library, card: &Card, live: &[ProbeResult], layout: &Layout) -> Doc {
+    let w = layout.width;
     let mut page = Page::default();
-    page.block(vec![st.bold(&format!("{}  {}", card.number, card.title))]);
-    page.section(st, "TL;DR", md(&card.tldr, INDENT, st));
-    page.section(st, "On your machine", live::block(live, st));
+    page.block(vec![Line::styled(
+        format!("{}  {}", card.number, card.title),
+        Kind::Bold,
+    )]);
+    page.section("TL;DR", markdown::render(&card.tldr, INDENT, w));
+    page.section("On your machine", live::block(live, w));
     if let Some(pitfalls) = &card.pitfalls {
-        page.section(st, "Pitfalls", md(pitfalls, INDENT, st));
+        page.section("Pitfalls", markdown::render(pitfalls, INDENT, w));
     }
 
     let n = card.deep_dive.len();
-    if n > 0 && opts.why {
-        let mut lines = vec![st.bold("Deep dive")];
-        for q in &card.deep_dive {
-            lines.push(String::new());
-            lines.push(format!("{}▾ {}", " ".repeat(INDENT), st.bold(&q.title)));
-            lines.push(String::new());
-            lines.extend(md(&q.body, INDENT * 2, st));
+    match &layout.deep_dive {
+        _ if n == 0 => {}
+        DeepDive::Hint => {
+            let what = if n == 1 { "question" } else { "questions" };
+            let spans = [
+                Span::plain(format!("Deep dive: {n} {what}. Read them with ")),
+                Span::new(command(&format!("{} --why", card.number)), Kind::Code),
+            ];
+            page.block(paragraph(&spans, w));
         }
-        page.block(lines);
-    } else if n > 0 {
-        let what = if n == 1 { "question" } else { "questions" };
-        let spans = [
-            Span::new(
-                format!("Deep dive: {n} {what}. Read them with "),
-                Kind::Plain,
-            ),
-            Span::new(command(&format!("{} --why", card.number)), Kind::Code),
-        ];
-        page.block(wrap(
-            &spans,
-            &Prefix::spaces(0),
-            &Prefix::spaces(0),
-            WIDTH,
-            st,
-        ));
+        mode => {
+            let mut lines = vec![Line::styled("Deep dive", Kind::Bold)];
+            for (i, q) in card.deep_dive.iter().enumerate() {
+                let open = match mode {
+                    DeepDive::Toggle(set) => set.contains(&i),
+                    _ => true,
+                };
+                let mark = if open { "▾ " } else { "▸ " };
+                if open || i == 0 {
+                    lines.push(Line::default());
+                }
+                let title = [Span::new(&q.title, Kind::Bold).with(Action::Toggle(i))];
+                let first = Line::spaces(INDENT).then(Line::new(vec![
+                    Span::new(mark, Kind::Bold).with(Action::Toggle(i))
+                ]));
+                lines.extend(wrap(&title, &first, &Line::spaces(INDENT + 2), w));
+                if open {
+                    lines.push(Line::default());
+                    lines.extend(markdown::render(&q.body, INDENT * 2, w));
+                }
+            }
+            page.block(lines);
+        }
     }
 
     let mut related = Vec::new();
     let mut row = |label: &str, spans: Vec<Span>| {
-        let first = Prefix::plain(&format!("{}{label:<10}", " ".repeat(INDENT)));
-        related.extend(wrap(
-            &spans,
-            &first,
-            &Prefix::spaces(INDENT + 10),
-            WIDTH,
-            st,
-        ));
+        let first = Line::plain(format!("{}{label:<10}", " ".repeat(INDENT)));
+        related.extend(wrap(&spans, &first, &Line::spaces(INDENT + 10), w));
     };
     if !card.commands.is_empty() {
         row("Commands", list(&card.commands));
@@ -145,8 +189,12 @@ pub fn card(lib: &Library, card: &Card, live: &[ProbeResult], opts: Options) -> 
             row("See also", link(&c.number.to_string(), &c.title));
         }
     }
-    page.section(st, "Related", related);
+    page.section("Related", related);
     page.finish()
+}
+
+pub fn card(lib: &Library, card: &Card, live: &[ProbeResult], opts: Options) -> String {
+    card_doc(lib, card, live, &Layout::cli(opts)).to_text(opts.color)
 }
 
 /// `a, b, c` with each item styled as code.
@@ -155,93 +203,116 @@ fn list(items: &[String]) -> Vec<Span> {
     for (i, item) in items.iter().enumerate() {
         let sep = if i + 1 < items.len() { "," } else { "" };
         spans.push(Span::new(item.as_str(), Kind::Code));
-        spans.push(Span::new(format!("{sep} "), Kind::Plain));
+        spans.push(Span::plain(format!("{sep} ")));
     }
     spans
 }
 
-/// `idk <target>  Title`
-fn link(target: &str, title: &str) -> Vec<Span> {
+/// `idk <handle>  Title`, all of it a link.
+fn link(handle: &str, title: &str) -> Vec<Span> {
+    let action = Action::Open(handle.to_string());
     vec![
-        Span::new(command(target), Kind::Code),
-        Span::new(format!("  {title}"), Kind::Plain),
+        open(handle),
+        Span::plain("  "),
+        Span::plain(title).with(action),
     ]
 }
 
-/// Two columns: something to copy on the left, what it is on the right.
-fn table(rows: &[(String, String)], st: Style) -> Vec<String> {
+/// One row of a two-column table: something to copy, and what it is.
+struct Row {
+    left: String,
+    desc: String,
+    action: Option<Action>,
+}
+
+impl Row {
+    fn new(left: impl Into<String>, desc: impl Into<String>) -> Row {
+        Row {
+            left: left.into(),
+            desc: desc.into(),
+            action: None,
+        }
+    }
+
+    fn opening(handle: &str, desc: &str) -> Row {
+        Row {
+            left: command(handle),
+            desc: desc.to_string(),
+            action: Some(Action::Open(handle.to_string())),
+        }
+    }
+}
+
+fn table(rows: &[Row], width: usize) -> Vec<Line> {
+    // In a narrow pane, long commands go on their own line rather than
+    // squeezing every description.
+    let max_left = MAX_LEFT.min(width / 3);
     let left = rows
         .iter()
-        .map(|(l, _)| text::width(l))
-        .filter(|&w| w <= MAX_LEFT)
+        .map(|r| text::width(&r.left))
+        .filter(|&w| w <= max_left)
         .max()
         .unwrap_or(0);
     let desc_col = INDENT + left + 2;
-    let rest = Prefix::spaces(desc_col);
+    let rest = Line::spaces(desc_col);
     let mut lines = Vec::new();
-    for (l, desc) in rows {
-        let w = text::width(l);
-        let styled = format!("{}{}", " ".repeat(INDENT), st.code(l));
-        let spans = [Span::new(desc.as_str(), Kind::Plain)];
-        if w <= MAX_LEFT {
-            let first = Prefix {
-                text: format!("{styled}{}", " ".repeat(left - w + 2)),
-                width: desc_col,
-            };
-            lines.extend(wrap(&spans, &first, &rest, WIDTH, st));
+    for r in rows {
+        let w = text::width(&r.left);
+        let mut cmd = Span::new(r.left.as_str(), Kind::Code);
+        let mut desc = Span::plain(r.desc.as_str());
+        cmd.action = r.action.clone();
+        desc.action = r.action.clone();
+        let styled = Line::spaces(INDENT).then(Line::new(vec![cmd]));
+        if w <= max_left {
+            let first = styled.then(Line::spaces(left - w + 2));
+            lines.extend(wrap(&[desc], &first, &rest, width));
         } else {
             lines.push(styled);
-            lines.extend(wrap(&spans, &rest, &rest, WIDTH, st));
+            lines.extend(wrap(&[desc], &rest, &rest, width));
         }
-        if is_dangerous(l) {
-            lines.push(format!("{}{}", " ".repeat(INDENT * 2), warning(st)));
+        if is_dangerous(&r.left) {
+            lines.push(Line::spaces(INDENT * 2).then(warning()));
         }
     }
     lines
 }
 
-pub fn hub(
+pub fn hub_doc(
     lib: &Library,
     hub: &Hub,
     also_card: Option<&Card>,
     live: &[ProbeResult],
-    opts: Options,
-) -> String {
-    let st = Style::new(opts.color);
+    layout: &Layout,
+) -> Doc {
+    let w = layout.width;
     let mut page = Page::default();
     if let Some(c) = also_card {
         let spans = [
-            Span::new(format!("Looking for \"{}\"? Run", c.title), Kind::Plain),
-            Span::new(command(&c.number.to_string()), Kind::Code),
+            Span::plain(format!("Looking for \"{}\"? Run", c.title)),
+            open(&c.number.to_string()),
         ];
-        page.block(wrap(
-            &spans,
-            &Prefix::spaces(0),
-            &Prefix::spaces(0),
-            WIDTH,
-            st,
-        ));
+        page.block(paragraph(&spans, w));
     }
-    page.block(vec![format!(
-        "{}  {}",
-        st.bold(&format!("{}. {}", hub.chapter, hub.title)),
-        st.dim("hub")
-    )]);
-    page.block(md(&hub.intro, 0, st));
-    page.section(st, "On your machine", live::block(live, st));
+    page.block(vec![Line::new(vec![
+        Span::new(format!("{}. {}", hub.chapter, hub.title), Kind::Bold),
+        Span::plain("  "),
+        Span::new("hub", Kind::Dim),
+    ])]);
+    page.block(markdown::render(&hub.intro, 0, w));
+    page.section("On your machine", live::block(live, w));
 
     let commands: Vec<_> = hub
         .commands
         .iter()
-        .map(|c| (c.cmd.clone(), c.desc.clone()))
+        .map(|c| Row::new(&c.cmd, &c.desc))
         .collect();
-    page.section(st, "Commands", table(&commands, st));
+    page.section("Commands", table(&commands, w));
     let paths: Vec<_> = hub
         .paths
         .iter()
-        .map(|p| (p.path.clone(), p.desc.clone()))
+        .map(|p| Row::new(&p.path, &p.desc))
         .collect();
-    page.section(st, "Paths", table(&paths, st));
+    page.section("Paths", table(&paths, w));
 
     // The hub's own chapter first, then related cards from elsewhere.
     let mut ids: Vec<&String> = lib
@@ -256,106 +327,129 @@ pub fn hub(
     let cards: Vec<_> = ids
         .into_iter()
         .filter_map(|id| lib.card(id))
-        .map(|c| (command(&c.number.to_string()), c.title.clone()))
+        .map(|c| Row::opening(&c.number.to_string(), &c.title))
         .collect();
-    page.section(st, "Cards", table(&cards, st));
+    page.section("Cards", table(&cards, w));
     page.finish()
 }
 
-pub fn toc(lib: &Library, opts: Options) -> String {
-    let st = Style::new(opts.color);
-    let mut page = Page::default();
-    page.block(vec![st.bold("Contents")]);
+pub fn hub(
+    lib: &Library,
+    hub: &Hub,
+    also_card: Option<&Card>,
+    live: &[ProbeResult],
+    opts: Options,
+) -> String {
+    hub_doc(lib, hub, also_card, live, &Layout::cli(opts)).to_text(opts.color)
+}
 
-    let hubs: Vec<_> = lib
-        .hubs()
-        .map(|h| (command(&h.id), h.title.clone()))
-        .collect();
-    page.section(st, "Hubs", table(&hubs, st));
+pub fn toc(lib: &Library, opts: Options) -> String {
+    let mut page = Page::default();
+    page.block(vec![Line::styled("Contents", Kind::Bold)]);
+
+    let hubs: Vec<_> = lib.hubs().map(|h| Row::opening(&h.id, &h.title)).collect();
+    page.section("Hubs", table(&hubs, WIDTH));
 
     let digits = lib.chapters().len().to_string().len();
-    let mut lines = vec![st.bold("Chapters")];
+    let mut lines = vec![Line::styled("Chapters", Kind::Bold)];
     for ch in lib.chapters() {
-        let mut line = format!("{}{:>digits$}. {}", " ".repeat(INDENT), ch.number, ch.title);
+        let mut line = Line::plain(format!(
+            "{}{:>digits$}. {}",
+            " ".repeat(INDENT),
+            ch.number,
+            ch.title
+        ));
         if let ChapterKind::Hub(id) = &ch.kind {
-            line.push_str(&format!("  {}", st.dim(&format!("hub: {}", command(id)))));
+            line.push(Span::plain("  "));
+            line.push(Span::new(format!("hub: {}", command(id)), Kind::Dim));
         }
         lines.push(line);
         for id in &ch.cards {
             if let Some(c) = lib.card(id) {
-                lines.push(format!(
-                    "{}{}  {}",
-                    " ".repeat(INDENT + digits + 2),
-                    st.code(&c.number.to_string()),
-                    c.title
-                ));
+                let n = c.number.to_string();
+                lines.push(Line::new(vec![
+                    Span::plain(" ".repeat(INDENT + digits + 2)),
+                    Span::new(&n, Kind::Code).with(Action::Open(n.clone())),
+                    Span::plain("  "),
+                    Span::plain(&c.title).with(Action::Open(n.clone())),
+                ]));
             }
         }
     }
     page.block(lines);
-    page.finish()
+    page.finish().to_text(opts.color)
 }
 
 /// The page for a lookup: the hub or card, preceded by a note when it is only
 /// the closest match. `None` when nothing matched: see [`not_found`].
-pub fn lookup(lib: &Library, l: &Lookup<'_>, opts: Options) -> Option<String> {
-    let st = Style::new(opts.color);
+pub fn lookup_doc(lib: &Library, l: &Lookup<'_>, layout: &Layout) -> Option<Doc> {
     let also_card = l.also_card.as_ref().and_then(|r| lib.card(&r.id));
-    let page = match l.entry? {
-        Target::Hub(h) => hub(lib, h, also_card, &l.probes, opts),
-        Target::Card(c) => card(lib, c, &l.probes, opts),
+    let mut doc = match l.entry? {
+        Target::Hub(h) => hub_doc(lib, h, also_card, &l.probes, layout),
+        Target::Card(c) => card_doc(lib, c, &l.probes, layout),
     };
     if l.matched != Match::Closest {
-        return Some(page);
+        return Some(doc);
     }
     let shown = l.entry.map(|t| t.title()).unwrap_or_default();
-    let mut lines = wrap(
-        &[Span::new(
-            format!("No exact match for \"{}\", showing \"{shown}\".", l.query),
-            Kind::Plain,
-        )],
-        &Prefix::spaces(0),
-        &Prefix::spaces(0),
-        WIDTH,
-        st,
+    let mut lines = paragraph(
+        &[Span::plain(format!(
+            "No exact match for \"{}\", showing \"{shown}\".",
+            l.query
+        ))],
+        layout.width,
     );
-    lines.extend(did_you_mean("Did you mean:", &l.suggestions, st));
-    let header: String = lines.iter().map(|l| st.dim(l) + "\n").collect();
-    Some(format!("{header}\n{page}"))
+    lines.extend(did_you_mean("Did you mean:", &l.suggestions, layout.width));
+    let mut header: Vec<Line> = lines.into_iter().map(Line::dimmed).collect();
+    header.push(Line::default());
+    header.append(&mut doc.lines);
+    doc.lines = header;
+    Some(doc)
+}
+
+pub fn lookup(lib: &Library, l: &Lookup<'_>, opts: Options) -> Option<String> {
+    lookup_doc(lib, l, &Layout::cli(opts)).map(|d| d.to_text(opts.color))
 }
 
 /// `Did you mean: idk 5.1 (free vs available), idk disk (Disk)`
-fn did_you_mean(intro: &str, refs: &[Ref], st: Style) -> Vec<String> {
+fn did_you_mean(intro: &str, refs: &[Ref], width: usize) -> Vec<Line> {
     if refs.is_empty() {
         return Vec::new();
     }
-    let mut spans = vec![Span::new(format!("{intro} "), Kind::Plain)];
+    let mut spans = vec![Span::plain(format!("{intro} "))];
     for (i, r) in refs.iter().enumerate() {
         let sep = if i + 1 < refs.len() { ")," } else { ")" };
-        spans.push(Span::new(command(&r.handle), Kind::Code));
-        spans.push(Span::new(format!(" ({}{sep} ", r.title), Kind::Plain));
+        spans.push(open(&r.handle));
+        spans.push(Span::plain(format!(" ({}{sep} ", r.title)));
     }
-    wrap(&spans, &Prefix::spaces(0), &Prefix::spaces(0), WIDTH, st)
+    paragraph(&spans, width)
+}
+
+pub fn not_found_doc(l: &Lookup<'_>, width: usize) -> Doc {
+    let mut lines = vec![Line::plain(format!("Nothing matches \"{}\".", l.query))];
+    lines.extend(did_you_mean("Related:", &l.suggestions, width));
+    lines.push(Line::new(vec![
+        Span::plain("Search every hub and card: "),
+        Span::new(command(&format!("search {}", l.query)), Kind::Code),
+    ]));
+    Doc { lines }
 }
 
 pub fn not_found(l: &Lookup<'_>, opts: Options) -> String {
-    let st = Style::new(opts.color);
-    let mut lines = vec![format!("Nothing matches \"{}\".", l.query)];
-    lines.extend(did_you_mean("Related:", &l.suggestions, st));
-    lines.push(format!(
-        "Search every hub and card: {}",
-        st.code(&command(&format!("search {}", l.query)))
-    ));
-    lines.join("\n") + "\n"
+    not_found_doc(l, WIDTH).to_text(opts.color)
 }
 
-pub fn search(query: &str, hits: &[Hit], opts: Options) -> String {
-    let st = Style::new(opts.color);
+pub fn search_doc(query: &str, hits: &[Hit], width: usize) -> Doc {
     if hits.is_empty() {
-        return format!(
-            "Nothing found for \"{query}\".\nBrowse everything with: {}\n",
-            st.code(&command("toc"))
-        );
+        return Doc {
+            lines: vec![
+                Line::plain(format!("Nothing found for \"{query}\".")),
+                Line::new(vec![
+                    Span::plain("Browse everything with: "),
+                    Span::new(command("toc"), Kind::Code),
+                ]),
+            ],
+        };
     }
     let left = hits
         .iter()
@@ -364,51 +458,56 @@ pub fn search(query: &str, hits: &[Hit], opts: Options) -> String {
         .unwrap_or(0);
     let mut lines = Vec::new();
     for h in hits {
+        let action = Action::Open(h.handle.clone());
         let cmd = command(&h.handle);
-        lines.push(format!(
-            "{}{}{}{}",
-            " ".repeat(INDENT),
-            st.code(&cmd),
-            " ".repeat(left - text::width(&cmd) + 2),
-            st.bold(&h.title)
-        ));
+        lines.push(Line::new(vec![
+            Span::plain(" ".repeat(INDENT)),
+            open(&h.handle),
+            Span::plain(" ".repeat(left - text::width(&cmd) + 2)),
+            Span::new(&h.title, Kind::Bold).with(action),
+        ]));
         if let Some(snippet) = &h.snippet {
-            let p = Prefix::spaces(INDENT + left + 2);
-            let spans = [Span::new(snippet.as_str(), Kind::Plain)];
-            lines.extend(wrap(&spans, &p, &p, WIDTH, st).iter().map(|l| st.dim(l)));
+            let p = Line::spaces(INDENT + left + 2);
+            let spans = [Span::plain(snippet.as_str())];
+            lines.extend(wrap(&spans, &p, &p, width).into_iter().map(Line::dimmed));
         }
     }
     let mut page = Page::default();
-    page.section(st, &format!("Results for \"{query}\""), lines);
+    page.section(&format!("Results for \"{query}\""), lines);
     page.finish()
+}
+
+pub fn search(query: &str, hits: &[Hit], opts: Options) -> String {
+    search_doc(query, hits, WIDTH).to_text(opts.color)
+}
+
+/// The probe results alone, as in "On your machine". Used by the AI prompt.
+pub fn live_text(live: &[ProbeResult], width: usize) -> String {
+    Doc {
+        lines: live::block(live, width),
+    }
+    .to_text(false)
 }
 
 /// `idk probe <name>`: one probe result.
 pub fn probe(info: &ProbeInfo, r: &ProbeResult, opts: Options) -> String {
-    let st = Style::new(opts.color);
     let mut page = Page::default();
-    page.block(vec![format!(
-        "{}  {}",
-        st.bold(info.name),
-        st.dim(info.description)
-    )]);
-    page.block(live::result(r, st));
-    page.finish()
+    page.block(vec![Line::new(vec![
+        Span::new(info.name, Kind::Bold),
+        Span::plain("  "),
+        Span::new(info.description, Kind::Dim),
+    ])]);
+    page.block(live::result(r, WIDTH));
+    page.finish().to_text(opts.color)
 }
 
 /// `idk probe` alone: the list of probes.
 pub fn probe_list(probes: &[ProbeInfo], opts: Options) -> String {
-    let st = Style::new(opts.color);
     let rows: Vec<_> = probes
         .iter()
-        .map(|p| {
-            (
-                command(&format!("probe {}", p.name)),
-                p.description.to_string(),
-            )
-        })
+        .map(|p| Row::new(command(&format!("probe {}", p.name)), p.description))
         .collect();
     let mut page = Page::default();
-    page.section(st, "Probes", table(&rows, st));
-    page.finish()
+    page.section("Probes", table(&rows, WIDTH));
+    page.finish().to_text(opts.color)
 }
