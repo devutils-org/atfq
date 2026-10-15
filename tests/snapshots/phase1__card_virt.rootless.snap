@@ -1,0 +1,46 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+7.5  Root in a container: users, capabilities and the docker group
+
+TL;DR
+  - Without user namespaces, root in a container is root on the host, held back
+    only by namespaces, dropped capabilities and seccomp.
+  - Being in the docker group equals being root: anyone in it can start a
+    container with the host's / mounted and edit any file.
+  - Rootless containers (Podman by default, Docker in rootless mode) map
+    container root to your own user: an escape gets only your rights.
+
+      id                                  # in the docker group?
+      podman run --rm alpine id           # uid=0 inside…
+      podman unshare cat /proc/self/uid_map   # …mapped to your uid outside
+
+On your machine
+  User      alice (uid 1000, gid 1000)
+  Groups    alice, wheel, docker, 4242
+  Admin     member of wheel: the group sudo usually trusts
+  Umask     0022: new files 644 (rw-r--r--), new folders 755
+
+  Here      no container or virtual machine detected
+  Isolated  none: the host's namespaces (pid, user, uts, ipc, cgroup, time)
+  Can run   VMs with KVM (/dev/kvm) · containers with Docker
+  Overlays  1 overlay mount: container layers, usually
+
+Pitfalls
+  - --privileged gives every capability and every device: practically no
+    isolation. Add only the capability you need (--cap-add).
+  - Mounting /var/run/docker.sock into a container hands it control of the host.
+  - Files a rootful container writes to a bind mount belong to root on the host;
+    rootless ones get IDs from your range in /etc/subuid.
+  - Run the application as a non-root user inside the image (USER in the
+    Dockerfile): defence in depth.
+
+Deep dive: 2 questions. Read them with idk 7.5 --why
+
+Related
+  Commands  id, podman, docker
+  Paths     /etc/subuid, /etc/subgid, /run/docker.sock
+  See also  idk 7.2 Namespaces: a private view of the system
+  See also  idk 11.4 ACLs and capabilities
+  See also  idk 11.3 sudo and groups

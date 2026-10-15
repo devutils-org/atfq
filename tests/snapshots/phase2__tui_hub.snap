@@ -3,7 +3,7 @@ source: tests/phase2.rs
 expression: t.screen()
 ---
 "┌ Contents ──────────────┐┌ Memory ────────────────────────────────────────────┐"
-"│  Memory                ││11. Memory  hub                                     │"
+"│  Memory                ││13. Memory  hub                                     │"
 "│  CPU                   ││                                                    │"
 "│  Network               ││How much RAM you have, who is using it, and why     │"
 "│  Boot                  ││"used" doesn't mean what you think.                 │"

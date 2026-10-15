@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-23.3  Merge or rebase?
+25.3  Merge or rebase?
 
 TL;DR
   - Both bring another branch's work into yours. Merge adds a commit with two
@@ -56,6 +56,6 @@ Deep dive
 
 Related
   Commands  git
-  See also  idk 23.1 How git stores your work
-  See also  idk 23.4 Remotes: fetch, pull and push
-  See also  idk 23.2 Undoing things in git
+  See also  idk 25.1 How git stores your work
+  See also  idk 25.4 Remotes: fetch, pull and push
+  See also  idk 25.2 Undoing things in git

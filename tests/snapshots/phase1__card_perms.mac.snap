@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-9.5  SELinux and AppArmor
+11.5  SELinux and AppArmor
 
 TL;DR
   - Both add a second set of rules on top of rwx: even a process running as root
@@ -30,11 +30,11 @@ Pitfalls
   - sudo aa-complain PROFILE makes one AppArmor profile log instead of block, to
     debug a single program.
 
-Deep dive: 2 questions. Read them with idk 9.5 --why
+Deep dive: 2 questions. Read them with idk 11.5 --why
 
 Related
   Commands  getenforce, setenforce, aa-status, restorecon
   Paths     /etc/selinux/config, /etc/apparmor.d/
   Hub       idk permissions Permissions
-  See also  idk 9.1 rwx, octal and umask
-  See also  idk 9.4 ACLs and capabilities
+  See also  idk 11.1 rwx, octal and umask
+  See also  idk 11.4 ACLs and capabilities

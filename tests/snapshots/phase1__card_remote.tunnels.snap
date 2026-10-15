@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-22.3  SSH tunnels and port forwarding
+24.3  SSH tunnels and port forwarding
 
 TL;DR
   - -L: a port on your machine leads to a port reachable from the server. Reach
@@ -31,11 +31,11 @@ Pitfalls
   - -N runs no command, so the session looks frozen: that's the tunnel working.
     Ctrl-C closes it.
   - "bind: Address already in use": something already listens on that local port
-    (13.1).
+    (15.1).
 
-Deep dive: 2 questions. Read them with idk 22.3 --why
+Deep dive: 2 questions. Read them with idk 24.3 --why
 
 Related
   Commands  ssh, ss
-  See also  idk 22.2 ~/.ssh/config, jump hosts and host keys
-  See also  idk 13.1 Who listens on which port
+  See also  idk 24.2 ~/.ssh/config, jump hosts and host keys
+  See also  idk 15.1 Who listens on which port

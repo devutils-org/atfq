@@ -6,6 +6,7 @@
 //! they never render and never panic on a missing or unreadable file.
 
 mod boot;
+mod conc;
 mod cpu;
 mod disk;
 mod git;
@@ -21,6 +22,7 @@ mod ssh;
 mod sys;
 mod systemd;
 mod user;
+mod virt;
 
 use std::collections::BTreeMap;
 use std::io;
@@ -29,6 +31,7 @@ use std::path::{Path, PathBuf};
 use serde::Serialize;
 
 pub use boot::{BootInfo, Firmware};
+pub use conc::{Ipc, Limit, Limits, Threads};
 pub use cpu::{
     Cache, CoreKind, CpuCaches, CpuFeatures, CpuFreq, CpuSummary, CpuTopology, CpuVulns,
 };
@@ -50,6 +53,7 @@ pub use ssh::{SshKey, SshServer, SshSetup};
 pub use sys::{FsSpace, IfAddr};
 pub use systemd::{DropIn, FailedUnit, Overrides, SystemdStatus};
 pub use user::Identity;
+pub use virt::VirtInfo;
 
 /// How far a probe got.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -108,6 +112,10 @@ pub enum ProbeData {
     Gpus(Gpus),
     Ssh(SshSetup),
     Git(GitConfig),
+    Virt(VirtInfo),
+    Threads(Threads),
+    Limits(Limits),
+    Ipc(Ipc),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -598,6 +606,26 @@ pub const REGISTRY: &[ProbeInfo] = &[
         name: git::NAME,
         description: "git config files, identity set or not, telling settings, aliases",
         run: git::probe,
+    },
+    ProbeInfo {
+        name: virt::NAME,
+        description: "container or virtual machine, separate namespaces, KVM, engines",
+        run: virt::probe,
+    },
+    ProbeInfo {
+        name: conc::THREADS,
+        description: "processes and threads, who runs the most, the system's ceilings",
+        run: conc::threads,
+    },
+    ProbeInfo {
+        name: conc::LIMITS,
+        description: "open files and processes allowed, for you and the system",
+        run: conc::limits,
+    },
+    ProbeInfo {
+        name: conc::IPC,
+        description: "Unix sockets and shared memory: how processes talk here",
+        run: conc::ipc,
     },
 ];
 

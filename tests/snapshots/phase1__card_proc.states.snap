@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-10.1  Process states and zombies
+12.1  Process states and zombies
 
 TL;DR
   - Every process has a one-letter state: R running, S sleeping, D waiting on
@@ -34,10 +34,10 @@ Pitfalls
   - ps adds letters after the state: s session leader, + foreground, < high
     priority, N low priority, l multithreaded.
 
-Deep dive: 3 questions. Read them with idk 10.1 --why
+Deep dive: 3 questions. Read them with idk 12.1 --why
 
 Related
   Commands  ps, top
   Paths     /proc/PID/stat, /proc/PID/status
-  See also  idk 10.2 Signals
-  See also  idk 12.1 Load average
+  See also  idk 12.2 Signals
+  See also  idk 14.1 Load average

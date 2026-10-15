@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-14.3  GRUB vs systemd-boot vs UKI
+16.3  GRUB vs systemd-boot vs UKI
 
 TL;DR
   - GRUB is the classic bootloader: menus, many filesystems, BIOS and UEFI. Its
@@ -27,7 +27,7 @@ On your machine
   Up        3 days, 4 h
 
 Pitfalls
-  - Never edit grub.cfg by hand: it is regenerated (see 14.2).
+  - Never edit grub.cfg by hand: it is regenerated (see 16.2).
   - systemd-boot needs the kernels on a partition UEFI can read, usually the EFI
     partition: it must be big enough for several kernels.
   - With a UKI, the command line is part of the signed image: changing it means
@@ -55,5 +55,5 @@ Related
   Commands  bootctl, efibootmgr
   Paths     /boot/grub, /boot/efi/EFI
   Hub       idk boot Boot
-  See also  idk 14.1 From firmware to init
-  See also  idk 14.2 The kernel command line
+  See also  idk 16.1 From firmware to init
+  See also  idk 16.2 The kernel command line

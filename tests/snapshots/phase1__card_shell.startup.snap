@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-20.2  Shell startup files
+22.2  Shell startup files
 
 TL;DR
   - A login shell (console, SSH) reads the profile files. bash reads only the
@@ -31,10 +31,10 @@ Pitfalls
   - A change to ~/.profile only applies at the next login, not in a new terminal
     tab.
 
-Deep dive: 2 questions. Read them with idk 20.2 --why
+Deep dive: 2 questions. Read them with idk 22.2 --why
 
 Related
   Commands  source
   Paths     ~/.bashrc, ~/.profile, /etc/profile, /etc/profile.d/
-  See also  idk 20.1 Where environment variables come from
-  See also  idk 17.3 PATH and command resolution
+  See also  idk 22.1 Where environment variables come from
+  See also  idk 19.3 PATH and command resolution

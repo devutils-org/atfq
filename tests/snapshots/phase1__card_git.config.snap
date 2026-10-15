@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-23.5  Configuring git
+25.5  Configuring git
 
 TL;DR
   - Three levels: system (/etc/gitconfig), yours (~/.gitconfig) and the
@@ -35,10 +35,10 @@ Pitfalls
     keyring (libsecret) or SSH keys instead.
   - On Linux, core.autocrlf should be input or unset; true is for Windows.
 
-Deep dive: 2 questions. Read them with idk 23.5 --why
+Deep dive: 2 questions. Read them with idk 25.5 --why
 
 Related
   Commands  git
   Paths     ~/.gitconfig, ~/.config/git/config, /etc/gitconfig, .git/config
-  See also  idk 23.4 Remotes: fetch, pull and push
-  See also  idk 20.1 Where environment variables come from
+  See also  idk 25.4 Remotes: fetch, pull and push
+  See also  idk 22.1 Where environment variables come from

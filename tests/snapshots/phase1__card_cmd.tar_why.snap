@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-21.6  tar
+23.6  tar
 
 TL;DR
   - c creates, x extracts, t lists. f names the archive file and v prints each
@@ -41,4 +41,4 @@ Deep dive
 
 Related
   Commands  tar
-  See also  idk 21.7 rsync
+  See also  idk 23.7 rsync

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-11.2  The OOM killer
+13.2  The OOM killer
 
 TL;DR
   - When RAM and swap are both used up, the kernel's OOM ("out of memory")
@@ -54,6 +54,6 @@ Related
   Commands  journalctl, dmesg
   Paths     /proc/PID/oom_score, /proc/PID/oom_score_adj
   Hub       idk memory Memory
-  See also  idk 11.3 Swap and swappiness
-  See also  idk 10.2 Signals
-  See also  idk 15.3 dmesg and the kernel log
+  See also  idk 13.3 Swap and swappiness
+  See also  idk 12.2 Signals
+  See also  idk 17.3 dmesg and the kernel log

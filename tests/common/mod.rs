@@ -47,6 +47,7 @@ pub fn laptop() -> ProbeCtx {
         .with_space("/", space(400 * GIB, 120 * GIB, 0, 0))
         .with_space("/boot/efi", space(GIB / 2, GIB / 4, 0, 0))
         .with_space("/tmp", space(8 * GIB, 7 * GIB, 2_000_000, 1_998_000))
+        .with_space("/dev/shm", space(8 * GIB, 8 * GIB - 64 * 1024 * 1024, 0, 0))
         .with_addr("lo", "127.0.0.1/8")
         .with_addr("lo", "::1/128")
         .with_addr("wlp0s20f3", "192.168.1.23/24")

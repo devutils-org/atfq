@@ -5,7 +5,7 @@ expression: "render::card(&lib, c, &live, PLAIN)"
 6.2  What happens when you open a website
 
 TL;DR
-  - DNS: the name becomes an IP address (13.2).
+  - DNS: the name becomes an IP address (15.2).
   - TCP: a three-way handshake opens a connection to port 443.
   - TLS: client and server agree on encryption keys, and the server proves who
     it is with a certificate.
@@ -39,5 +39,5 @@ Related
   Commands  curl
   Hub       idk network Network
   See also  idk 6.1 Network layers: OSI and TCP/IP
-  See also  idk 13.2 DNS resolution
+  See also  idk 15.2 DNS resolution
   See also  idk 6.4 TCP, UDP and connections

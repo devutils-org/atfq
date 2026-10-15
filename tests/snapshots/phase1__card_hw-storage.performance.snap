@@ -32,7 +32,7 @@ Pitfalls
     drive at 100 % may still have plenty of capacity left.
   - dd with no oflag=direct or conv=fsync measures the page cache, not the disk.
   - A process stuck in state D with high wa in top is waiting for the disk, not
-    using the CPU (10.1).
+    using the CPU (12.1).
   - The fio command above creates a 1 GiB test file in the current folder: run
     it on the disk you want to test, and delete the file after.
 
@@ -43,4 +43,4 @@ Related
   Paths     /proc/diskstats
   Hub       idk disk Disk
   See also  idk 4.1 Hard drives, SSDs and NVMe
-  See also  idk 10.1 Process states and zombies
+  See also  idk 12.1 Process states and zombies

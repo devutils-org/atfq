@@ -10,7 +10,7 @@ TL;DR
   - Linux preempts: it can take a CPU back from a task at any moment, so that
     nothing hogs the machine.
   - Since kernel 6.6 the policy is EEVDF: tasks get CPU time in proportion to
-    their weight (their niceness, 10.3).
+    their weight (their niceness, 12.3).
 
       vmstat 1                      # cs: switches per second, r: tasks waiting
       grep ctxt /proc/self/status   # switches of one process
@@ -39,6 +39,6 @@ Related
   Commands  vmstat, top
   Paths     /proc/PID/status
   Hub       idk cpu CPU
-  See also  idk 10.3 nice and priorities
-  See also  idk 12.1 Load average
+  See also  idk 12.3 nice and priorities
+  See also  idk 14.1 Load average
   See also  idk 1.4 Interrupts: how devices get attention

@@ -1,0 +1,35 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+8.2  Race conditions, locks and atomics
+
+TL;DR
+  - A race: the result depends on which thread runs first. count += 1 is read,
+    add, write: two threads can read the same value and lose one increment.
+  - A lock (mutex) lets one thread at a time into a critical section. Atomics do
+    one small operation indivisibly, with no lock.
+  - Races hide: the code works a thousand times, then fails under load or on a
+    machine with more cores.
+
+      gcc -fsanitize=thread -g prog.c   # ThreadSanitizer finds data races
+      go test -race ./...
+
+On your machine
+  CPUs      8 logical CPUs on 4 cores, up to 2 threads per core (SMT)
+
+Pitfalls
+  - Deadlock: thread A holds lock 1 and waits for 2, thread B holds 2 and waits
+    for 1. Always take locks in the same order.
+  - A lock protects data only if every access takes it, reads included.
+  - "Check then act" (if the file doesn't exist, create it) races with other
+    processes too: use atomic operations (O_EXCL, rename).
+  - Holding a lock while waiting on the network or disk serialises everything
+    behind it.
+
+Deep dive: 2 questions. Read them with idk 8.2 --why
+
+Related
+  Commands  gdb
+  See also  idk 8.1 Processes, threads and async: doing several things at once
+  See also  idk 2.3 CPU caches: why memory layout matters

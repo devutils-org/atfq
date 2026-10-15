@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-15.4  syscalls and strace
+17.4  syscalls and strace
 
 TL;DR
   - Programs don't touch files, the network or devices themselves: they ask the
@@ -54,4 +54,4 @@ Deep dive
 
 Related
   Commands  strace
-  See also  idk 10.2 Signals
+  See also  idk 12.2 Signals

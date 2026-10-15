@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-21.2  grep and regex
+23.2  grep and regex
 
 TL;DR
   - grep prints the lines that match a pattern, in files or in what you pipe
@@ -26,9 +26,9 @@ Pitfalls
   - grep -r reads binary files too: add -I to skip them. It doesn't follow
     symbolic links; -R does.
 
-Deep dive: 2 questions. Read them with idk 21.2 --why
+Deep dive: 2 questions. Read them with idk 23.2 --why
 
 Related
   Commands  grep, rg
-  See also  idk 21.1 find
-  See also  idk 21.4 sed
+  See also  idk 23.1 find
+  See also  idk 23.4 sed

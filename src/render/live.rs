@@ -13,6 +13,7 @@ use crate::probes::{
 use crate::probes::{CpuCaches, CpuFeatures, CpuFreq, CpuTopology, CpuVulns, MemErrors, Numa};
 use crate::probes::{DiskHardware, DiskIo, GitConfig, Gpus, SshSetup};
 use crate::probes::{Interrupts, KernelOverview, NetLayers, VirtualMemory};
+use crate::probes::{Ipc, Limit, Limits, Threads, VirtInfo};
 
 /// Width of the label column (`RAM`, `Swap`, `Zombies`…).
 const LABEL: usize = 10;
@@ -81,6 +82,10 @@ pub(crate) fn result(r: &ProbeResult, w: usize) -> Vec<Line> {
         (_, Some(ProbeData::Gpus(g))) => gpus(g, w),
         (_, Some(ProbeData::Ssh(x))) => ssh(x, w),
         (_, Some(ProbeData::Git(g))) => git(g, w),
+        (_, Some(ProbeData::Virt(v))) => virt(v, w),
+        (_, Some(ProbeData::Threads(t))) => threads(t, w),
+        (_, Some(ProbeData::Limits(l))) => limits(l, w),
+        (_, Some(ProbeData::Ipc(i))) => ipc(i, w),
         (_, None) => Vec::new(),
     };
     for note in &r.notes {
@@ -1001,18 +1006,21 @@ fn count(n: u64) -> String {
     match n {
         1_000_000_000.. => format!("{:.1} billion", n as f64 / 1e9),
         1_000_000.. => format!("{:.1} million", n as f64 / 1e6),
-        _ => {
-            let s = n.to_string();
-            let mut out = String::new();
-            for (i, c) in s.chars().enumerate() {
-                if i > 0 && (s.len() - i).is_multiple_of(3) {
-                    out.push(',');
-                }
-                out.push(c);
-            }
-            out
-        }
+        _ => grouped(n),
     }
+}
+
+/// `1,048,576`: exact, for limits and settings.
+fn grouped(n: u64) -> String {
+    let s = n.to_string();
+    let mut out = String::new();
+    for (i, c) in s.chars().enumerate() {
+        if i > 0 && (s.len() - i).is_multiple_of(3) {
+            out.push(',');
+        }
+        out.push(c);
+    }
+    out
 }
 
 fn kernel(k: &KernelOverview, w: usize) -> Vec<Line> {
@@ -1790,6 +1798,187 @@ fn git(g: &GitConfig, w: usize) -> Vec<Line> {
                 "{} more {}, read under conditions (include, includeIf)",
                 g.includes,
                 if g.includes == 1 { "file" } else { "files" }
+            ),
+            w,
+        ));
+    }
+    out
+}
+
+fn virt(v: &VirtInfo, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut verdict = Vec::new();
+    if let (Some(c), Some(h)) = (&v.container, &v.container_hint) {
+        verdict.push(format!("a container: {c} (from {h})"));
+    }
+    if let (Some(m), Some(h)) = (&v.vm, &v.vm_hint) {
+        let text = format!("a virtual machine: {m} (from {h})");
+        verdict.push(if verdict.is_empty() {
+            text
+        } else {
+            format!("inside {text}")
+        });
+    }
+    let text = if verdict.is_empty() {
+        "no container or virtual machine detected".to_string()
+    } else {
+        format!("this is {}", verdict.join(", "))
+    };
+    out.extend(row("Here", &text, w));
+    if !v.namespaces.is_empty() {
+        let own: Vec<&str> = v
+            .namespaces
+            .iter()
+            .filter(|(_, o)| *o)
+            .map(|(n, _)| n.as_str())
+            .collect();
+        let shared: Vec<&str> = v
+            .namespaces
+            .iter()
+            .filter(|(_, o)| !*o)
+            .map(|(n, _)| n.as_str())
+            .collect();
+        let text = match (own.is_empty(), shared.is_empty()) {
+            (true, _) => format!("none: the host's namespaces ({})", shared.join(", ")),
+            (false, true) => format!("own namespaces: {}", own.join(", ")),
+            (false, false) => format!(
+                "own namespaces: {} · the host's: {}",
+                own.join(", "),
+                shared.join(", ")
+            ),
+        };
+        out.extend(row("Isolated", &text, w));
+    }
+    let mut can = Vec::new();
+    if v.kvm {
+        can.push("VMs with KVM (/dev/kvm)".to_string());
+    }
+    if !v.engines.is_empty() {
+        can.push(format!("containers with {}", v.engines.join(", ")));
+    }
+    if !can.is_empty() {
+        out.extend(row("Can run", &can.join(" · "), w));
+    }
+    if v.overlays > 0 {
+        out.extend(row(
+            "Overlays",
+            &format!(
+                "{} overlay {}: container layers, usually",
+                v.overlays,
+                if v.overlays == 1 { "mount" } else { "mounts" }
+            ),
+            w,
+        ));
+    }
+    out
+}
+
+fn threads(t: &Threads, w: usize) -> Vec<Line> {
+    let mut out = row(
+        "Now",
+        &format!(
+            "{} threads in {} processes",
+            count(t.threads),
+            count(t.processes as u64)
+        ),
+        w,
+    );
+    if !t.top.is_empty() {
+        let top: Vec<String> = t
+            .top
+            .iter()
+            .map(|(pid, name, n)| format!("{name}, PID {pid}: {n}"))
+            .collect();
+        out.extend(row("Most", &top.join(" · "), w));
+    }
+    let mut ceil = Vec::new();
+    if let Some(m) = t.threads_max {
+        ceil.push(format!("{} threads", count(m)));
+    }
+    if let Some(p) = t.pid_max {
+        ceil.push(format!("PIDs up to {}", count(p)));
+    }
+    if !ceil.is_empty() {
+        out.extend(row("Ceiling", &ceil.join(", "), w));
+    }
+    out
+}
+
+/// `1,024 per process, can be raised to 524,288`.
+fn limit(l: &Limit, what: &str, unit: impl Fn(u64) -> String) -> String {
+    match (l.soft, l.hard) {
+        (None, _) => format!("unlimited {what}"),
+        (Some(s), Some(h)) if h > s => {
+            format!("{} {what}, can be raised to {}", unit(s), unit(h))
+        }
+        (Some(s), None) => format!("{} {what}, can be raised without limit", unit(s)),
+        (Some(s), _) => format!("{} {what}", unit(s)),
+    }
+}
+
+fn limits(l: &Limits, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if let Some(f) = &l.open_files {
+        out.extend(row("Files", &limit(f, "open per process", grouped), w));
+    }
+    if let Some(p) = &l.processes {
+        out.extend(row(
+            "Processes",
+            &limit(p, "for your user, threads included", grouped),
+            w,
+        ));
+    }
+    if let Some(s) = &l.stack {
+        out.extend(row("Stack", &limit(s, "per thread", size), w));
+    }
+    if let Some(n) = l.files_open {
+        let max = match l.files_max {
+            // 2^63 - 1: no ceiling in practice.
+            Some(m) if m < 1 << 60 => format!(" of {} allowed", count(m)),
+            _ => String::new(),
+        };
+        out.extend(row(
+            "System",
+            &format!("{} files open on the whole system{max}", count(n)),
+            w,
+        ));
+    }
+    out
+}
+
+fn ipc(i: &Ipc, w: usize) -> Vec<Line> {
+    let mut out = row(
+        "Unix",
+        &format!(
+            "{} sockets, {} waiting for connections",
+            count(i.unix_sockets as u64),
+            count(i.unix_listening as u64)
+        ),
+        w,
+    );
+    if !i.listening_paths.is_empty() {
+        out.extend(row("Servers", &i.listening_paths.join(", "), w));
+    }
+    if let (Some(u), Some(t)) = (i.shm_used, i.shm_size) {
+        out.extend(row(
+            "/dev/shm",
+            &format!(
+                "{} used of {}: POSIX shared memory, in RAM",
+                size(u),
+                size(t)
+            ),
+            w,
+        ));
+    }
+    if i.sysv_segments + i.sysv_semaphores + i.sysv_queues > 0 {
+        out.extend(row(
+            "System V",
+            &format!(
+                "{} shared memory segments ({}), {} semaphore sets, {} message queues",
+                i.sysv_segments,
+                size(i.sysv_bytes),
+                i.sysv_semaphores,
+                i.sysv_queues
             ),
             w,
         ));

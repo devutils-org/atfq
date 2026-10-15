@@ -1,0 +1,44 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+8.5  How processes talk: sockets, shared memory and D-Bus
+
+TL;DR
+  - Pipes connect a program's output to another's input (|). Unix sockets are
+    two-way connections through a file path, like TCP without the network:
+    Docker, D-Bus and databases listen on them.
+  - Shared memory maps the same RAM into several processes: the fastest, but
+    they must synchronise like threads.
+  - D-Bus is a message bus on top of Unix sockets: desktop apps and system
+    services call each other's methods through it.
+
+      ss -xlp                       # Unix sockets waiting for connections
+      ls -lh /dev/shm               # POSIX shared memory
+      busctl list                   # services on the system bus
+
+On your machine
+  Unix      5 sockets, 3 waiting for connections
+  Servers   /run/dbus/system_bus_socket, /run/docker.sock
+  /dev/shm  64.0 MiB used of 8.0 GiB: POSIX shared memory, in RAM
+  System V  2 shared memory segments (2.5 MiB), 0 semaphore sets, 0 message
+            queues
+
+Pitfalls
+  - A Unix socket's file permissions decide who may connect: that's why
+    /run/docker.sock is limited to root and the docker group.
+  - A stale socket file left after a crash makes the next start fail with
+    "Address already in use": the program should remove it first.
+  - In Docker, /dev/shm is only 64 MB by default: browsers and PyTorch data
+    loaders die with "Bus error". --shm-size=1g fixes it.
+  - Connecting to a local database through its socket is faster than through
+    localhost TCP.
+
+Deep dive: 2 questions. Read them with idk 8.5 --why
+
+Related
+  Commands  ss, ipcs, busctl
+  Paths     /run/, /dev/shm/
+  See also  idk 8.1 Processes, threads and async: doing several things at once
+  See also  idk 22.3 Redirections and file descriptors
+  See also  idk 15.1 Who listens on which port

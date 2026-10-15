@@ -1,0 +1,41 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+8.1  Processes, threads and async: doing several things at once
+
+TL;DR
+  - Processes don't share memory: safe and independent, but talking costs more
+    (8.5). Threads are tasks inside one process that share its memory: fast to
+    talk, easy to break.
+  - Async runs many tasks on few threads: a task gives the thread back while it
+    waits for the network or the disk.
+  - Parallel work on the CPU is capped by the number of CPUs; waiting on I/O
+    isn't. Pick threads or processes for the first, async for the second.
+
+      ps -eLf | wc -l                 # threads on the system
+      ps -o nlwp,pid,comm -p PID      # threads of one process
+      top -H -p PID                   # one line per thread
+
+On your machine
+  Now       14 threads in 3 processes
+  Most      supervisor, PID 4100: 12 · systemd, PID 1: 1 · rsync, PID 5000: 1
+  Ceiling   126,906 threads, PIDs up to 4.2 million
+
+Pitfalls
+  - In CPython, threads don't run Python code in parallel (the GIL): use
+    processes for CPU work. Free-threaded builds are changing this.
+  - More threads than CPUs doesn't speed up computing: it adds switching.
+  - Each thread reserves a stack (8 MiB of address space by default), but only
+    the pages it touches use RAM.
+  - A crash in one thread kills the whole process; a crash in a child process
+    doesn't.
+
+Deep dive: 2 questions. Read them with idk 8.1 --why
+
+Related
+  Commands  ps, top
+  Paths     /proc/PID/task/
+  See also  idk 1.2 How the kernel shares the CPUs
+  See also  idk 8.2 Race conditions, locks and atomics
+  See also  idk 8.3 Event loops: one thread, thousands of connections

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: page
 ---
-8. Disk  hub
+10. Disk  hub
 
 Everything about storage devices: what's plugged in, how full it is, how it's
 mounted.
@@ -41,6 +41,6 @@ Cards
   idk 4.1   Hard drives, SSDs and NVMe
   idk 4.2   Inside an SSD: flash, TRIM and wear
   idk 4.4   IOPS, throughput and latency: how fast is a disk?
-  idk 7.2   /tmp vs /var/tmp
-  idk 7.4   Links, inodes and "disk full"
-  idk 21.1  find
+  idk 9.2   /tmp vs /var/tmp
+  idk 9.4   Links, inodes and "disk full"
+  idk 23.1  find

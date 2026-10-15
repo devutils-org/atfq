@@ -39,4 +39,4 @@ Related
   Paths     /sys/block/DEV/queue/discard_max_bytes
   Hub       idk disk Disk
   See also  idk 4.1 Hard drives, SSDs and NVMe
-  See also  idk 7.5 fstab and mount options
+  See also  idk 9.5 fstab and mount options

@@ -209,3 +209,21 @@ git.config  git config files, identity set or not, telling settings, aliases
   Files     none: git uses its defaults
   Identity  name and email not set: commits get a guessed identity, or fail
   note: home folder unknown: only /etc/gitconfig was read
+
+virt.detect  container or virtual machine, separate namespaces, KVM, engines
+
+  Here      no container or virtual machine detected
+
+proc.threads  processes and threads, who runs the most, the system's ceilings
+
+  Now       0 threads in 0 processes
+
+proc.limits  open files and processes allowed, for you and the system
+
+  not available on this system
+  note: /proc/self/limits: not found
+
+ipc.summary  Unix sockets and shared memory: how processes talk here
+
+  not available on this system
+  note: /proc/net/unix: not found

@@ -58,4 +58,4 @@ Related
   Paths     /sys/devices/system/cpu/vulnerabilities/
   Hub       idk cpu CPU
   See also  idk 2.1 What a CPU does: instructions and architectures
-  See also  idk 14.2 The kernel command line
+  See also  idk 16.2 The kernel command line

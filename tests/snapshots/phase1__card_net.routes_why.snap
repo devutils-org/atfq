@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-13.3  Interfaces and routes
+15.3  Interfaces and routes
 
 TL;DR
   - An interface is a network connection point: enp3s0 (cable), wlp2s0 (Wi-Fi),
@@ -54,5 +54,5 @@ Related
   Commands  ip, nmcli
   Paths     /sys/class/net/, /proc/net/route
   Hub       idk network Network
-  See also  idk 13.2 DNS resolution
-  See also  idk 13.4 nftables vs iptables vs ufw
+  See also  idk 15.2 DNS resolution
+  See also  idk 15.4 nftables vs iptables vs ufw

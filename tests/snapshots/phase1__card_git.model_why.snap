@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-23.1  How git stores your work
+25.1  How git stores your work
 
 TL;DR
   - A commit is a snapshot of the whole project, plus its author, message and
@@ -45,5 +45,5 @@ Deep dive
 Related
   Commands  git
   Paths     .git/
-  See also  idk 23.2 Undoing things in git
-  See also  idk 23.3 Merge or rebase?
+  See also  idk 25.2 Undoing things in git
+  See also  idk 25.3 Merge or rebase?

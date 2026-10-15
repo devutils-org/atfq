@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: page
 ---
-19. GPU  hub
+21. GPU  hub
 
 Which graphics chip you have, which driver runs it, and whether programs can use
 it.

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: page
 ---
-10. Processes & scheduling  hub
+12. Processes & scheduling  hub
 
 What's running, who started it, what it costs, and how to stop it.
 
@@ -31,11 +31,11 @@ Paths
   /proc/PID/status  state, memory, threads, owner
 
 Cards
-  idk 10.1  Process states and zombies
-  idk 10.2  Signals
-  idk 10.3  nice and priorities
-  idk 10.4  cgroups
+  idk 12.1  Process states and zombies
+  idk 12.2  Signals
+  idk 12.3  nice and priorities
+  idk 12.4  cgroups
   idk 1.5   How a program starts: fork and exec
   idk 1.2   How the kernel shares the CPUs
-  idk 12.1  Load average
-  idk 11.2  The OOM killer
+  idk 14.1  Load average
+  idk 13.2  The OOM killer

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-13.1  Who listens on which port
+15.1  Who listens on which port
 
 TL;DR
   - A program that accepts connections listens on a port: 22 for SSH, 443 for
@@ -55,4 +55,4 @@ Related
   Commands  ss
   Paths     /proc/net/tcp
   Hub       idk network Network
-  See also  idk 9.2 setuid, setgid and sticky bit
+  See also  idk 11.2 setuid, setgid and sticky bit

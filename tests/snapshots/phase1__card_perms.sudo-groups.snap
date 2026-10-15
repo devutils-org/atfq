@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-9.3  sudo and groups
+11.3  sudo and groups
 
 TL;DR
   - sudo runs one command as root, if /etc/sudoers (or a file in
@@ -31,9 +31,9 @@ Pitfalls
     root. Use echo x | sudo tee /etc/file.
   - To use a new group without logging out, run newgrp docker in that shell.
 
-Deep dive: 2 questions. Read them with idk 9.3 --why
+Deep dive: 2 questions. Read them with idk 11.3 --why
 
 Related
   Commands  sudo, id, usermod, visudo
   Paths     /etc/sudoers, /etc/sudoers.d/, /etc/group
-  See also  idk 9.1 rwx, octal and umask
+  See also  idk 11.1 rwx, octal and umask

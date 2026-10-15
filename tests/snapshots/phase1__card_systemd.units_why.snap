@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-16.1  Units and timers
+18.1  Units and timers
 
 TL;DR
   - systemd manages units: services (.service), timers (.timer), mounts,
@@ -34,7 +34,7 @@ Deep dive
 
     A target is a named group of units that marks a stage: multi-user.target is
     a working system without a graphical login, graphical.target adds one. At
-    boot, systemd starts everything the default target needs (see 14.1). Targets
+    boot, systemd starts everything the default target needs (see 16.1). Targets
     replaced the numbered runlevels of the older SysV init.
 
   ▾ Timers or cron?
@@ -52,6 +52,6 @@ Deep dive
 Related
   Commands  systemctl
   Paths     /etc/systemd/system, /usr/lib/systemd/system
-  See also  idk 16.2 Why a service won't start
-  See also  idk 16.3 Unit files and overrides
-  See also  idk 14.1 From firmware to init
+  See also  idk 18.2 Why a service won't start
+  See also  idk 18.3 Unit files and overrides
+  See also  idk 16.1 From firmware to init

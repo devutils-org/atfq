@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-11.1  free vs available
+13.1  free vs available
 
 TL;DR
   - free: memory nobody is using at all, not even as cache.
@@ -26,11 +26,11 @@ Pitfalls
   - A little swap in use is not a problem by itself. What hurts is constant
     swapping: watch the si and so columns of vmstat 1.
 
-Deep dive: 3 questions. Read them with idk 11.1 --why
+Deep dive: 3 questions. Read them with idk 13.1 --why
 
 Related
   Commands  free, vmstat
   Paths     /proc/meminfo
   Hub       idk memory Memory
-  See also  idk 11.3 Swap and swappiness
-  See also  idk 11.2 The OOM killer
+  See also  idk 13.3 Swap and swappiness
+  See also  idk 13.2 The OOM killer

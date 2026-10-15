@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-11.3  Swap and swappiness
+13.3  Swap and swappiness
 
 TL;DR
   - Swap is disk space the kernel uses as overflow for RAM: app memory that is
@@ -36,7 +36,7 @@ Deep dive
     The kernel balances two uses of RAM: app memory and file cache. An app page
     nobody touched for hours is worth less than file data in active use, so
     moving it out makes the machine faster overall. vm.swappiness sets that
-    balance (see 11.1).
+    balance (see 13.1).
 
   ▾ Swap partition, swap file or zram?
 
@@ -50,5 +50,5 @@ Related
   Commands  swapon, vmstat
   Paths     /proc/swaps, /proc/sys/vm/swappiness
   Hub       idk memory Memory
-  See also  idk 11.1 free vs available
-  See also  idk 11.2 The OOM killer
+  See also  idk 13.1 free vs available
+  See also  idk 13.2 The OOM killer

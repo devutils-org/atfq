@@ -125,11 +125,11 @@ fn scripted_clicks() {
     let mut t = Tui::new(&lib);
 
     // A TOC entry: the first click selects, the second opens.
-    let entry = t.toc_entry("11.1");
+    let entry = t.toc_entry("13.1");
     t.click(entry);
     assert_eq!(t.app.current(), None);
     t.click(entry);
-    assert_eq!(t.app.current(), Some("11.1"));
+    assert_eq!(t.app.current(), Some("13.1"));
     assert_snapshot!("tui_card", t.screen());
 
     // A deep dive question opens in place.
@@ -151,19 +151,19 @@ fn scripted_clicks() {
 
     // Right click goes back, with the question still open.
     t.right_click();
-    assert_eq!(t.app.current(), Some("11.1"));
+    assert_eq!(t.app.current(), Some("13.1"));
     assert!(t.screen().contains("▾ Why is unused RAM wasted RAM?"));
 
     // Nothing before 5.1: right click stays there.
     t.right_click();
-    assert_eq!(t.app.current(), Some("11.1"));
+    assert_eq!(t.app.current(), Some("13.1"));
 }
 
 #[test]
 fn wheel_scrolls_the_pane_under_the_pointer() {
     let lib = lib();
     let mut t = Tui::new(&lib);
-    t.app.open("10.1");
+    t.app.open("12.1");
     t.draw();
     assert_eq!(t.app.content_scroll(), 0);
     t.mouse(MouseEventKind::ScrollDown, 50, 10);
@@ -204,7 +204,7 @@ fn keyboard_only() {
     t.key(KeyCode::Tab);
     assert_eq!(t.app.focus(), Pane::Content);
     t.key(KeyCode::Enter);
-    assert_eq!(t.app.current(), Some("11.1"));
+    assert_eq!(t.app.current(), Some("13.1"));
     t.key(KeyCode::Backspace);
     assert_eq!(t.app.current(), Some("memory"));
 
@@ -214,7 +214,7 @@ fn keyboard_only() {
     assert!(t.screen().contains("Process states and zombies"));
     assert_snapshot!("tui_search", t.screen());
     t.key(KeyCode::Enter);
-    assert_eq!(t.app.current(), Some("10.1"));
+    assert_eq!(t.app.current(), Some("12.1"));
 
     // Deep dive by keyboard: tab to the first question, enter to open.
     for _ in 0..10 {
@@ -253,7 +253,7 @@ fn mouse_toggle() {
     let lib = lib();
     let mut t = Tui::new(&lib);
     assert!(t.screen().contains("mouse:on"));
-    let entry = t.toc_entry("11.1");
+    let entry = t.toc_entry("13.1");
     t.key(KeyCode::Char('M'));
     assert!(!t.app.mouse_captured());
     assert!(t.screen().contains("mouse:off"));

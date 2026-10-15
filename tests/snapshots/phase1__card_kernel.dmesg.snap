@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-15.3  dmesg and the kernel log
+17.3  dmesg and the kernel log
 
 TL;DR
   - The kernel keeps its messages in a buffer in RAM: hardware found, driver
@@ -35,10 +35,10 @@ Pitfalls
   - A "Call Trace" block means the kernel hit a bug or a warning: the whole
     block, not just one line, is what a bug report needs.
 
-Deep dive: 2 questions. Read them with idk 15.3 --why
+Deep dive: 2 questions. Read them with idk 17.3 --why
 
 Related
   Commands  dmesg, journalctl
   Paths     /dev/kmsg
-  See also  idk 15.2 Kernel modules
-  See also  idk 11.2 The OOM killer
+  See also  idk 17.2 Kernel modules
+  See also  idk 13.2 The OOM killer

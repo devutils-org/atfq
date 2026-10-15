@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-16.2  Why a service won't start
+18.2  Why a service won't start
 
 TL;DR
   - systemctl status NAME shows the state and the last log lines.
@@ -31,9 +31,9 @@ Pitfalls
   - "degraded" from systemctl is-system-running means at least one unit failed;
     systemctl --failed says which.
 
-Deep dive: 2 questions. Read them with idk 16.2 --why
+Deep dive: 2 questions. Read them with idk 18.2 --why
 
 Related
   Commands  systemctl, journalctl
-  See also  idk 16.1 Units and timers
-  See also  idk 13.1 Who listens on which port
+  See also  idk 18.1 Units and timers
+  See also  idk 15.1 Who listens on which port

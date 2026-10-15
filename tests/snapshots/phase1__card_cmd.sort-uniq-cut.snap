@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-21.9  sort, uniq and cut
+23.9  sort, uniq and cut
 
 TL;DR
   - sort sorts lines: -n by number, -h by size with units (2K, 1G), -r in
@@ -20,12 +20,12 @@ Pitfalls
     duplicates.
   - sort without -n compares text, so 10 comes before 9.
   - cut splits on one character: with columns separated by several spaces, use
-    awk (see 21.3).
+    awk (see 23.3).
   - The order depends on your language settings (case, accents). LC_ALL=C sort
     sorts by byte value, and faster.
 
-Deep dive: 2 questions. Read them with idk 21.9 --why
+Deep dive: 2 questions. Read them with idk 23.9 --why
 
 Related
   Commands  sort, uniq, cut, wc
-  See also  idk 21.3 awk
+  See also  idk 23.3 awk

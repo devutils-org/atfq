@@ -8,3 +8,4 @@
 30 23 0:31 /@home /home rw,relatime shared:2 - btrfs /dev/nvme0n1p2 rw
 not a mountinfo line
 31 23 0:28 / /tmp rw,nosuid,nodev shared:8 - tmpfs tmpfs rw,size=8159112k,nr_inodes=1048576
+40 23 0:45 / /var/lib/docker/overlay2/3f9a1c/merged rw,relatime - overlay overlay rw,lowerdir=/var/lib/docker/overlay2/l/ABC,upperdir=/var/lib/docker/overlay2/3f9a1c/diff,workdir=/var/lib/docker/overlay2/3f9a1c/work

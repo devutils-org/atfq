@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-13.3  Interfaces and routes
+15.3  Interfaces and routes
 
 TL;DR
   - An interface is a network connection point: enp3s0 (cable), wlp2s0 (Wi-Fi),
@@ -34,11 +34,11 @@ Pitfalls
   - Docker, VPNs and VMs add their own interfaces and routes (docker0, tun0,
     virbr0): that's normal.
 
-Deep dive: 2 questions. Read them with idk 13.3 --why
+Deep dive: 2 questions. Read them with idk 15.3 --why
 
 Related
   Commands  ip, nmcli
   Paths     /sys/class/net/, /proc/net/route
   Hub       idk network Network
-  See also  idk 13.2 DNS resolution
-  See also  idk 13.4 nftables vs iptables vs ufw
+  See also  idk 15.2 DNS resolution
+  See also  idk 15.4 nftables vs iptables vs ufw

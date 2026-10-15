@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-21.7  rsync
+23.7  rsync
 
 TL;DR
   - rsync copies files and only transfers what changed: run it again and it
@@ -48,4 +48,4 @@ Deep dive
 Related
   Commands  rsync
   Hub       idk disk Disk
-  See also  idk 21.6 tar
+  See also  idk 23.6 tar

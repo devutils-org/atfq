@@ -49,10 +49,10 @@ Deep dive
 
     It compares the destination with its own network. Same network: it sends the
     packet directly, finding the MAC address with ARP. Anywhere else: it sends
-    it to the gateway. ip route get ADDRESS shows the choice (13.3).
+    it to the gateway. ip route get ADDRESS shows the choice (15.3).
 
 Related
   Commands  ip
   Hub       idk network Network
-  See also  idk 13.3 Interfaces and routes
+  See also  idk 15.3 Interfaces and routes
   See also  idk 6.5 Ethernet, MAC addresses and ARP

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-13.1  Who listens on which port
+15.1  Who listens on which port
 
 TL;DR
   - A program that accepts connections listens on a port: 22 for SSH, 443 for
@@ -34,10 +34,10 @@ Pitfalls
   - "Address already in use" means another process holds the port: find it with
     sudo ss -ltnp 'sport = :8080'.
 
-Deep dive: 2 questions. Read them with idk 13.1 --why
+Deep dive: 2 questions. Read them with idk 15.1 --why
 
 Related
   Commands  ss
   Paths     /proc/net/tcp
   Hub       idk network Network
-  See also  idk 9.2 setuid, setgid and sticky bit
+  See also  idk 11.2 setuid, setgid and sticky bit

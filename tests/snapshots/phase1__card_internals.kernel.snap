@@ -8,9 +8,9 @@ TL;DR
   - The kernel is the one program with full control of the hardware. It shares
     the CPUs, the memory and the devices among all the others.
   - Programs run in user space and can't touch the hardware: they ask the
-    kernel, through system calls (15.4).
+    kernel, through system calls (17.4).
   - Linux is one big program, a monolithic kernel, that loads most drivers as
-    modules when needed (15.2).
+    modules when needed (17.2).
 
       uname -r              # the running kernel
       cat /proc/version     # who built it, and with what
@@ -39,4 +39,4 @@ Related
   Paths     /proc/version
   See also  idk 1.2 How the kernel shares the CPUs
   See also  idk 1.3 How virtual memory works
-  See also  idk 15.4 syscalls and strace
+  See also  idk 17.4 syscalls and strace

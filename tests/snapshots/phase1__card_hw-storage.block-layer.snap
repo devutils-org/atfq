@@ -26,7 +26,7 @@ Pitfalls
   - bfq keeps a desktop responsive while something copies in the background, at
     some CPU cost; on fast NVMe, none is usually best.
   - Changing the scheduler with echo lasts until reboot; a udev rule makes it
-    permanent (7.6).
+    permanent (9.6).
   - O_DIRECT skips the page cache, for databases that cache by themselves. It
     needs aligned buffers, and it isn't a durability promise: only fsync is
     (4.5).
@@ -37,6 +37,6 @@ Related
   Commands  cat, lsblk
   Paths     /sys/block/DEV/queue/scheduler
   Hub       idk disk Disk
-  See also  idk 11.4 The page cache
+  See also  idk 13.4 The page cache
   See also  idk 4.5 fsync: when is data really on disk?
-  See also  idk 7.6 /dev and udev
+  See also  idk 9.6 /dev and udev

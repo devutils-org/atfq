@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-17.1  Dynamic linking and ldd
+19.1  Dynamic linking and ldd
 
 TL;DR
   - Most programs don't contain the libraries they use: at start-up, the dynamic
@@ -54,5 +54,5 @@ Deep dive
 Related
   Commands  ldd, ldconfig, objdump
   Paths     /etc/ld.so.conf.d/
-  See also  idk 17.2 ELF and "command not found"
-  See also  idk 15.4 syscalls and strace
+  See also  idk 19.2 ELF and "command not found"
+  See also  idk 17.4 syscalls and strace

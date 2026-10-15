@@ -51,7 +51,7 @@ explanation."
 `On your machine` block: `RAM  2.6 GiB available of 3.9 GiB (68%) · 1.0 GiB
 completely free`. Check it against the `available` and `free` columns of
 `free -h`: the same 2.6 GiB and 1.0 GiB. Last, the line `Deep dive: 3
-questions. Read them with idk 11.1 --why`: the why exists, but it waits until
+questions. Read them with idk 13.1 --why`: the why exists, but it waits until
 you ask.
 
 ---
@@ -106,11 +106,11 @@ idk overcomit; echo $?
 **Say:** "You don't need to know what a thing is called. Paste the error
 message you got: that's the query."
 
-**Point at:** each first line: `17.2 ELF and "command not found"` twice,
-`13.1 Who listens on which port`, `7.4 Links, inodes and "disk full"`. Then
+**Point at:** each first line: `19.2 ELF and "command not found"` twice,
+`15.1 Who listens on which port`, `9.4 Links, inodes and "disk full"`. Then
 the typo: `No exact match for "memroy", showing "Memory".` And when nothing
 matches, it doesn't guess: `Nothing matches "overcomit".` with `Related: idk
-11.2 (The OOM killer), idk 15.1 (sysctl)`, found in the text of the cards, and
+13.2 (The OOM killer), idk 17.1 (sysctl)`, found in the text of the cards, and
 exit code 1 for scripts.
 
 ---
@@ -119,7 +119,7 @@ exit code 1 for scripts.
 
 ```console
 idk toc
-idk 11.1 --why
+idk 13.1 --why
 ```
 
 **Say:** "It's organized like a book: hubs to start from, then three parts.
@@ -199,7 +199,7 @@ One fact, four surfaces: the CLI, the TUI, the prompt and an agent.
 | a messy PATH | `idk path` | each folder once, in search order; `Repeated` for the doubles and `(doesn't exist)` for dead entries (27 entries on this VM, 13 of them repeats) |
 | the disks | `idk disk` | the btrfs root matched to `vdb1` by its source, free space as `df` counts it; on a laptop, the NVMe model and `SSD` |
 | raw data for scripts | `idk probe mem.summary --json \| jq .data.available` | bytes, the same figure as the live block |
-| search | `idk search delete matches` | `idk 21.1 find`, with the line that matched |
+| search | `idk search delete matches` | `idk 23.1 find`, with the line that matched |
 | boot | `idk boot` | on this VM `device tree (no UEFI)`; on a laptop `UEFI · Secure Boot on` and the bootloader |
 | dangerous commands | `idk find` | under `find . -name '*.tmp' -delete`, the line `⚠ changes or deletes data: check what it targets first`; a pitfall says to run it without `-delete` first and check the list |
 

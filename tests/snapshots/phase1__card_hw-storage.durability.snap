@@ -45,5 +45,5 @@ Related
   Commands  sync
   Paths     /proc/sys/vm/dirty_expire_centisecs
   Hub       idk disk Disk
-  See also  idk 11.4 The page cache
+  See also  idk 13.4 The page cache
   See also  idk 4.3 From write() to the disk: the block layer

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-20.3  Redirections and file descriptors
+22.3  Redirections and file descriptors
 
 TL;DR
   - Every program starts with three open files: 0 is stdin (its input), 1 is
@@ -43,4 +43,4 @@ Deep dive
 Related
   Commands  tee
   Paths     /dev/null
-  See also  idk 20.4 Exit codes
+  See also  idk 22.4 Exit codes

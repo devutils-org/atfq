@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-15.2  Kernel modules
+17.2  Kernel modules
 
 TL;DR
   - Most drivers are modules: pieces of the kernel loaded when the hardware that
@@ -30,7 +30,7 @@ Pitfalls
     from tainted kernels.
   - blacklist only stops automatic loading: the module can still load by hand or
     as a dependency. install NAME /bin/false blocks it completely.
-  - With Secure Boot on, the kernel refuses unsigned modules (see 14.1).
+  - With Secure Boot on, the kernel refuses unsigned modules (see 16.1).
 
 Deep dive
 
@@ -52,5 +52,5 @@ Deep dive
 Related
   Commands  lsmod, modinfo, modprobe
   Paths     /proc/modules, /etc/modprobe.d/, /etc/modules-load.d/
-  See also  idk 14.1 From firmware to init
-  See also  idk 15.3 dmesg and the kernel log
+  See also  idk 16.1 From firmware to init
+  See also  idk 17.3 dmesg and the kernel log

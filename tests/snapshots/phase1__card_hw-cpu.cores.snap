@@ -21,7 +21,7 @@ On your machine
 
 Pitfalls
   - A load average of 8 on "8 CPUs" that are 4 cores with SMT is a busier
-    machine than it looks (12.1).
+    machine than it looks (14.1).
   - In a container limited with --cpus=2, nproc still shows every CPU of the
     host: the limit is a time quota, not fewer CPUs.
   - Recent Intel chips mix performance (P) and efficiency (E) cores, like ARM's

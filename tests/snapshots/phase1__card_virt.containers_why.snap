@@ -1,0 +1,57 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+7.1  What a container really is
+
+TL;DR
+  - A container is a group of ordinary processes on your kernel. Nothing is
+    emulated: uname -r inside shows the host's kernel.
+  - Three kernel features make them feel apart: namespaces (what they see),
+    cgroups (what they may use) and capabilities and seccomp (what they may do).
+    An image gives them their own files.
+  - So containers start in milliseconds and cost little, but they all depend on
+    the host's kernel.
+
+      docker run --rm -it alpine sh     # then: ps, hostname, uname -r
+      ps -ef --forest                   # on the host: the same processes
+
+On your machine
+  Here      no container or virtual machine detected
+  Isolated  none: the host's namespaces (pid, user, uts, ipc, cgroup, time)
+  Can run   VMs with KVM (/dev/kvm) · containers with Docker
+  Overlays  1 overlay mount: container layers, usually
+
+Pitfalls
+  - Your program as PID 1 doesn't stop on SIGTERM unless it handles it:
+    docker stop waits 10 seconds, then kills it. --init adds a tiny init.
+  - A container can't run a different kernel: Linux images only, and kernel
+    modules or sysctls come from the host.
+  - On a Mac or Windows, Docker and Podman run Linux in a virtual machine, and
+    the containers inside it.
+  - Anything written inside a container is gone when it's removed, unless it's
+    in a volume (7.3).
+
+Deep dive
+
+  ▾ What does docker run actually do?
+
+    The engine unpacks the image's layers, stacks them as the root filesystem,
+    then asks a runtime (runc or crun) to start the process: it creates new
+    namespaces, puts the process in a cgroup with its limits, drops
+    capabilities, applies a seccomp filter of allowed system calls, and calls
+    exec. From then on it's just a process the kernel schedules like any other.
+
+  ▾ Container or virtual machine?
+
+    A VM runs its own kernel on emulated hardware: stronger isolation, any
+    operating system, more memory and a slower start. A container shares the
+    host's kernel: light and fast, but a kernel flaw affects them all. Clouds
+    often combine them: containers inside small VMs (7.4).
+
+Related
+  Commands  docker, podman, uname
+  Paths     /sys/fs/cgroup/, /proc/self/ns/
+  See also  idk 7.2 Namespaces: a private view of the system
+  See also  idk 12.4 cgroups
+  See also  idk 7.4 Virtual machines and hypervisors

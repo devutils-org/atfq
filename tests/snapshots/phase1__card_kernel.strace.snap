@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-15.4  syscalls and strace
+17.4  syscalls and strace
 
 TL;DR
   - Programs don't touch files, the network or devices themselves: they ask the
@@ -35,8 +35,8 @@ Pitfalls
   - A failing call isn't always a problem: programs often try several paths and
     use the first that exists.
 
-Deep dive: 2 questions. Read them with idk 15.4 --why
+Deep dive: 2 questions. Read them with idk 17.4 --why
 
 Related
   Commands  strace
-  See also  idk 10.2 Signals
+  See also  idk 12.2 Signals

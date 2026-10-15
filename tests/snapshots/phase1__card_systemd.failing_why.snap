@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-16.2  Why a service won't start
+18.2  Why a service won't start
 
 TL;DR
   - systemctl status NAME shows the state and the last log lines.
@@ -49,5 +49,5 @@ Deep dive
 
 Related
   Commands  systemctl, journalctl
-  See also  idk 16.1 Units and timers
-  See also  idk 13.1 Who listens on which port
+  See also  idk 18.1 Units and timers
+  See also  idk 15.1 Who listens on which port

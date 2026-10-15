@@ -23,7 +23,7 @@ On your machine
 Pitfalls
   - nomodeset on the kernel command line disables KMS: a basic framebuffer with
     no acceleration. Useful to get a broken system to a desktop, never to keep
-    (14.2).
+    (16.2).
   - Screen sharing and global hotkeys work differently on Wayland: apps go
     through portals (PipeWire), not by reading the whole screen.
   - Tearing is an image changed in the middle of a refresh. Compositors avoid it
@@ -35,4 +35,4 @@ Related
   Commands  echo, cat
   Paths     /sys/class/drm/
   See also  idk 5.2 GPU drivers: the kernel, Mesa and NVIDIA
-  See also  idk 14.2 The kernel command line
+  See also  idk 16.2 The kernel command line

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-7.4  Links, inodes and "disk full"
+9.4  Links, inodes and "disk full"
 
 TL;DR
   - An inode is a file's record: owner, rights, size, where the data is. The
@@ -57,4 +57,4 @@ Deep dive
 Related
   Commands  ln, df, lsof
   Hub       idk disk Disk
-  See also  idk 7.1 The hierarchy in 2 minutes
+  See also  idk 9.1 The hierarchy in 2 minutes

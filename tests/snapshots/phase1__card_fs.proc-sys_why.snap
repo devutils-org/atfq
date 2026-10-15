@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-7.3  /proc and /sys
+9.3  /proc and /sys
 
 TL;DR
   - Neither is on disk: the kernel makes up their content when you read it.
@@ -46,4 +46,4 @@ Deep dive
 Related
   Commands  cat, sysctl
   Paths     /proc, /sys, /proc/sys
-  See also  idk 7.1 The hierarchy in 2 minutes
+  See also  idk 9.1 The hierarchy in 2 minutes

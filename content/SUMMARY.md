@@ -35,6 +35,18 @@
   - [IP addresses, subnets and NAT](cards/netmodel/ip.md)
   - [TCP, UDP and connections](cards/netmodel/tcp-udp.md)
   - [Ethernet, MAC addresses and ARP](cards/netmodel/ethernet.md)
+- [How containers and virtual machines work](virt)
+  - [What a container really is](cards/virt/containers.md)
+  - [Namespaces: a private view of the system](cards/virt/namespaces.md)
+  - [Images, layers and overlayfs](cards/virt/images.md)
+  - [Virtual machines and hypervisors](cards/virt/vms.md)
+  - [Root in a container: users, capabilities and the docker group](cards/virt/rootless.md)
+- [How programs do several things at once](concurrency)
+  - [Processes, threads and async: doing several things at once](cards/concurrency/threads.md)
+  - [Race conditions, locks and atomics](cards/concurrency/races.md)
+  - [Event loops: one thread, thousands of connections](cards/concurrency/event-loops.md)
+  - [Too many open files: limits on processes](cards/concurrency/limits.md)
+  - [How processes talk: sockets, shared memory and D-Bus](cards/concurrency/ipc.md)
 
 # Your system
 

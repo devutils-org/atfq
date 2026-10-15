@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-18.1  Which package owns a file
+20.1  Which package owns a file
 
 TL;DR
   - Every file a package installs is recorded in the package database: ask it
@@ -10,7 +10,7 @@ TL;DR
   - dpkg -S on Debian and Ubuntu, rpm -qf on Fedora and openSUSE, pacman -Qo on
     Arch.
   - For a program that isn't installed yet, search the repositories instead (see
-    17.2).
+    19.2).
 
       dpkg -S /usr/bin/curl
       rpm -qf /usr/bin/curl
@@ -26,7 +26,7 @@ Pitfalls
     command -v curl gives the path.
   - Files you created, and settings a package generated after install, belong to
     no package.
-  - With merged /usr (see 7.1), ask about /usr/bin/… rather than /bin/…: the
+  - With merged /usr (see 9.1), ask about /usr/bin/… rather than /bin/…: the
     database may only know one of the two.
 
 Deep dive
@@ -46,5 +46,5 @@ Deep dive
 
 Related
   Commands  dpkg, rpm, pacman
-  See also  idk 18.2 Native packages vs Snap and Flatpak
-  See also  idk 17.2 ELF and "command not found"
+  See also  idk 20.2 Native packages vs Snap and Flatpak
+  See also  idk 19.2 ELF and "command not found"

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-7.5  fstab and mount options
+9.5  fstab and mount options
 
 TL;DR
   - /etc/fstab lists what to mount at boot, one line per filesystem: what,
@@ -52,5 +52,5 @@ Related
   Commands  mount, findmnt, lsblk, blkid
   Paths     /etc/fstab
   Hub       idk disk Disk
-  See also  idk 7.6 /dev and udev
-  See also  idk 16.1 Units and timers
+  See also  idk 9.6 /dev and udev
+  See also  idk 18.1 Units and timers
