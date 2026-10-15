@@ -2,7 +2,7 @@
 source: tests/phase2.rs
 expression: t.screen()
 ---
-"┌ Prompt for an AI assistant (same as atfq ask) ───────────────────────────────┐"
+"╭ Prompt for an AI assistant (same as atfq ask) ───────────────────────────────╮"
 "│I have a question about my Linux machine.                                     │"
 "│                                                                              │"
 "│## My question                                                                │"
@@ -24,5 +24,5 @@ expression: t.screen()
 "│                                                                              │"
 "│- `free -h`: RAM and swap, in human units                                     │"
 "│- `vmstat 1`: memory and swap activity every second (Ctrl-C stops)            │"
-"└──────────────────────────────────────────────────────────────────────────────┘"
-"esc close  ↑↓ scroll  q quit  M mouse:on                                        "
+"╰──────────────────────────────────────────────────────────────────────────────╯"
+" PROMPT  esc close  ↑↓ scroll  q quit                                M mouse:on "

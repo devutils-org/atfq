@@ -2,7 +2,7 @@
 source: tests/phase2.rs
 expression: t.screen()
 ---
-"┌ Contents ──────────────┐┌ 17.1 free vs available ────────────────────────────┐"
+"╭ Contents ──────────────╮╭ 17.1 free vs available ────────────────────────────╮"
 "│13. Filesystem          ││  ▾ Why is unused RAM wasted RAM?                   │"
 "│  13.1 The hierarchy in…││                                                    │"
 "│  13.2 /tmp vs /var/tmp ││    RAM is much faster than any disk. When a program│"
@@ -24,5 +24,5 @@ expression: t.screen()
 "│  16.4 cgroups          ││  Paths     /proc/meminfo                           │"
 "│17. Memory              ││  Hub       atfq memory Memory                      │"
 "│  17.1 free vs available││  See also  atfq 17.3 Swap and swappiness           │"
-"└────────────────────────┘└────────────────────────────────────────────────────┘"
-"q quit  ↑↓ move  tab link  ⏎ open  ⌫ back  / search  ? ask AI  M mouse:on       "
+"╰────────────────────────╯╰────────────────────────────────────────────────────╯"
+" NORMAL  q quit  jk move  tab link  ⏎ open  ⌫ back  / search  ? AI   M mouse:on "

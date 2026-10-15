@@ -71,16 +71,23 @@ Contents on the left, the page on the right.
 
 | Key | Does |
 |---|---|
-| ↑ ↓ / j k | move in the contents, scroll the page |
+| ↑ ↓ / j k | move in the contents, scroll the page (`5j`: five lines) |
 | ← → / h l | switch pane |
+| `gg`, `G` (Home, End) | first, last entry or top, bottom of the page |
+| Ctrl-d, Ctrl-u | half a page down, up |
+| Ctrl-f, Ctrl-b (Space, PgDn, PgUp) | a page down, up |
+| Ctrl-e, Ctrl-y | scroll the page one line, whatever the focus |
 | Tab, Shift-Tab | next, previous link or deep dive question |
 | Enter | open the link, expand or collapse the question |
-| Backspace | back |
+| Backspace, Ctrl-o | back |
 | `/` | search |
 | `?` | the AI prompt for this page |
 | `r` | run the probes again |
 | `M` | mouse on or off (off: select text to copy) |
 | `q`, Esc | quit (Esc first closes search or the prompt) |
+
+In search, Ctrl-n / Ctrl-p (or Ctrl-j / Ctrl-k) walk the results, Ctrl-w
+erases a word and Ctrl-u the whole query.
 
 With the mouse: click selects, a second click opens, right click goes back,
 the wheel scrolls the pane under the pointer. In tmux, mouse support needs

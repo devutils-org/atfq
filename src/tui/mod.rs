@@ -2,6 +2,7 @@
 //! behaviour lives in [`App`].
 
 mod app;
+mod theme;
 
 pub use app::{App, Pane, Region};
 

@@ -2,7 +2,7 @@
 source: tests/phase2.rs
 expression: t.screen()
 ---
-"┌ Contents ──────────────┐┌ Search ────────────────────────────────────────────┐"
+"╭ Contents ──────────────╮╭ Search ────────────────────────────────────────────╮"
 "│  Memory                ││/ zomb█                                             │"
 "│  CPU                   ││                                                    │"
 "│  Network               ││Results for "zomb"                                  │"
@@ -24,5 +24,5 @@ expression: t.screen()
 "│  2.5 Speculative execu…││                                                    │"
 "│3. How memory works     ││                                                    │"
 "│  3.1 RAM and the memor…││                                                    │"
-"└────────────────────────┘└────────────────────────────────────────────────────┘"
-"esc close  ↑↓ result  ⏎ open  ⌫ erase  M mouse:on                               "
+"╰────────────────────────╯╰────────────────────────────────────────────────────╯"
+" SEARCH  esc close  ↑↓ result  ⏎ open  ⌫ erase                       M mouse:on "

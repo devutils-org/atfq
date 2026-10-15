@@ -10,9 +10,11 @@ use ratatui::crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
 };
 use ratatui::layout::{Constraint, Layout as Split, Position, Rect};
-use ratatui::style::{Color, Modifier, Style};
+use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line as TLine, Span as TSpan};
 use ratatui::widgets::{Block, Borders, Clear, Paragraph};
+
+use super::theme;
 use ratatui::Frame;
 
 use crate::content::{ChapterKind, Library};
@@ -76,6 +78,15 @@ struct Visit {
     view: DocView,
 }
 
+/// How far a vim motion goes.
+#[derive(Debug, Clone, Copy)]
+enum Motion {
+    Lines(usize),
+    HalfPages(usize),
+    Pages(usize),
+    Edge,
+}
+
 enum Mode {
     Normal,
     Search { query: String, view: DocView },
@@ -90,6 +101,8 @@ pub struct App<'a> {
     toc_sel: usize,
     toc_scroll: usize,
     toc_reveal: bool,
+    /// Height of the TOC pane at the last draw.
+    toc_height: usize,
     page: Option<Page<'a>>,
     history: Vec<Visit>,
     focus: Pane,
@@ -97,6 +110,9 @@ pub struct App<'a> {
     mouse: bool,
     quit: bool,
     message: Option<String>,
+    /// Vim prefixes typed so far: a count (`5j`) and the first `g` of `gg`.
+    count: Option<usize>,
+    pending_g: bool,
     regions: Vec<(Rect, Region)>,
     /// Links of the document drawn last: action and first line.
     items: Vec<(Action, usize)>,
@@ -116,6 +132,7 @@ impl<'a> App<'a> {
             toc_sel,
             toc_scroll: 0,
             toc_reveal: true,
+            toc_height: 0,
             page: None,
             history: Vec::new(),
             focus: Pane::Toc,
@@ -123,6 +140,8 @@ impl<'a> App<'a> {
             mouse: true,
             quit: false,
             message: None,
+            count: None,
+            pending_g: false,
             regions: Vec::new(),
             items: Vec::new(),
             content_height: 0,
@@ -357,6 +376,107 @@ impl<'a> App<'a> {
         }
     }
 
+    /// Selects the first (or last) page of the TOC.
+    fn toc_edge(&mut self, last: bool) {
+        let mut pages = self
+            .toc
+            .iter()
+            .enumerate()
+            .filter(|(_, e)| e.handle.is_some());
+        let found = if last {
+            pages.next_back()
+        } else {
+            pages.next()
+        };
+        if let Some((i, _)) = found {
+            self.toc_sel = i;
+            self.toc_reveal = true;
+        }
+    }
+
+    /// Moves the TOC selection or scrolls the content, as `pane` says.
+    fn motion(&mut self, pane: Pane, down: bool, m: Motion) {
+        let height = match pane {
+            Pane::Toc => self.toc_height,
+            Pane::Content => self.content_height,
+        };
+        let n = match m {
+            Motion::Lines(n) => n,
+            Motion::HalfPages(n) => n * (height / 2).max(1),
+            Motion::Pages(n) => n * height.saturating_sub(1).max(1),
+            Motion::Edge => match pane {
+                Pane::Toc => return self.toc_edge(down),
+                Pane::Content => {
+                    if let Some(v) = self.view_mut() {
+                        v.scroll = if down { usize::MAX / 2 } else { 0 };
+                    }
+                    return;
+                }
+            },
+        };
+        match pane {
+            Pane::Toc => {
+                for _ in 0..n.min(self.toc.len()) {
+                    self.move_toc(down);
+                }
+            }
+            Pane::Content => self.scroll_content(down, n),
+        }
+    }
+
+    /// Vim keys shared by the page and the prompt overlay: counts, `gg`,
+    /// `G` and the Ctrl scrolls. Returns false when `k` is not one of them.
+    fn vim_motion(&mut self, k: KeyEvent, pane: Pane) -> bool {
+        let ctrl = k.modifiers.contains(KeyModifiers::CONTROL);
+        if let (KeyCode::Char(c @ '0'..='9'), false) = (k.code, ctrl) {
+            // A lone 0 is not a count.
+            if c != '0' || self.count.is_some() {
+                let d = c as usize - '0' as usize;
+                self.count = Some(self.count.unwrap_or(0).saturating_mul(10).saturating_add(d));
+                self.pending_g = false;
+                return true;
+            }
+        }
+        let g = std::mem::take(&mut self.pending_g);
+        // Esc first drops a half-typed count or g.
+        if k.code == KeyCode::Esc && (g || self.count.is_some()) {
+            self.count = None;
+            return true;
+        }
+        let n = self.count.unwrap_or(1);
+        let (down, m) = match (k.code, ctrl) {
+            (KeyCode::Char('g'), false) if !g => {
+                self.pending_g = true;
+                return true;
+            }
+            (KeyCode::Char('g'), false) | (KeyCode::Home, _) => (false, Motion::Edge),
+            (KeyCode::Char('G'), false) | (KeyCode::End, _) => (true, Motion::Edge),
+            (KeyCode::Down | KeyCode::Char('j'), false) => (true, Motion::Lines(n)),
+            (KeyCode::Up | KeyCode::Char('k'), false) => (false, Motion::Lines(n)),
+            (KeyCode::Char('d'), true) => (true, Motion::HalfPages(n)),
+            (KeyCode::Char('u'), true) => (false, Motion::HalfPages(n)),
+            (KeyCode::PageDown | KeyCode::Char(' '), false) | (KeyCode::Char('f'), true) => {
+                (true, Motion::Pages(n))
+            }
+            (KeyCode::PageUp, false) | (KeyCode::Char('b'), true) => (false, Motion::Pages(n)),
+            // Ctrl-e and Ctrl-y scroll the page whatever the focus, as in vim.
+            (KeyCode::Char('e'), true) => {
+                self.count = None;
+                self.scroll_content(true, n);
+                return true;
+            }
+            (KeyCode::Char('y'), true) => {
+                self.count = None;
+                self.scroll_content(false, n);
+                return true;
+            }
+            _ => return false,
+        };
+        self.count = None;
+        self.motion(pane, down, m);
+        true
+    }
+
     fn open_toc(&mut self, i: usize) {
         if let Some(h) = self.toc.get(i).and_then(|e| e.handle.clone()) {
             self.navigate(&h);
@@ -381,9 +501,23 @@ impl<'a> App<'a> {
             self.quit = true;
             return;
         }
+        let ctrl = k.modifiers.contains(KeyModifiers::CONTROL);
         match &mut self.mode {
             Mode::Search { query, view } => {
                 match k.code {
+                    KeyCode::Char('n' | 'j') if ctrl => self.step_link(true),
+                    KeyCode::Char('p' | 'k') if ctrl => self.step_link(false),
+                    KeyCode::Char('u') if ctrl => {
+                        query.clear();
+                        *view = DocView::default();
+                    }
+                    KeyCode::Char('w') if ctrl => {
+                        let kept = query.trim_end().len();
+                        let start = query[..kept].rfind(' ').map_or(0, |i| i + 1);
+                        query.truncate(start);
+                        *view = DocView::default();
+                    }
+                    KeyCode::Char(_) if ctrl => {}
                     KeyCode::Esc => self.mode = Mode::Normal,
                     KeyCode::Enter => self.activate_selected(),
                     KeyCode::Down | KeyCode::Tab => self.step_link(true),
@@ -401,21 +535,28 @@ impl<'a> App<'a> {
                 return;
             }
             Mode::Ask { .. } => {
+                if self.vim_motion(k, Pane::Content) {
+                    return;
+                }
+                self.count = None;
                 match k.code {
+                    KeyCode::Char('o') if ctrl => self.mode = Mode::Normal,
                     KeyCode::Esc | KeyCode::Char('?') => self.mode = Mode::Normal,
                     KeyCode::Char('q') => self.quit = true,
                     KeyCode::Char('M') => self.toggle_mouse(),
-                    KeyCode::Down | KeyCode::Char('j') => self.scroll_content(true, 1),
-                    KeyCode::Up | KeyCode::Char('k') => self.scroll_content(false, 1),
-                    KeyCode::PageDown | KeyCode::Char(' ') => self.page_down(),
-                    KeyCode::PageUp => self.page_up(),
                     _ => {}
                 }
                 return;
             }
             Mode::Normal => {}
         }
+        if self.vim_motion(k, self.focus) {
+            return;
+        }
+        let count = self.count.take();
         match k.code {
+            KeyCode::Char('o') if ctrl => self.back(),
+            KeyCode::Char(_) if ctrl => {}
             KeyCode::Char('q') | KeyCode::Esc => self.quit = true,
             KeyCode::Char('M') => self.toggle_mouse(),
             KeyCode::Char('/') => {
@@ -428,40 +569,19 @@ impl<'a> App<'a> {
             KeyCode::Char('?') => self.ask(),
             KeyCode::Char('r') => self.refresh(),
             KeyCode::Backspace => self.back(),
-            KeyCode::Tab => self.step_link(true),
-            KeyCode::BackTab => self.step_link(false),
-            KeyCode::Left | KeyCode::Char('h') => self.focus = Pane::Toc,
-            KeyCode::Right | KeyCode::Char('l') => self.focus = Pane::Content,
-            KeyCode::Down | KeyCode::Char('j') => match self.focus {
-                Pane::Toc => self.move_toc(true),
-                Pane::Content => self.scroll_content(true, 1),
-            },
-            KeyCode::Up | KeyCode::Char('k') => match self.focus {
-                Pane::Toc => self.move_toc(false),
-                Pane::Content => self.scroll_content(false, 1),
-            },
-            KeyCode::PageDown | KeyCode::Char(' ') => self.page_down(),
-            KeyCode::PageUp => self.page_up(),
-            KeyCode::Home | KeyCode::Char('g') => {
-                if let Some(v) = self.view_mut() {
-                    v.scroll = 0;
+            KeyCode::Tab | KeyCode::BackTab => {
+                for _ in 0..count.unwrap_or(1).min(self.items.len().max(1)) {
+                    self.step_link(k.code == KeyCode::Tab);
                 }
             }
-            KeyCode::End | KeyCode::Char('G') => self.scroll_content(true, usize::MAX / 2),
+            KeyCode::Left | KeyCode::Char('h') => self.focus = Pane::Toc,
+            KeyCode::Right | KeyCode::Char('l') => self.focus = Pane::Content,
             KeyCode::Enter => match self.focus {
                 Pane::Toc => self.open_toc(self.toc_sel),
                 Pane::Content => self.activate_selected(),
             },
             _ => {}
         }
-    }
-
-    fn page_down(&mut self) {
-        self.scroll_content(true, self.content_height.saturating_sub(1).max(1));
-    }
-
-    fn page_up(&mut self) {
-        self.scroll_content(false, self.content_height.saturating_sub(1).max(1));
     }
 
     fn toggle_mouse(&mut self) {
@@ -551,15 +671,11 @@ impl<'a> App<'a> {
     }
 
     fn block(&self, title: String, focused: bool) -> Block<'static> {
-        let color = if focused {
-            Color::Cyan
-        } else {
-            Color::DarkGray
-        };
         Block::default()
             .borders(Borders::ALL)
-            .border_style(Style::default().fg(color))
-            .title(title)
+            .border_type(theme::BORDER)
+            .border_style(theme::border(focused))
+            .title(TSpan::styled(title, theme::title(focused)))
     }
 
     fn draw_toc(&mut self, f: &mut Frame<'_>, area: Rect) {
@@ -570,6 +686,7 @@ impl<'a> App<'a> {
         self.regions.push((area, Region::Pane(Pane::Toc)));
 
         let height = inner.height as usize;
+        self.toc_height = height;
         if self.toc_reveal {
             if self.toc_sel < self.toc_scroll {
                 self.toc_scroll = self.toc_sel;
@@ -590,13 +707,13 @@ impl<'a> App<'a> {
             if e.header {
                 style = style.add_modifier(Modifier::BOLD);
             } else if e.handle.is_none() {
-                style = style.fg(Color::DarkGray);
+                style = style.fg(theme::MUTED);
             }
             if e.handle.is_some() && e.handle == current {
-                style = style.fg(Color::Cyan).add_modifier(Modifier::BOLD);
+                style = style.fg(theme::ACCENT).add_modifier(Modifier::BOLD);
             }
             if i == self.toc_sel && focused {
-                style = style.add_modifier(Modifier::REVERSED);
+                style = theme::selection();
             }
             if e.handle.is_some() {
                 let rect = Rect::new(inner.x, inner.y + row as u16, inner.width, 1);
@@ -628,9 +745,9 @@ impl<'a> App<'a> {
         let (doc, view) = match &mut self.mode {
             Mode::Search { query, view } => {
                 let input = TLine::from(vec![
-                    TSpan::styled("/ ", Style::default().fg(Color::Cyan)),
+                    TSpan::styled("/ ", Style::default().fg(theme::SEARCH)),
                     TSpan::raw(query.clone()),
-                    TSpan::styled("█", Style::default().fg(Color::DarkGray)),
+                    TSpan::styled("█", theme::muted()),
                 ]);
                 f.render_widget(Paragraph::new(input), Rect { height: 1, ..inner });
                 inner.y += 2.min(inner.height);
@@ -675,8 +792,12 @@ impl<'a> App<'a> {
         };
         let block = Block::default()
             .borders(Borders::ALL)
-            .border_style(Style::default().fg(Color::Cyan))
-            .title(" Prompt for an AI assistant (same as atfq ask) ");
+            .border_type(theme::BORDER)
+            .border_style(Style::default().fg(theme::PROMPT))
+            .title(TSpan::styled(
+                " Prompt for an AI assistant (same as atfq ask) ",
+                theme::title(true).fg(theme::PROMPT),
+            ));
         let inner = block.inner(area);
         f.render_widget(Clear, area);
         f.render_widget(block, area);
@@ -696,16 +817,21 @@ impl<'a> App<'a> {
     }
 
     fn draw_footer(&mut self, f: &mut Frame<'_>, area: Rect) {
+        let (mode, color) = match self.mode {
+            Mode::Normal => ("NORMAL", theme::NORMAL),
+            Mode::Search { .. } => ("SEARCH", theme::SEARCH),
+            Mode::Ask { .. } => ("PROMPT", theme::PROMPT),
+        };
         let mouse = if self.mouse { "mouse:on" } else { "mouse:off" };
         let keys: &[(&str, &str)] = match self.mode {
             Mode::Normal => &[
                 ("q", "quit"),
-                ("↑↓", "move"),
+                ("jk", "move"),
                 ("tab", "link"),
                 ("⏎", "open"),
                 ("⌫", "back"),
                 ("/", "search"),
-                ("?", "ask AI"),
+                ("?", "AI"),
                 ("r", "refresh"),
                 ("←→", "pane"),
             ],
@@ -717,20 +843,32 @@ impl<'a> App<'a> {
             ],
             Mode::Ask { .. } => &[("esc", "close"), ("↑↓", "scroll"), ("q", "quit")],
         };
-        let key = Style::default().add_modifier(Modifier::BOLD);
-        let label = Style::default().fg(Color::DarkGray);
         let width = area.width as usize;
-        // The mouse state always shows; the other keys while they fit.
-        let tail = vec![
-            TSpan::styled("M", key),
-            TSpan::styled(format!(" {mouse}"), label),
+        let mut spans = vec![
+            TSpan::styled(format!(" {mode} "), theme::badge(color)),
+            TSpan::raw(" "),
         ];
-        let mut used = 2 + mouse.len();
-        let mut spans = Vec::new();
+        // The mouse state always shows, on the right; the other keys while
+        // they fit.
+        let tail = vec![
+            TSpan::styled("M", theme::key()),
+            TSpan::styled(format!(" {mouse} "), theme::muted()),
+        ];
+        let mut used = mode.len() + 3 + 3 + mouse.len();
+        // A half-typed vim command (5, g), like vim's showcmd.
+        let mut pending = self.count.map(|n| n.to_string()).unwrap_or_default();
+        if self.pending_g {
+            pending.push('g');
+        }
+        if !pending.is_empty() {
+            used += pending.chars().count() + 2;
+            spans.push(TSpan::styled(pending, theme::key().fg(color)));
+            spans.push(TSpan::raw("  "));
+        }
         if let Some(msg) = &self.message {
-            let msg = truncate(msg, width.saturating_sub(used + 3));
-            spans.push(TSpan::styled(msg, Style::default().fg(Color::Yellow)));
-            spans.push(TSpan::raw("   "));
+            let msg = truncate(msg, width.saturating_sub(used + 1));
+            used += msg.chars().count();
+            spans.push(TSpan::styled(msg, Style::default().fg(theme::WARN)));
         } else {
             for (k, l) in keys {
                 let w = k.chars().count() + l.chars().count() + 3;
@@ -738,10 +876,11 @@ impl<'a> App<'a> {
                     break;
                 }
                 used += w;
-                spans.push(TSpan::styled(*k, key));
-                spans.push(TSpan::styled(format!(" {l}  "), label));
+                spans.push(TSpan::styled(*k, theme::key()));
+                spans.push(TSpan::styled(format!(" {l}  "), theme::muted()));
             }
         }
+        spans.push(TSpan::raw(" ".repeat(width.saturating_sub(used))));
         spans.extend(tail);
         f.render_widget(Paragraph::new(TLine::from(spans)), area);
     }
@@ -779,7 +918,7 @@ fn draw_doc(
         let mut spans = Vec::new();
         for (si, span) in doc.lines[li].spans.iter().enumerate() {
             let item = map[li][si];
-            let mut style = style_of(span.kind);
+            let mut style = theme::of(span.kind);
             if item.is_some() {
                 style = style.add_modifier(Modifier::UNDERLINED);
                 if item == view.selected {
@@ -831,18 +970,6 @@ fn links(doc: &Doc) -> (Vec<(Action, usize)>, Vec<Vec<Option<usize>>>) {
         map.push(row);
     }
     (items, map)
-}
-
-fn style_of(kind: Kind) -> Style {
-    let s = Style::default();
-    match kind {
-        Kind::Plain => s,
-        Kind::Bold => s.add_modifier(Modifier::BOLD),
-        Kind::Emph => s.add_modifier(Modifier::ITALIC),
-        Kind::Code => s.fg(Color::Cyan),
-        Kind::Dim => s.fg(Color::DarkGray),
-        Kind::Warn => s.fg(Color::Yellow),
-    }
 }
 
 fn truncate(s: &str, width: usize) -> String {

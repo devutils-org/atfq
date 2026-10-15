@@ -2,7 +2,7 @@
 source: tests/phase2.rs
 expression: t.screen()
 ---
-"┌ Contents ──────────────┐┌ Memory ────────────────────────────────────────────┐"
+"╭ Contents ──────────────╮╭ Memory ────────────────────────────────────────────╮"
 "│  Memory                ││17. Memory  hub                                     │"
 "│  CPU                   ││                                                    │"
 "│  Network               ││How much RAM you have, who is using it, and why     │"
@@ -24,5 +24,5 @@ expression: t.screen()
 "│  2.5 Speculative execu…││  swapon --show  swap areas and how full they are   │"
 "│3. How memory works     ││  sudo dmesg | grep -i oom                          │"
 "│  3.1 RAM and the memor…││                 recent work of the OOM killer      │"
-"└────────────────────────┘└────────────────────────────────────────────────────┘"
-"q quit  ↑↓ move  tab link  ⏎ open  ⌫ back  / search  ? ask AI  M mouse:on       "
+"╰────────────────────────╯╰────────────────────────────────────────────────────╯"
+" NORMAL  q quit  jk move  tab link  ⏎ open  ⌫ back  / search  ? AI   M mouse:on "

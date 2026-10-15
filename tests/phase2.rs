@@ -60,6 +60,13 @@ impl<'a> Tui<'a> {
         self.send(Event::Key(KeyEvent::new(code, KeyModifiers::NONE)));
     }
 
+    fn ctrl(&mut self, c: char) {
+        self.send(Event::Key(KeyEvent::new(
+            KeyCode::Char(c),
+            KeyModifiers::CONTROL,
+        )));
+    }
+
     fn typing(&mut self, text: &str) {
         for c in text.chars() {
             self.key(KeyCode::Char(c));
@@ -235,6 +242,72 @@ fn keyboard_only() {
 
     t.key(KeyCode::Char('q'));
     assert!(t.app.should_quit());
+}
+
+#[test]
+fn vim_keys() {
+    let lib = lib();
+    let mut t = Tui::new(&lib);
+    // A count moves the TOC selection: 3j is three times j.
+    t.typing("3j");
+    t.key(KeyCode::Enter);
+    assert_eq!(t.app.current(), Some("memory"));
+
+    // G and gg go to the last and first page of the TOC.
+    t.typing("G");
+    t.key(KeyCode::Enter);
+    let last = t.app.current().unwrap().to_string();
+    assert_ne!(last, "memory");
+    t.typing("gg");
+    t.key(KeyCode::Enter);
+    assert_eq!(t.app.current(), Some("disk"));
+
+    // In the page: Ctrl-d half a page, a count of lines, gg back to the top.
+    t.key(KeyCode::Char('l'));
+    t.ctrl('d');
+    let half = t.app.content_scroll();
+    assert!(half > 0, "Ctrl-d scrolls:\n{}", t.screen());
+    t.typing("2j");
+    assert_eq!(t.app.content_scroll(), half + 2);
+    t.ctrl('u');
+    assert_eq!(t.app.content_scroll(), 2);
+    t.typing("gg");
+    assert_eq!(t.app.content_scroll(), 0);
+
+    // Ctrl-o goes back, like Backspace.
+    t.ctrl('o');
+    assert_eq!(t.app.current(), Some(last.as_str()));
+
+    // Esc drops a half-typed g or count before it quits.
+    t.typing("g");
+    t.key(KeyCode::Esc);
+    t.typing("5");
+    assert!(t.screen().contains(" NORMAL  5  "), "{}", t.screen());
+    t.key(KeyCode::Esc);
+    assert!(!t.app.should_quit());
+    t.key(KeyCode::Esc);
+    assert!(t.app.should_quit());
+}
+
+#[test]
+fn search_ctrl_keys() {
+    let lib = lib();
+    let mut t = Tui::new(&lib);
+    t.key(KeyCode::Char('/'));
+    t.typing("swap zomb");
+    // Ctrl-w erases the last word, Ctrl-u the whole query.
+    t.ctrl('w');
+    assert!(t.screen().contains("/ swap █"), "{}", t.screen());
+    t.ctrl('u');
+    assert!(t.screen().contains("Type words to search"));
+    // Ctrl-n and Ctrl-p walk the results without typing n or p.
+    t.typing("zomb");
+    t.ctrl('n');
+    t.ctrl('n');
+    t.ctrl('p');
+    assert!(t.screen().contains("/ zomb█"), "{}", t.screen());
+    t.key(KeyCode::Enter);
+    assert_eq!(t.app.current(), Some("16.1"));
 }
 
 #[test]
