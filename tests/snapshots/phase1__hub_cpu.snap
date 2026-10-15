@@ -26,4 +26,6 @@ Paths
 
 Cards
   idk 12.1  Load average
+  idk 1.2   How the kernel shares the CPUs
+  idk 1.4   Interrupts: how devices get attention
   idk 10.3  nice and priorities

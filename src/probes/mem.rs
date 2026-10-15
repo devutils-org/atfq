@@ -7,6 +7,7 @@ use serde::Serialize;
 use super::{ProbeCtx, ProbeData, ProbeResult, Status};
 
 pub(crate) const NAME: &str = "mem.summary";
+pub(crate) const VM: &str = "mem.vm";
 
 /// All sizes in bytes.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -70,6 +71,59 @@ pub(crate) fn probe(ctx: &ProbeCtx) -> ProbeResult {
     r
 }
 
+/// Virtual memory counters, since boot.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct VirtualMemory {
+    /// Bytes per page, as the kernel maps them for this process.
+    pub page_size: Option<u64>,
+    /// Faults served from RAM (a page to map, a copy to make).
+    pub minor_faults: Option<u64>,
+    /// Faults that had to read the disk.
+    pub major_faults: Option<u64>,
+    /// Pages read from and written to swap.
+    pub swap_in: Option<u64>,
+    pub swap_out: Option<u64>,
+    /// Transparent huge pages mode: `always`, `madvise` or `never`.
+    pub thp: Option<String>,
+}
+
+pub(crate) fn vm(ctx: &ProbeCtx) -> ProbeResult {
+    let text = match ctx.read("/proc/vmstat") {
+        Ok(t) => t,
+        Err(e) => return ProbeResult::failed(VM, e),
+    };
+    let get = |k: &str| {
+        text.lines().find_map(|l| {
+            let (key, v) = l.split_once(' ')?;
+            (key == k).then(|| v.trim().parse::<u64>().ok()).flatten()
+        })
+    };
+    let (faults, major) = (get("pgfault"), get("pgmajfault"));
+    let page_size = ctx.read("/proc/self/smaps").ok().and_then(|s| {
+        s.lines()
+            .find_map(|l| l.strip_prefix("KernelPageSize:"))
+            .and_then(|v| v.split_whitespace().next()?.parse::<u64>().ok())
+            .map(|kb| kb * 1024)
+    });
+    // `always [madvise] never`: the mode in brackets is the active one.
+    let thp = ctx
+        .read_trimmed("/sys/kernel/mm/transparent_hugepage/enabled")
+        .and_then(|t| {
+            let start = t.find('[')?;
+            let end = t[start..].find(']')?;
+            Some(t[start + 1..start + end].to_string())
+        });
+    let data = VirtualMemory {
+        page_size,
+        minor_faults: faults.zip(major).map(|(f, m)| f.saturating_sub(m)),
+        major_faults: major,
+        swap_in: get("pswpin"),
+        swap_out: get("pswpout"),
+        thp,
+    };
+    ProbeResult::new(VM, Status::Ok, Some(ProbeData::Vm(data)))
+}
+
 /// `Key:   1234 kB` lines → bytes. Lines without a unit are taken as is.
 fn parse_meminfo(text: &str) -> HashMap<&str, u64> {
     text.lines()
@@ -130,6 +184,18 @@ mod tests {
     fn garbage_meminfo_is_unavailable() {
         let r = probe(&fixture("garbage"));
         assert_eq!(r.status, Status::Unavailable);
+    }
+
+    #[test]
+    fn virtual_memory_counters() {
+        let Some(ProbeData::Vm(v)) = vm(&fixture("laptop")).data else {
+            panic!()
+        };
+        assert_eq!(v.page_size, Some(4096));
+        assert_eq!(v.minor_faults, Some(812_000_000 - 2_400_000));
+        assert_eq!(v.major_faults, Some(2_400_000));
+        assert_eq!(v.thp.as_deref(), Some("madvise"));
+        assert_eq!(vm(&fixture("empty")).status, Status::Unavailable);
     }
 
     #[test]

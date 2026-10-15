@@ -1,0 +1,5 @@
+nr_free_pages 300000
+pgfault 812000000
+pgmajfault 2400000
+pswpin 4000
+pswpout 65536

@@ -37,3 +37,8 @@ Cards
   idk 13.2  DNS resolution
   idk 13.3  Interfaces and routes
   idk 13.4  nftables vs iptables vs ufw
+  idk 6.1   Network layers: OSI and TCP/IP
+  idk 6.2   What happens when you open a website
+  idk 6.3   IP addresses, subnets and NAT
+  idk 6.4   TCP, UDP and connections
+  idk 6.5   Ethernet, MAC addresses and ARP

@@ -2,7 +2,7 @@
 id: perms.mac
 kind: concept
 title: SELinux and AppArmor
-aliases: [selinux, apparmor, mac, mandatory access control, getenforce, setenforce, aa-status, avc denied, lsm]
+aliases: [selinux, apparmor, mandatory access control, getenforce, setenforce, aa-status, avc denied, lsm]
 hubs: [permissions]
 probes: [security.lsm]
 see_also: [perms.rwx, perms.acl-caps]

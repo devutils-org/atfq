@@ -1,0 +1,8 @@
+           CPU0       CPU1       
+  0:         10          0   IO-APIC   2-edge      timer
+147:        200        100   PCI-MSIX-0000:00:14.3   0-edge      iwlwifi
+148:         50         20   PCI-MSI-0000:00:1d.0   0-edge      nvme0q0
+NMI:          1          1   Non-maskable interrupts
+LOC:        500        400   Local timer interrupts
+RES:         80         90   Rescheduling interrupts
+ERR:          0

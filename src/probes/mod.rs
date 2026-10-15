@@ -29,10 +29,12 @@ pub use boot::{BootInfo, Firmware};
 pub use cpu::CpuSummary;
 pub use disk::{BlockDevice, DiskTree, Mount, Partition, TmpDir, TmpDirs};
 pub use disk::{Fstab, FstabEntry, UdevRules};
+pub use kernel::{Interrupts, KernelOverview};
 pub use kernel::{Modules, Sysctl, SysctlSetting, SysctlValue};
 pub use mem::MemSummary;
-pub use net::Firewall;
+pub use mem::VirtualMemory;
 pub use net::{DnsConfig, Interface, Listener, Listening, NetInterfaces};
+pub use net::{Firewall, Neighbour, NetLayers, TcpStats};
 pub use pkg::Packages;
 pub use proc::{CgroupInfo, ProcInfo, ProcStates, TopEntry, TopProcesses};
 pub use security::Lsm;
@@ -82,6 +84,10 @@ pub enum ProbeData {
     Firewall(Firewall),
     Lsm(Lsm),
     Packages(Packages),
+    Kernel(KernelOverview),
+    Irq(Interrupts),
+    Vm(VirtualMemory),
+    Layers(NetLayers),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -462,6 +468,26 @@ pub const REGISTRY: &[ProbeInfo] = &[
         name: pkg::NAME,
         description: "package managers in use and their package counts",
         run: pkg::probe,
+    },
+    ProbeInfo {
+        name: kernel::OVERVIEW,
+        description: "kernel version and build, and its work counters since boot",
+        run: kernel::overview,
+    },
+    ProbeInfo {
+        name: kernel::IRQ,
+        description: "busiest interrupt sources, hardware and software",
+        run: kernel::irq,
+    },
+    ProbeInfo {
+        name: mem::VM,
+        description: "page size, page faults, swap traffic, huge pages",
+        run: mem::vm,
+    },
+    ProbeInfo {
+        name: net::LAYERS,
+        description: "this machine's network, layer by layer, link to DNS",
+        run: net::layers,
     },
 ];
 

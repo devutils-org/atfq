@@ -1,0 +1,58 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+6.3  IP addresses, subnets and NAT
+
+TL;DR
+  - An IPv4 address is 32 bits, written 192.168.1.23. /24 means the first 24
+    bits name the network and the rest the machine.
+  - 10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16 are private: used at home and
+    at work, never on the Internet. Your router shares one public address
+    through NAT.
+  - IPv6 addresses are 128 bits; fe80::… ones only work on the local link. There
+    are enough to give every device a public address.
+
+      ip -br addr
+      curl -s https://ifconfig.me      # your public address, as others see it
+
+On your machine
+  docker0   down · virtual · MAC 02:42:5c:11:aa:01
+            172.17.0.1/16
+  enp0s31f6 down · MAC 54:e1:ad:12:34:56
+  lo        unknown · loopback
+            127.0.0.1/8, ::1/128
+  wlp0s20f3 up · wireless · MAC 8c:c6:81:2a:10:7f
+            192.168.1.23/24, fe80::8ec6:81ff:fe2a:107f/64
+  Route     default via 192.168.1.1 on wlp0s20f3
+
+Pitfalls
+  - Two machines with the same address on one network fight over it: one of them
+    becomes unreachable.
+  - An address in 169.254.x.x means DHCP failed: the machine picked a link-local
+    address by itself.
+  - 127.0.0.1 and ::1 are always the machine itself, never the network.
+  - Behind NAT, outside machines can't open a connection to yours unless the
+    router forwards a port.
+
+Deep dive
+
+  ▾ Why NAT?
+
+    IPv4 has about 4.3 billion addresses, fewer than there are devices. NAT lets
+    a whole home share one: the router rewrites addresses and ports on the way
+    out and remembers the mapping to send replies back. The cost is that
+    connections can't come in by themselves, which is why games and peer-to-peer
+    apps need port forwarding or tricks.
+
+  ▾ How does a machine know where to send a packet?
+
+    It compares the destination with its own network. Same network: it sends the
+    packet directly, finding the MAC address with ARP. Anywhere else: it sends
+    it to the gateway. ip route get ADDRESS shows the choice (13.3).
+
+Related
+  Commands  ip
+  Hub       idk network Network
+  See also  idk 13.3 Interfaces and routes
+  See also  idk 6.5 Ethernet, MAC addresses and ARP

@@ -89,11 +89,21 @@ fn toc_follows_summary() {
     let expected = "\
 Part I · How it works
    1. How the kernel works
+      1.1  What does the kernel do?
+      1.2  How the kernel shares the CPUs
+      1.3  How virtual memory works
+      1.4  Interrupts: how devices get attention
+      1.5  How a program starts: fork and exec
    2. How a CPU works
    3. How memory works
    4. How storage works
    5. How a GPU works
    6. How networks work
+      6.1  Network layers: OSI and TCP/IP
+      6.2  What happens when you open a website
+      6.3  IP addresses, subnets and NAT
+      6.4  TCP, UDP and connections
+      6.5  Ethernet, MAC addresses and ARP
 
 Part II · Your system
    7. Filesystem

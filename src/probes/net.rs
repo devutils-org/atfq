@@ -12,6 +12,7 @@ pub(crate) const INTERFACES: &str = "net.interfaces";
 pub(crate) const LISTENING: &str = "net.listening";
 pub(crate) const DNS: &str = "net.dns";
 pub(crate) const FIREWALL: &str = "net.firewall";
+pub(crate) const LAYERS: &str = "net.layers";
 
 const FIREWALL_UNITS: &[&str] = &[
     "systemctl",
@@ -419,6 +420,119 @@ pub(crate) fn firewall(ctx: &ProbeCtx) -> ProbeResult {
     r
 }
 
+// ----- net.layers ------------------------------------------------------------
+
+/// What this machine shows at each layer, bottom to top.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct NetLayers {
+    /// Link: interfaces up (loopback left out).
+    pub links_up: Vec<String>,
+    /// Link: neighbours whose MAC address is known (the ARP table).
+    pub neighbours: Vec<Neighbour>,
+    /// Network: addresses other than loopback, as `iface address/prefix`.
+    pub addresses: Vec<String>,
+    pub gateway: Option<Route>,
+    /// Network: whether this machine routes packets for others.
+    pub forwarding: Option<bool>,
+    /// Transport, since boot.
+    pub tcp: Option<TcpStats>,
+    pub udp: Option<(u64, u64)>,
+    /// Application: where names get resolved.
+    pub dns_servers: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct Neighbour {
+    pub ip: String,
+    pub mac: String,
+    pub iface: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct TcpStats {
+    /// Connections open right now.
+    pub established: u64,
+    /// Connections this machine started, and accepted, since boot.
+    pub opened: u64,
+    pub accepted: u64,
+    pub segments_out: u64,
+    pub retransmitted: u64,
+}
+
+/// `Tcp: name name…` then `Tcp: value value…` → value for `key`.
+fn snmp(text: &str, proto: &str, key: &str) -> Option<i64> {
+    let prefix = format!("{proto}:");
+    let mut rows = text.lines().filter(|l| l.starts_with(&prefix));
+    let names: Vec<&str> = rows.next()?.split_whitespace().skip(1).collect();
+    let values: Vec<&str> = rows.next()?.split_whitespace().skip(1).collect();
+    let i = names.iter().position(|n| *n == key)?;
+    values.get(i)?.parse().ok()
+}
+
+pub(crate) fn layers(ctx: &ProbeCtx) -> ProbeResult {
+    let r = interfaces(ctx);
+    let Some(ProbeData::Net(net)) = r.data else {
+        let mut r = r;
+        r.name = LAYERS;
+        return r;
+    };
+    let neighbours = ctx
+        .read("/proc/net/arp")
+        .unwrap_or_default()
+        .lines()
+        .skip(1)
+        .filter_map(|l| {
+            let f: Vec<&str> = l.split_whitespace().collect();
+            // Flags 0x2: the MAC address is known (a complete entry).
+            (f.get(2) == Some(&"0x2")).then(|| Neighbour {
+                ip: f[0].to_string(),
+                mac: f.get(3).unwrap_or(&"").to_string(),
+                iface: f.get(5).unwrap_or(&"").to_string(),
+            })
+        })
+        .collect();
+    let snmp_text = ctx.read("/proc/net/snmp").ok();
+    let s = |proto: &str, key: &str| snmp_text.as_deref().and_then(|t| snmp(t, proto, key));
+    let u = |proto: &str, key: &str| s(proto, key).and_then(|v| u64::try_from(v).ok());
+    let tcp = (|| {
+        Some(TcpStats {
+            established: u("Tcp", "CurrEstab")?,
+            opened: u("Tcp", "ActiveOpens")?,
+            accepted: u("Tcp", "PassiveOpens")?,
+            segments_out: u("Tcp", "OutSegs")?,
+            retransmitted: u("Tcp", "RetransSegs")?,
+        })
+    })();
+    let dns_servers = match dns(ctx).data {
+        Some(ProbeData::Dns(d)) => d.nameservers,
+        _ => Vec::new(),
+    };
+    let data = NetLayers {
+        links_up: net
+            .interfaces
+            .iter()
+            .filter(|i| i.kind != Some("loopback") && i.state == "up")
+            .map(|i| i.name.clone())
+            .collect(),
+        neighbours,
+        addresses: net
+            .interfaces
+            .iter()
+            .filter(|i| i.kind != Some("loopback"))
+            .flat_map(|i| i.addrs.iter().map(move |a| format!("{} {a}", i.name)))
+            .collect(),
+        gateway: net.default_route,
+        // RFC 1213: 1 forwarding, 2 not forwarding.
+        forwarding: s("Ip", "Forwarding").map(|v| v == 1),
+        tcp,
+        udp: u("Udp", "InDatagrams").zip(u("Udp", "OutDatagrams")),
+        dns_servers,
+    };
+    let mut out = ProbeResult::new(LAYERS, Status::Ok, Some(ProbeData::Layers(data)));
+    out.notes = r.notes;
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -530,6 +644,26 @@ mod tests {
         assert_eq!(f.services[1], ("ufw".to_string(), "active".to_string()));
         assert_eq!(f.ufw_enabled, Some(true));
         assert_eq!(firewall(&fixture("empty")).status, Status::Unavailable);
+    }
+
+    #[test]
+    fn layers_bottom_to_top() {
+        let Some(ProbeData::Layers(l)) = layers(&laptop()).data else {
+            panic!()
+        };
+        assert_eq!(l.links_up, ["wlp0s20f3"]);
+        assert_eq!(l.neighbours.len(), 1);
+        assert_eq!(l.neighbours[0].ip, "192.168.1.1");
+        assert_eq!(
+            l.addresses,
+            ["docker0 172.17.0.1/16", "wlp0s20f3 192.168.1.23/24"]
+        );
+        assert_eq!(l.forwarding, Some(true));
+        let tcp = l.tcp.unwrap();
+        assert_eq!((tcp.established, tcp.retransmitted), (12, 1_840));
+        assert_eq!(l.udp, Some((95_000, 61_000)));
+        assert_eq!(l.dns_servers, ["127.0.0.53"]);
+        assert_eq!(layers(&fixture("empty")).status, Status::Unavailable);
     }
 
     #[test]

@@ -10,6 +10,7 @@ use crate::probes::{
     MemSummary, Modules, Mount, NetInterfaces, Overrides, ProbeData, ProbeResult, ProcInfo,
     ProcStates, Status, Sysctl, SystemdStatus, TmpDirs,
 };
+use crate::probes::{Interrupts, KernelOverview, NetLayers, VirtualMemory};
 
 /// Width of the label column (`RAM`, `Swap`, `Zombies`…).
 const LABEL: usize = 10;
@@ -62,6 +63,10 @@ pub(crate) fn result(r: &ProbeResult, w: usize) -> Vec<Line> {
         (_, Some(ProbeData::Firewall(f))) => firewall(f, w),
         (_, Some(ProbeData::Lsm(l))) => lsm(l, w),
         (_, Some(ProbeData::Packages(p))) => packages(p, w),
+        (_, Some(ProbeData::Kernel(k))) => kernel(k, w),
+        (_, Some(ProbeData::Irq(i))) => irq(i, w),
+        (_, Some(ProbeData::Vm(v))) => vm(v, w),
+        (_, Some(ProbeData::Layers(l))) => layers(l, w),
         (_, None) => Vec::new(),
     };
     for note in &r.notes {
@@ -977,6 +982,192 @@ fn packages(p: &Packages, w: usize) -> Vec<Line> {
     out
 }
 
+/// `780,774`, `24.8 million`, `1.2 billion`.
+fn count(n: u64) -> String {
+    match n {
+        1_000_000_000.. => format!("{:.1} billion", n as f64 / 1e9),
+        1_000_000.. => format!("{:.1} million", n as f64 / 1e6),
+        _ => {
+            let s = n.to_string();
+            let mut out = String::new();
+            for (i, c) in s.chars().enumerate() {
+                if i > 0 && (s.len() - i).is_multiple_of(3) {
+                    out.push(',');
+                }
+                out.push(c);
+            }
+            out
+        }
+    }
+}
+
+fn kernel(k: &KernelOverview, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if let Some(r) = &k.release {
+        let text = match &k.compiler {
+            Some(c) => format!("{r}, built with {c}"),
+            None => r.clone(),
+        };
+        out.extend(row("Kernel", &text, w));
+    }
+    if let Some(b) = &k.build {
+        out.extend(row("Build", b, w));
+    }
+    let per_sec = |n: u64| {
+        k.uptime_secs
+            .filter(|&s| s > 0)
+            .map(|s| format!(" ({} per second)", count(n / s)))
+            .unwrap_or_default()
+    };
+    let mut since = Vec::new();
+    if let Some(n) = k.context_switches {
+        since.push(format!("{} context switches{}", count(n), per_sec(n)));
+    }
+    if let Some(n) = k.processes_started {
+        since.push(format!("{} processes started", count(n)));
+    }
+    if let Some(n) = k.interrupts {
+        since.push(format!("{} interrupts", count(n)));
+    }
+    if !since.is_empty() {
+        let label = k
+            .uptime_secs
+            .map(|s| format!("in the {} since boot: ", duration(s)))
+            .unwrap_or_default();
+        out.extend(row("Work", &format!("{label}{}", since.join(", ")), w));
+    }
+    if let (Some(r), Some(b)) = (k.running, k.blocked) {
+        out.extend(row(
+            "Now",
+            &format!("{r} tasks running or ready, {b} waiting on I/O"),
+            w,
+        ));
+    }
+    if !k.filesystems.is_empty() {
+        out.extend(row("Disk FS", &k.filesystems.join(", "), w));
+    }
+    out
+}
+
+fn irq(i: &Interrupts, w: usize) -> Vec<Line> {
+    let list = |items: &[(String, u64)]| {
+        items
+            .iter()
+            .map(|(name, n)| format!("{name} {}", count(*n)))
+            .collect::<Vec<_>>()
+            .join(", ")
+    };
+    let mut out = row("Hardware", &list(&i.top), w);
+    if !i.softirqs.is_empty() {
+        out.extend(row("Software", &list(&i.softirqs), w));
+    }
+    out.extend(row("CPUs", &format!("{} share the work", i.cpus), w));
+    out
+}
+
+fn vm(v: &VirtualMemory, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if let Some(p) = v.page_size {
+        out.extend(row("Page", &size(p), w));
+    }
+    if let (Some(minor), Some(major)) = (v.minor_faults, v.major_faults) {
+        out.extend(row(
+            "Faults",
+            &format!(
+                "{} served from RAM, {} that read the disk, since boot",
+                count(minor),
+                count(major)
+            ),
+            w,
+        ));
+    }
+    if let (Some(i), Some(o)) = (v.swap_in, v.swap_out) {
+        let bytes = |n: u64| {
+            v.page_size
+                .map_or(format!("{} pages", count(n)), |p| size(n * p))
+        };
+        out.extend(row(
+            "Swap",
+            &format!("{} read back, {} written out", bytes(i), bytes(o)),
+            w,
+        ));
+    }
+    if let Some(t) = &v.thp {
+        out.extend(row(
+            "Huge pages",
+            &format!("transparent huge pages: {t}"),
+            w,
+        ));
+    }
+    out
+}
+
+fn layers(l: &NetLayers, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut link = if l.links_up.is_empty() {
+        "no interface up".to_string()
+    } else {
+        format!("{} up", l.links_up.join(", "))
+    };
+    for n in &l.neighbours {
+        link.push_str(&format!(
+            " · neighbour {} is {} on {}",
+            n.ip, n.mac, n.iface
+        ));
+    }
+    out.extend(row("L2 link", &link, w));
+    let mut ip = if l.addresses.is_empty() {
+        "no address".to_string()
+    } else {
+        l.addresses.join(", ")
+    };
+    if let Some(g) = &l.gateway {
+        ip.push_str(&format!(" · gateway {}", g.gateway));
+    }
+    if l.forwarding == Some(true) {
+        ip.push_str(" · forwards packets for others");
+    }
+    out.extend(row("L3 IP", &ip, w));
+    if let Some(t) = &l.tcp {
+        let resent = if t.segments_out > 0 {
+            format!(
+                " · {} of {} segments resent",
+                count(t.retransmitted),
+                count(t.segments_out)
+            )
+        } else {
+            String::new()
+        };
+        out.extend(row(
+            "L4 TCP",
+            &format!(
+                "{} connections open now; {} started and {} accepted since boot{resent}",
+                t.established,
+                count(t.opened),
+                count(t.accepted)
+            ),
+            w,
+        ));
+    }
+    if let Some((i, o)) = l.udp {
+        out.extend(row(
+            "L4 UDP",
+            &format!("{} datagrams in, {} out, since boot", count(i), count(o)),
+            w,
+        ));
+    }
+    out.extend(row(
+        "L7 DNS",
+        &if l.dns_servers.is_empty() {
+            "no server in /etc/resolv.conf".to_string()
+        } else {
+            l.dns_servers.join(", ")
+        },
+        w,
+    ));
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -996,6 +1187,14 @@ mod tests {
         assert_eq!(duration(42 * 60), "42 min");
         assert_eq!(duration(2 * 3600 + 300), "2 h 5 min");
         assert_eq!(duration(273_912), "3 days, 4 h");
+    }
+
+    #[test]
+    fn counts() {
+        assert_eq!(count(780_774), "780,774");
+        assert_eq!(count(999), "999");
+        assert_eq!(count(24_793_434), "24.8 million");
+        assert_eq!(count(1_200_000_000), "1.2 billion");
     }
 
     #[test]

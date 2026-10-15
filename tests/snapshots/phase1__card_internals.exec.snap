@@ -1,0 +1,42 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+1.5  How a program starts: fork and exec
+
+TL;DR
+  - A new process starts as a copy of an existing one: fork() duplicates the
+    process that calls it.
+  - exec() then replaces the copy's program with another: the kernel loads the
+    new ELF file and its loader (17.2).
+  - Your shell does both for every command you type. Every process descends from
+    PID 1.
+
+      pstree -p $$       # your shell and what it started
+      strace -f -e trace=clone,clone3,execve bash -c 'ls; true'
+
+On your machine
+  Kernel    6.12.48-amd64, built with gcc 14.2.0
+  Build     #1 SMP PREEMPT_DYNAMIC Debian 6.12.48-1 (2025-09-20)
+  Work      in the 3 days, 4 h since boot: 912.3 million context switches (3,330
+            per second), 1.2 million processes started, 51.2 million interrupts
+  Now       3 tasks running or ready, 1 waiting on I/O
+  Disk FS   ext4, vfat, btrfs
+
+Pitfalls
+  - fork copies no memory up front: pages are shared until one side writes to
+    them (copy-on-write), so forking even a big process is cheap.
+  - After exec, the PID stays the same: it's the same process running another
+    program.
+  - Environment variables and open files survive exec: that's how export and
+    redirections reach the program (19.3).
+  - A parent that never waits for its children leaves zombies (10.1).
+
+Deep dive: 2 questions. Read them with idk 1.5 --why
+
+Related
+  Commands  pstree, strace
+  Hub       idk processes Processes & scheduling
+  See also  idk 17.2 ELF and "command not found"
+  See also  idk 10.1 Process states and zombies
+  See also  idk 19.3 Redirections and file descriptors

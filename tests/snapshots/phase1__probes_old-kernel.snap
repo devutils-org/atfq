@@ -128,3 +128,23 @@ pkg.manager  package managers in use and their package counts
 
   not available on this system
   note: no known package database found
+
+kernel.overview  kernel version and build, and its work counters since boot
+
+  not available on this system
+  note: /proc/stat: not found
+
+kernel.irq  busiest interrupt sources, hardware and software
+
+  not available on this system
+  note: /proc/interrupts: not found
+
+mem.vm  page size, page faults, swap traffic, huge pages
+
+  not available on this system
+  note: /proc/vmstat: not found
+
+net.layers  this machine's network, layer by layer, link to DNS
+
+  not available on this system
+  note: /sys/class/net: not found

@@ -1,0 +1,43 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+6.2  What happens when you open a website
+
+TL;DR
+  - DNS: the name becomes an IP address (13.2).
+  - TCP: a three-way handshake opens a connection to port 443.
+  - TLS: client and server agree on encryption keys, and the server proves who
+    it is with a certificate.
+  - HTTP: the browser sends a request, the server answers. With HTTP/3, the
+    transport is QUIC, over UDP, instead of TCP.
+
+      curl -v -o /dev/null https://example.com     # every step, in order
+
+On your machine
+  L2 link   wlp0s20f3 up · neighbour 192.168.1.1 is f4:92:bf:0e:21:7a on
+            wlp0s20f3
+  L3 IP     docker0 172.17.0.1/16, wlp0s20f3 192.168.1.23/24, wlp0s20f3
+            fe80::8ec6:81ff:fe2a:107f/64 · gateway 192.168.1.1 · forwards
+            packets for others
+  L4 TCP    12 connections open now; 30,120 started and 410 accepted since boot
+            · 1,840 of 3.1 million segments resent
+  L4 UDP    95,000 datagrams in, 61,000 out, since boot
+  L7 DNS    127.0.0.53
+
+Pitfalls
+  - A slow first request is often DNS or the TLS handshake.
+    curl -w '%{time_namelookup} %{time_connect} %{time_appconnect}\n' splits the
+    time between them.
+  - A certificate error means a name or date that doesn't match, or an issuer
+    that isn't trusted: check the machine's clock first.
+  - A proxy (HTTPS_PROXY) changes the whole path: curl -v shows it.
+
+Deep dive: 2 questions. Read them with idk 6.2 --why
+
+Related
+  Commands  curl
+  Hub       idk network Network
+  See also  idk 6.1 Network layers: OSI and TCP/IP
+  See also  idk 13.2 DNS resolution
+  See also  idk 6.4 TCP, UDP and connections

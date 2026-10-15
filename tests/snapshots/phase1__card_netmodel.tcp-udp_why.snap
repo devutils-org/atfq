@@ -1,0 +1,60 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+6.4  TCP, UDP and connections
+
+TL;DR
+  - TCP gives a reliable, ordered stream: it numbers the bytes, waits for
+    acknowledgements and sends again what was lost.
+  - UDP sends independent datagrams with no promise of delivery: no waiting,
+    used by DNS, video calls, games and QUIC (HTTP/3).
+  - A TCP connection starts with a three-way handshake (SYN, SYN-ACK, ACK) and
+    is named by four values: both addresses and both ports.
+
+      ss -tan state established     # TCP connections open now
+      ss -s                         # how many, in each state
+
+On your machine
+  L2 link   wlp0s20f3 up · neighbour 192.168.1.1 is f4:92:bf:0e:21:7a on
+            wlp0s20f3
+  L3 IP     docker0 172.17.0.1/16, wlp0s20f3 192.168.1.23/24, wlp0s20f3
+            fe80::8ec6:81ff:fe2a:107f/64 · gateway 192.168.1.1 · forwards
+            packets for others
+  L4 TCP    12 connections open now; 30,120 started and 410 accepted since boot
+            · 1,840 of 3.1 million segments resent
+  L4 UDP    95,000 datagrams in, 61,000 out, since boot
+  L7 DNS    127.0.0.53
+
+Pitfalls
+  - "Connection refused": the host answered, but nothing listens on that port.
+    "Timed out": no answer at all, often a firewall dropping packets.
+  - Many sockets in TIME_WAIT after closing is normal: the side that closed
+    first keeps the pair for 60 seconds, so late packets can't confuse a new
+    connection.
+  - Retransmissions mean lost packets. A small share is normal, especially on
+    Wi-Fi; a steady high rate slows every transfer.
+
+Deep dive
+
+  ▾ How does TCP know how fast to send?
+
+    Congestion control: it starts slowly, speeds up while acknowledgements come
+    back, and slows down when packets get lost. Linux uses CUBIC by default;
+    BBR, which watches delays rather than losses, is a common alternative.
+    sysctl net.ipv4.tcp_congestion_control shows yours.
+
+  ▾ Why build QUIC on top of UDP?
+
+    A new transport protocol can't cross the Internet: firewalls and routers let
+    TCP and UDP through, little else. QUIC puts reliability, encryption and
+    several streams on top of UDP, inside the application, so it can change
+    without waiting for kernels and routers. And one lost packet no longer
+    stalls every stream, as it does with HTTP/2 over TCP.
+
+Related
+  Commands  ss
+  Paths     /proc/net/snmp
+  Hub       idk network Network
+  See also  idk 13.1 Who listens on which port
+  See also  idk 6.2 What happens when you open a website

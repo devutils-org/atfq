@@ -16,7 +16,7 @@ paths:
   - { path: "/etc/hosts", desc: "names resolved without DNS" }
   - { path: "/etc/resolv.conf", desc: "DNS servers the system resolver asks" }
   - { path: "/sys/class/net/", desc: "one folder per interface: state, MAC, speed" }
-cards: []
+cards: [netmodel.layers, netmodel.website, netmodel.ip, netmodel.tcp-udp, netmodel.ethernet]
 ---
 
 Your network interfaces, their addresses, where traffic goes, and how names

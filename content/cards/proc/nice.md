@@ -2,7 +2,7 @@
 id: proc.nice
 kind: concept
 title: nice and priorities
-aliases: [nice, renice, niceness, priority, priorities, ionice, scheduler]
+aliases: [nice, renice, niceness, priority, priorities, ionice]
 hubs: [cpu]
 probes: []
 see_also: [cpu.load-average]

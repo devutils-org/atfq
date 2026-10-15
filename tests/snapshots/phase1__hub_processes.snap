@@ -35,5 +35,7 @@ Cards
   idk 10.2  Signals
   idk 10.3  nice and priorities
   idk 10.4  cgroups
+  idk 1.5   How a program starts: fork and exec
+  idk 1.2   How the kernel shares the CPUs
   idk 12.1  Load average
   idk 11.2  The OOM killer

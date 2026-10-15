@@ -1,0 +1,38 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+1.4  Interrupts: how devices get attention
+
+TL;DR
+  - A device that needs the CPU (a packet arrived, a disk finished, a key was
+    pressed) raises an interrupt: the CPU stops what it's doing and runs the
+    kernel's handler for that device.
+  - The handler does only the urgent part; the rest runs a moment later, as a
+    software interrupt (softirq) or in a kernel thread.
+  - The timer interrupt is the kernel's heartbeat: it's how the scheduler gets
+    the CPU back.
+
+      cat /proc/interrupts
+      watch -d -n1 cat /proc/softirqs      # -d highlights what changes
+
+On your machine
+  Hardware  LOC Local timer interrupts 900, iwlwifi 300, RES Rescheduling
+            interrupts 170, nvme0q0 70, timer 10, NMI Non-maskable interrupts 2
+  Software  TIMER 70, NET_RX 45, SCHED 40
+  CPUs      2 share the work
+
+Pitfalls
+  - The counters only grow from boot: compare two readings, or watch them.
+  - One CPU taking every interrupt of a busy network card can become the
+    bottleneck. Multi-queue cards and irqbalance spread them over CPUs.
+  - ksoftirqd using CPU means deferred work piled up, often under heavy network
+    traffic.
+
+Deep dive: 2 questions. Read them with idk 1.4 --why
+
+Related
+  Commands  watch
+  Paths     /proc/interrupts, /proc/softirqs
+  See also  idk 1.2 How the kernel shares the CPUs
+  See also  idk 15.3 dmesg and the kernel log

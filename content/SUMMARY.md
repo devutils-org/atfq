@@ -3,11 +3,21 @@
 # How it works
 
 - [How the kernel works](internals)
+  - [What does the kernel do?](cards/internals/kernel.md)
+  - [How the kernel shares the CPUs](cards/internals/scheduler.md)
+  - [How virtual memory works](cards/internals/vm.md)
+  - [Interrupts: how devices get attention](cards/internals/interrupts.md)
+  - [How a program starts: fork and exec](cards/internals/exec.md)
 - [How a CPU works](hw-cpu)
 - [How memory works](hw-memory)
 - [How storage works](hw-storage)
 - [How a GPU works](hw-gpu)
 - [How networks work](netmodel)
+  - [Network layers: OSI and TCP/IP](cards/netmodel/layers.md)
+  - [What happens when you open a website](cards/netmodel/website.md)
+  - [IP addresses, subnets and NAT](cards/netmodel/ip.md)
+  - [TCP, UDP and connections](cards/netmodel/tcp-udp.md)
+  - [Ethernet, MAC addresses and ARP](cards/netmodel/ethernet.md)
 
 # Your system
 

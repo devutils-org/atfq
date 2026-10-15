@@ -1,0 +1,5 @@
+                    CPU0       CPU1       
+          HI:          0          0
+       TIMER:         40         30
+      NET_RX:         25         20
+       SCHED:         30         10

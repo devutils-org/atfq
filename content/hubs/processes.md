@@ -14,7 +14,7 @@ commands:
 paths:
   - { path: "/proc/PID/", desc: "everything about one process" }
   - { path: "/proc/PID/status", desc: "state, memory, threads, owner" }
-cards: [cpu.load-average, memory.oom-killer]
+cards: [internals.exec, internals.scheduler, cpu.load-average, memory.oom-killer]
 ---
 
 What's running, who started it, what it costs, and how to stop it.

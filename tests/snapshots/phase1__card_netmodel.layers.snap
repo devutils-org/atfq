@@ -1,0 +1,45 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+6.1  Network layers: OSI and TCP/IP
+
+TL;DR
+  - A network is built in layers, each using the one below: link (Ethernet,
+    Wi-Fi), network (IP), transport (TCP, UDP), application (HTTP, DNS, SSH).
+  - The OSI model names seven layers, the Internet uses four, and people still
+    say "layer 2" for Ethernet and "layer 7" for HTTP.
+  - When something fails, check from the bottom up:
+
+      ip -br link                     # 2: is the link up?
+      ip -br addr; ip route           # 3: an address, and a way out?
+      ping -c 3 1.1.1.1               # 3: does IP reach the Internet?
+      dig example.com                 # 7: do names resolve?
+      curl -I https://example.com     # 4 to 7: TCP, TLS, HTTP
+
+On your machine
+  L2 link   wlp0s20f3 up · neighbour 192.168.1.1 is f4:92:bf:0e:21:7a on
+            wlp0s20f3
+  L3 IP     docker0 172.17.0.1/16, wlp0s20f3 192.168.1.23/24, wlp0s20f3
+            fe80::8ec6:81ff:fe2a:107f/64 · gateway 192.168.1.1 · forwards
+            packets for others
+  L4 TCP    12 connections open now; 30,120 started and 410 accepted since boot
+            · 1,840 of 3.1 million segments resent
+  L4 UDP    95,000 datagrams in, 61,000 out, since boot
+  L7 DNS    127.0.0.53
+
+Pitfalls
+  - ping 1.1.1.1 works but ping example.com doesn't: it's DNS, not the network.
+  - ping uses ICMP, which some networks block: a failed ping doesn't prove a
+    host is down.
+  - OSI layers 5 and 6 (session, presentation) have no clear place of their own
+    on the Internet; TLS is usually put between 4 and 7.
+
+Deep dive: 2 questions. Read them with idk 6.1 --why
+
+Related
+  Commands  ip, ping, dig, curl
+  Hub       idk network Network
+  See also  idk 6.2 What happens when you open a website
+  See also  idk 6.5 Ethernet, MAC addresses and ARP
+  See also  idk 6.4 TCP, UDP and connections

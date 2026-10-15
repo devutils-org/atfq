@@ -1,0 +1,43 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+1.3  How virtual memory works
+
+TL;DR
+  - Every process sees its own memory, as if it were alone: the addresses it
+    uses are virtual.
+  - The CPU's MMU translates them into real RAM through page tables the kernel
+    keeps, one page (usually 4 KiB) at a time.
+  - Memory is only handed out when first touched: the first access to a page
+    causes a page fault, and the kernel maps a page then.
+
+      cat /proc/self/maps | head            # a process's memory map
+      grep -E '^pg(maj)?fault ' /proc/vmstat
+
+On your machine
+  Page      4.0 KiB
+  Faults    809.6 million served from RAM, 2.4 million that read the disk, since
+            boot
+  Swap      15.6 MiB read back, 256.0 MiB written out
+  Huge pages transparent huge pages: madvise
+
+Pitfalls
+  - Page faults are normal: most are minor, served from RAM. Major faults read
+    the disk, and those are the slow ones.
+  - VSZ (or VIRT) in ps and top is reserved address space, not RAM in use: look
+    at RSS (RES).
+  - A segmentation fault is an access to an address the process has no mapping
+    for, such as a null pointer: the kernel sends it SIGSEGV.
+  - Shared libraries count in the RSS of every process using them, but sit in
+    RAM once: adding up RSS overstates. PSS in smaps splits them fairly.
+
+Deep dive: 2 questions. Read them with idk 1.3 --why
+
+Related
+  Commands  ps, top
+  Paths     /proc/PID/maps, /proc/PID/smaps, /proc/vmstat
+  Hub       idk memory Memory
+  See also  idk 11.4 The page cache
+  See also  idk 11.3 Swap and swappiness
+  See also  idk 1.5 How a program starts: fork and exec
