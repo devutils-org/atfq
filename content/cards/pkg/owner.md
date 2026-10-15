@@ -17,7 +17,7 @@ paths: []
 - `dpkg -S` on Debian and Ubuntu, `rpm -qf` on Fedora and openSUSE,
   `pacman -Qo` on Arch.
 - For a program that isn't installed yet, search the repositories instead
-  (see 12.2).
+  (see {{bin.elf}}).
 
 ```
 dpkg -S /usr/bin/curl
@@ -31,7 +31,7 @@ pacman -Qo /usr/bin/curl
   "curl". `command -v curl` gives the path.
 - Files you created, and settings a package generated after install,
   belong to no package.
-- With merged /usr (see 1.1), ask about `/usr/bin/…` rather than `/bin/…`:
+- With merged /usr (see {{fs.hierarchy}}), ask about `/usr/bin/…` rather than `/bin/…`:
   the database may only know one of the two.
 
 ## Deep dive

@@ -40,7 +40,7 @@ cd build || exit 1
 ### Where does the number come from?
 
 The program passes it to the kernel when it exits, and the parent reads it
-with `wait()`, the same call that clears zombies (see 4.1). The shell adds
+with `wait()`, the same call that clears zombies (see {{proc.states}}). The shell adds
 the conventions for 126, 127 and 128 + N. Some programs give meaning to
 their codes: for `diff` and `grep`, 1 means "different" or "no match", and
 2 means an error.

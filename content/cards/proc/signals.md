@@ -31,7 +31,7 @@ pgrep -af backup   # find processes by command line
 - Start with a plain `kill`: `-9` skips cleanup, and temp files, locks and
   half-written data stay behind.
 - `kill -9` does nothing to a zombie, and a process stuck in D state only
-  dies when its I/O ends (see 4.1).
+  dies when its I/O ends (see {{proc.states}}).
 - `pkill -f` matches anywhere in the command line: check what it would hit
   with `pgrep -af` first.
 - Closing a terminal sends SIGHUP to what runs in it. For long tasks, use

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-9.1  From firmware to init
+14.1  From firmware to init
 
 TL;DR
   - The firmware (UEFI or BIOS) checks the hardware and starts a bootloader from
@@ -59,7 +59,7 @@ Related
   Commands  systemd-analyze, journalctl, efibootmgr
   Paths     /boot, /boot/efi
   Hub       idk boot Boot
-  See also  idk 9.3 GRUB vs systemd-boot vs UKI
-  See also  idk 9.4 systemd targets
-  See also  idk 9.2 The kernel command line
-  See also  idk 10.2 Kernel modules
+  See also  idk 14.3 GRUB vs systemd-boot vs UKI
+  See also  idk 14.4 systemd targets
+  See also  idk 14.2 The kernel command line
+  See also  idk 15.2 Kernel modules

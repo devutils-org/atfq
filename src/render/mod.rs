@@ -360,8 +360,24 @@ pub fn toc(lib: &Library, opts: Options) -> String {
     page.section("Hubs", table(&hubs, WIDTH));
 
     let digits = lib.chapters().len().to_string().len();
-    let mut lines = vec![Line::styled("Chapters", Kind::Bold)];
+    let mut lines = Vec::new();
+    let mut part: Option<&str> = None;
+    let mut parts = 0;
     for ch in lib.chapters() {
+        if lines.is_empty() || ch.part.as_deref() != part {
+            part = ch.part.as_deref();
+            if !lines.is_empty() {
+                lines.push(Line::default());
+            }
+            let heading = match part {
+                Some(title) => {
+                    parts += 1;
+                    format!("Part {} · {title}", roman(parts))
+                }
+                None => "Chapters".to_string(),
+            };
+            lines.push(Line::styled(heading, Kind::Bold));
+        }
         let mut line = Line::plain(format!(
             "{}{:>digits$}. {}",
             " ".repeat(INDENT),
@@ -387,6 +403,19 @@ pub fn toc(lib: &Library, opts: Options) -> String {
     }
     page.block(lines);
     page.finish().to_text(opts.color)
+}
+
+/// 1 → I, 4 → IV: part numbers, as books write them.
+pub fn roman(mut n: u32) -> String {
+    const TABLE: &[(u32, &str)] = &[(10, "X"), (9, "IX"), (5, "V"), (4, "IV"), (1, "I")];
+    let mut s = String::new();
+    for &(value, letters) in TABLE {
+        while n >= value {
+            s.push_str(letters);
+            n -= value;
+        }
+    }
+    s
 }
 
 /// The page for a lookup: the hub or card, preceded by a note when it is only

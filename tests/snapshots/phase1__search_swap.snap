@@ -3,23 +3,23 @@ source: tests/phase1.rs
 expression: "render::search(\"swap\", &search(&lib, \"swap\", 10), PLAIN)"
 ---
 Results for "swap"
-  idk 5.3     Swap and swappiness
+  idk 11.3    Swap and swappiness
               Swap is disk space the kernel uses as overflow for RAM: app mem…
   idk memory  Memory
               free -h: RAM and swap, in human units
-  idk 5.2     The OOM killer
+  idk 11.2    The OOM killer
               When RAM and swap are both used up, the kernel's OOM ("out of m…
-  idk 1.6     /dev and udev
+  idk 7.6     /dev and udev
               /dev/sda and /dev/sdb can swap places: scripts should use
-  idk 5.1     free vs available
+  idk 11.1    free vs available
               available: what your apps can still get without swapping.
-  idk 10.1    sysctl
+  idk 15.1    sysctl
               with dots instead of slashes: vm.swappiness is
-  idk 1.2     /tmp vs /var/tmp
+  idk 7.2     /tmp vs /var/tmp
               swap under pressure, but a machine without swap has nowhere to…
-  idk 1.3     /proc and /sys
+  idk 7.3     /proc and /sys
               /proc/sys holds what sysctl changes: sysctl vm.swappiness reads
-  idk 6.7     rsync
+  idk 20.7    rsync
               The order is source then destination, as with cp: swapping them…
-  idk 6.4     sed
+  idk 20.4    sed
               the replacement. This swaps "user@host" into "host: user":

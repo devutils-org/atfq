@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-10.3  dmesg and the kernel log
+15.3  dmesg and the kernel log
 
 TL;DR
   - The kernel keeps its messages in a buffer in RAM: hardware found, driver
@@ -53,5 +53,5 @@ Deep dive
 Related
   Commands  dmesg, journalctl
   Paths     /dev/kmsg
-  See also  idk 10.2 Kernel modules
-  See also  idk 5.2 The OOM killer
+  See also  idk 15.2 Kernel modules
+  See also  idk 11.2 The OOM killer

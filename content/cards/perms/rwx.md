@@ -44,7 +44,7 @@ chmod u+x deploy.sh     # let the owner run it
 
 Each set of rights is three bits, and one octal digit is exactly three
 bits, so `750` reads as owner 7 (rwx), group 5 (r-x), others 0. A fourth
-digit in front holds the setuid, setgid and sticky bits (see 3.2):
+digit in front holds the setuid, setgid and sticky bits (see {{perms.special}}):
 `chmod 2775 shared/`.
 
 ### Where does the umask come from?

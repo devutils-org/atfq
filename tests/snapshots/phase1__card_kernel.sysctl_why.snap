@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-10.1  sysctl
+15.1  sysctl
 
 TL;DR
   - Kernel settings are files under /proc/sys. sysctl reads and writes them with
@@ -47,8 +47,8 @@ Deep dive
 
   ▾ Which settings are worth knowing?
 
-    vm.swappiness (see 5.3) and vm.overcommit_memory (5.2) for memory.
-    kernel.dmesg_restrict (10.3) and kernel.yama.ptrace_scope (10.4) for what
+    vm.swappiness (see 11.3) and vm.overcommit_memory (11.2) for memory.
+    kernel.dmesg_restrict (15.3) and kernel.yama.ptrace_scope (15.4) for what
     regular users may inspect. net.ipv4.ip_forward lets the machine route
     packets, which containers and VPN servers need. fs.inotify.max_user_watches
     is the one to raise when an editor or a build tool runs out of file watches.
@@ -56,5 +56,5 @@ Deep dive
 Related
   Commands  sysctl
   Paths     /proc/sys, /etc/sysctl.d/
-  See also  idk 1.3 /proc and /sys
-  See also  idk 5.3 Swap and swappiness
+  See also  idk 7.3 /proc and /sys
+  See also  idk 11.3 Swap and swappiness

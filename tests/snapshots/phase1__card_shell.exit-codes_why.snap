@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-13.4  Exit codes
+19.4  Exit codes
 
 TL;DR
   - Every command ends with a number: 0 means success, anything else (1 to 255)
@@ -30,10 +30,10 @@ Deep dive
   ▾ Where does the number come from?
 
     The program passes it to the kernel when it exits, and the parent reads it
-    with wait(), the same call that clears zombies (see 4.1). The shell adds the
-    conventions for 126, 127 and 128 + N. Some programs give meaning to their
-    codes: for diff and grep, 1 means "different" or "no match", and 2 means an
-    error.
+    with wait(), the same call that clears zombies (see 10.1). The shell adds
+    the conventions for 126, 127 and 128 + N. Some programs give meaning to
+    their codes: for diff and grep, 1 means "different" or "no match", and 2
+    means an error.
 
   ▾ How do I write safer scripts?
 
@@ -43,5 +43,5 @@ Deep dive
 
 Related
   Commands  echo
-  See also  idk 13.3 Redirections and file descriptors
-  See also  idk 4.2 Signals
+  See also  idk 19.3 Redirections and file descriptors
+  See also  idk 10.2 Signals

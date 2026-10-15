@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-1.2  /tmp vs /var/tmp
+7.2  /tmp vs /var/tmp
 
 TL;DR
   - /tmp: short-lived scratch files. Often in RAM (tmpfs) and emptied at every
@@ -26,14 +26,14 @@ Pitfalls
   - A fixed name like /tmp/myapp.log is a security hole: another user can create
     that name first, as a link to one of your files.
   - Everyone can write to /tmp, yet nobody can delete other people's files
-    there: that's the sticky bit (see 3.2).
+    there: that's the sticky bit (see 9.2).
   - Don't keep anything you need in /tmp: it may be gone after a reboot.
 
-Deep dive: 2 questions. Read them with idk 1.2 --why
+Deep dive: 2 questions. Read them with idk 7.2 --why
 
 Related
   Commands  mktemp
   Paths     /tmp, /var/tmp
   Hub       idk disk Disk
-  See also  idk 3.2 setuid, setgid and sticky bit
-  See also  idk 1.1 The hierarchy in 2 minutes
+  See also  idk 9.2 setuid, setgid and sticky bit
+  See also  idk 7.1 The hierarchy in 2 minutes

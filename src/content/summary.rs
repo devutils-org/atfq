@@ -8,10 +8,15 @@
 //!   - [free vs available](cards/memory/free-vs-available.md)
 //! - [Finding and transforming](cmd) chapter without a page
 //! ```
+//!
+//! As in mdBook, a `# Title` line after the first starts a part; chapter
+//! numbers keep counting across parts.
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct SummaryChapter {
     pub title: String,
+    /// The part this chapter belongs to, if the summary has parts.
+    pub part: Option<String>,
     /// `Some(path)` when the chapter is a hub file, `None` for a plain chapter.
     pub file: Option<String>,
     pub entries: Vec<SummaryEntry>,
@@ -27,6 +32,7 @@ pub(crate) fn parse(src: &str) -> Result<Vec<SummaryChapter>, Vec<String>> {
     let mut chapters: Vec<SummaryChapter> = Vec::new();
     let mut problems = Vec::new();
     let mut seen_title = false;
+    let mut part: Option<String> = None;
 
     for (i, line) in src.lines().enumerate() {
         let at = |msg: &str| format!("SUMMARY.md:{}: {msg}", i + 1);
@@ -42,10 +48,16 @@ pub(crate) fn parse(src: &str) -> Result<Vec<SummaryChapter>, Vec<String>> {
             }
             continue;
         }
-        if let Some(item) = line.strip_prefix("- ") {
+        if let Some(title) = line.strip_prefix("# ") {
+            if title.trim().is_empty() {
+                problems.push(at("a part needs a title"));
+            }
+            part = Some(title.trim().to_string());
+        } else if let Some(item) = line.strip_prefix("- ") {
             match parse_link(item) {
                 Some((title, target)) => chapters.push(SummaryChapter {
                     title,
+                    part: part.clone(),
                     file: is_file(&target).then_some(target),
                     entries: Vec::new(),
                 }),
@@ -109,6 +121,23 @@ mod tests {
         assert_eq!(chapters[1].file.as_deref(), Some("hubs/memory.md"));
         assert_eq!(chapters[1].entries[0].title, "free vs available");
         assert_eq!(chapters[1].entries[0].file, "cards/memory/free.md");
+    }
+
+    #[test]
+    fn parts_group_chapters() {
+        let src = "# Summary\n\n- [Intro](intro)\n\n# How it works\n\n- [Kernel](kernel)\n- [Net](net)\n\n# Your system\n\n- [Disk](hubs/disk.md)\n";
+        let ch = parse(src).unwrap();
+        let parts: Vec<Option<&str>> = ch.iter().map(|c| c.part.as_deref()).collect();
+        assert_eq!(
+            parts,
+            [
+                None,
+                Some("How it works"),
+                Some("How it works"),
+                Some("Your system")
+            ]
+        );
+        assert!(parse("# Summary\n# \n- [A](a)\n").unwrap_err()[0].contains("part needs a title"));
     }
 
     #[test]

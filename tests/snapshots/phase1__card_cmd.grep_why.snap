@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-6.2  grep and regex
+20.2  grep and regex
 
 TL;DR
   - grep prints the lines that match a pattern, in files or in what you pipe
@@ -46,5 +46,5 @@ Deep dive
 
 Related
   Commands  grep, rg
-  See also  idk 6.1 find
-  See also  idk 6.4 sed
+  See also  idk 20.1 find
+  See also  idk 20.4 sed

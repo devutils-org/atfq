@@ -27,7 +27,7 @@ ls /boot/efi/EFI
 
 ## Pitfalls
 
-- Never edit `grub.cfg` by hand: it is regenerated (see 9.2).
+- Never edit `grub.cfg` by hand: it is regenerated (see {{boot.cmdline}}).
 - systemd-boot needs the kernels on a partition UEFI can read, usually the
   EFI partition: it must be big enough for several kernels.
 - With a UKI, the command line is part of the signed image: changing it

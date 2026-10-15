@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: page
 ---
-7. CPU  hub
+12. CPU  hub
 
 What your processor is, how busy it is, and who keeps it busy.
 
@@ -25,5 +25,5 @@ Paths
   /sys/devices/system/cpu/  online CPUs, frequency, governor
 
 Cards
-  idk 7.1  Load average
-  idk 4.3  nice and priorities
+  idk 12.1  Load average
+  idk 10.3  nice and priorities

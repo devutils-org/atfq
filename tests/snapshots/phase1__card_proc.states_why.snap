@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-4.1  Process states and zombies
+10.1  Process states and zombies
 
 TL;DR
   - Every process has a one-letter state: R running, S sleeping, D waiting on
@@ -73,5 +73,5 @@ Deep dive
 Related
   Commands  ps, top
   Paths     /proc/PID/stat, /proc/PID/status
-  See also  idk 4.2 Signals
-  See also  idk 7.1 Load average
+  See also  idk 10.2 Signals
+  See also  idk 12.1 Load average

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-5.1  free vs available
+11.1  free vs available
 
 TL;DR
   - free: memory nobody is using at all, not even as cache.
@@ -67,5 +67,5 @@ Related
   Commands  free, vmstat
   Paths     /proc/meminfo
   Hub       idk memory Memory
-  See also  idk 5.3 Swap and swappiness
-  See also  idk 5.2 The OOM killer
+  See also  idk 11.3 Swap and swappiness
+  See also  idk 11.2 The OOM killer

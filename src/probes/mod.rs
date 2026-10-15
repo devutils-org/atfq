@@ -567,10 +567,18 @@ mod tests {
         let _ = fs::remove_dir_all(&root);
         fs::create_dir_all(root.join("etc/authselect")).unwrap();
         fs::create_dir_all(root.join("usr/lib")).unwrap();
-        fs::write(root.join("etc/authselect/nsswitch.conf"), "hosts: files dns\n").unwrap();
+        fs::write(
+            root.join("etc/authselect/nsswitch.conf"),
+            "hosts: files dns\n",
+        )
+        .unwrap();
         fs::write(root.join("usr/lib/os-release"), "ID=test\n").unwrap();
         // Absolute, relative, and through a linked folder.
-        symlink("/etc/authselect/nsswitch.conf", root.join("etc/nsswitch.conf")).unwrap();
+        symlink(
+            "/etc/authselect/nsswitch.conf",
+            root.join("etc/nsswitch.conf"),
+        )
+        .unwrap();
         symlink("../usr/lib/os-release", root.join("etc/os-release")).unwrap();
         symlink("usr/lib", root.join("lib")).unwrap();
         symlink("/etc/passwd", root.join("etc/host-passwd")).unwrap();
@@ -578,7 +586,10 @@ mod tests {
 
         let ctx = ProbeCtx::fixture(&root);
         let read = |p: &str| ctx.read(p).ok();
-        assert_eq!(read("/etc/nsswitch.conf").as_deref(), Some("hosts: files dns\n"));
+        assert_eq!(
+            read("/etc/nsswitch.conf").as_deref(),
+            Some("hosts: files dns\n")
+        );
         assert_eq!(read("/etc/os-release").as_deref(), Some("ID=test\n"));
         assert_eq!(read("/lib/os-release").as_deref(), Some("ID=test\n"));
         // Never the host's /etc/passwd.

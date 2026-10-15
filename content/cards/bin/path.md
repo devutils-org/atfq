@@ -17,7 +17,7 @@ paths: [/usr/local/bin, ~/.local/bin]
 - `type NAME` says what a name is: alias, function, builtin or file.
   `type -a` shows every match.
 - Your own scripts usually go in `~/.local/bin`. Many distros add it to
-  PATH when it exists; otherwise add it in a startup file (13.2).
+  PATH when it exists; otherwise add it in a startup file ({{shell.startup}}).
 
 ```
 echo "$PATH" | tr : '\n'

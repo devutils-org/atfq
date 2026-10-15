@@ -68,7 +68,7 @@ fn typo_suggests_the_closest_page() {
         out.starts_with("No exact match for \"memroy\", showing \"Memory\"."),
         "{out}"
     );
-    assert!(out.contains("5. Memory  hub"));
+    assert!(out.contains("11. Memory  hub"));
 }
 
 #[test]
@@ -122,7 +122,7 @@ fn lookup_json_has_card_and_probes() {
     assert_eq!(v["match"], "exact");
     assert_eq!(v["entry"]["kind"], "card");
     assert_eq!(v["entry"]["id"], "memory.free-vs-available");
-    assert_eq!(v["entry"]["number"], "5.1");
+    assert_eq!(v["entry"]["number"], "11.1");
     assert_eq!(v["entry"]["deep_dive"].as_array().unwrap().len(), 3);
     assert_eq!(v["probes"][0]["name"], "mem.summary");
     assert_eq!(v["probes"][0]["status"], "ok");
@@ -148,7 +148,7 @@ fn cli_typo_and_search() {
 
     let (code, out) = idk(&["search", "zombie"]);
     assert_eq!(code, 0);
-    assert!(out.contains("idk 4.1"));
+    assert!(out.contains("idk 10.1"));
     assert_eq!(idk(&["search", "qwertyuiop"]).0, 1);
     assert_eq!(idk(&["search"]).0, 2);
 }

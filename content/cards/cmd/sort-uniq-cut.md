@@ -30,7 +30,7 @@ cut -d: -f1,7 /etc/passwd                   # users and their shells
   duplicates.
 - `sort` without `-n` compares text, so 10 comes before 9.
 - `cut` splits on one character: with columns separated by several spaces,
-  use `awk` (see 6.3).
+  use `awk` (see {{cmd.awk}}).
 - The order depends on your language settings (case, accents).
   `LC_ALL=C sort` sorts by byte value, and faster.
 

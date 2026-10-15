@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-8.2  DNS resolution
+13.2  DNS resolution
 
 TL;DR
   - Programs ask the system resolver to turn a name into an address. It tries
@@ -29,10 +29,10 @@ Pitfalls
   - Old answers can stay cached after a change: resolvectl flush-caches.
   - Browsers may use their own DNS over HTTPS and skip the system resolver.
 
-Deep dive: 2 questions. Read them with idk 8.2 --why
+Deep dive: 2 questions. Read them with idk 13.2 --why
 
 Related
   Commands  getent, resolvectl, dig
   Paths     /etc/resolv.conf, /etc/nsswitch.conf, /etc/hosts
   Hub       idk network Network
-  See also  idk 8.1 Who listens on which port
+  See also  idk 13.1 Who listens on which port

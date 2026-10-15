@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-8.4  nftables vs iptables vs ufw
+13.4  nftables vs iptables vs ufw
 
 TL;DR
   - The kernel does the filtering (netfilter). iptables, nftables, ufw and
@@ -26,7 +26,7 @@ Pitfalls
   - Several tools at once write rules that fight each other: pick one front-end.
   - Over SSH, allow SSH before turning a firewall on (sudo ufw allow OpenSSH),
     or you lock yourself out.
-  - Docker writes its own rules, so ports it publishes bypass ufw (see 8.1).
+  - Docker writes its own rules, so ports it publishes bypass ufw (see 13.1).
   - Rules added by hand with nft or iptables vanish at reboot unless your
     distro's service saves them.
 
@@ -51,5 +51,5 @@ Related
   Commands  nft, ufw, firewall-cmd
   Paths     /etc/nftables.conf, /etc/ufw/
   Hub       idk network Network
-  See also  idk 8.1 Who listens on which port
-  See also  idk 8.3 Interfaces and routes
+  See also  idk 13.1 Who listens on which port
+  See also  idk 13.3 Interfaces and routes

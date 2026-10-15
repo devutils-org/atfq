@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-12.3  PATH and command resolution
+17.3  PATH and command resolution
 
 TL;DR
   - PATH is a list of folders separated by :. The shell looks for a command in
@@ -10,7 +10,7 @@ TL;DR
   - type NAME says what a name is: alias, function, builtin or file. type -a
     shows every match.
   - Your own scripts usually go in ~/.local/bin. Many distros add it to PATH
-    when it exists; otherwise add it in a startup file (13.2).
+    when it exists; otherwise add it in a startup file (19.2).
 
       echo "$PATH" | tr : '\n'
       type -a python3
@@ -52,5 +52,5 @@ Deep dive
 Related
   Commands  type, which
   Paths     /usr/local/bin, ~/.local/bin
-  See also  idk 12.2 ELF and "command not found"
-  See also  idk 13.2 Shell startup files
+  See also  idk 17.2 ELF and "command not found"
+  See also  idk 19.2 Shell startup files

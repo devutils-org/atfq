@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-4.4  cgroups
+10.4  cgroups
 
 TL;DR
   - A cgroup is a group of processes that the kernel measures and limits
@@ -23,7 +23,7 @@ On your machine
 
 Pitfalls
   - A process that reaches its cgroup's memory limit is OOM-killed, even when
-    the machine has free RAM (see 5.2).
+    the machine has free RAM (see 11.2).
   - systemctl set-property is permanent: add --runtime for a change that ends at
     the next reboot.
   - Killing a service's main process can leave its children running;
@@ -52,5 +52,5 @@ Related
   Commands  systemd-cgls, systemd-cgtop, systemctl
   Paths     /sys/fs/cgroup, /proc/self/cgroup
   Hub       idk processes Processes & scheduling
-  See also  idk 5.2 The OOM killer
-  See also  idk 11.1 Units and timers
+  See also  idk 11.2 The OOM killer
+  See also  idk 16.1 Units and timers

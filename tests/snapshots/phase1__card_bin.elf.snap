@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-12.2  ELF and "command not found"
+17.2  ELF and "command not found"
 
 TL;DR
   - "command not found": no file of that name in any folder of your PATH.
@@ -33,10 +33,10 @@ Pitfalls
   - To find the package that provides a command: apt-file search bin/NAME
     (Debian, Ubuntu), dnf provides '*/bin/NAME' (Fedora), pacman -F NAME (Arch).
 
-Deep dive: 2 questions. Read them with idk 12.2 --why
+Deep dive: 2 questions. Read them with idk 17.2 --why
 
 Related
   Commands  file, readelf
-  See also  idk 12.3 PATH and command resolution
-  See also  idk 12.1 Dynamic linking and ldd
-  See also  idk 3.1 rwx, octal and umask
+  See also  idk 17.3 PATH and command resolution
+  See also  idk 17.1 Dynamic linking and ldd
+  See also  idk 9.1 rwx, octal and umask

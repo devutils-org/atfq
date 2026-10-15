@@ -31,7 +31,7 @@ sudo nft list ruleset
   front-end.
 - Over SSH, allow SSH before turning a firewall on (`sudo ufw allow
   OpenSSH`), or you lock yourself out.
-- Docker writes its own rules, so ports it publishes bypass ufw (see 8.1).
+- Docker writes its own rules, so ports it publishes bypass ufw (see {{net.ports}}).
 - Rules added by hand with `nft` or `iptables` vanish at reboot unless your
   distro's service saves them.
 

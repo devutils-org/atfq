@@ -31,7 +31,7 @@ mktemp -d     # a new private folder
 - A fixed name like `/tmp/myapp.log` is a security hole: another user can
   create that name first, as a link to one of your files.
 - Everyone can write to `/tmp`, yet nobody can delete other people's files
-  there: that's the sticky bit (see 3.2).
+  there: that's the sticky bit (see {{perms.special}}).
 - Don't keep anything you need in `/tmp`: it may be gone after a reboot.
 
 ## Deep dive

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: page
 ---
-8. Network  hub
+13. Network  hub
 
 Your network interfaces, their addresses, where traffic goes, and how names
 become addresses.
@@ -33,7 +33,7 @@ Paths
   /sys/class/net/   one folder per interface: state, MAC, speed
 
 Cards
-  idk 8.1  Who listens on which port
-  idk 8.2  DNS resolution
-  idk 8.3  Interfaces and routes
-  idk 8.4  nftables vs iptables vs ufw
+  idk 13.1  Who listens on which port
+  idk 13.2  DNS resolution
+  idk 13.3  Interfaces and routes
+  idk 13.4  nftables vs iptables vs ufw

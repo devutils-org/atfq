@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-6.1  find
+20.1  find
 
 TL;DR
   - find walks a folder and everything under it, and prints each path that
@@ -30,11 +30,11 @@ Pitfalls
   - Add 2>/dev/null to hide "Permission denied" noise, knowing it hides real
     errors too.
 
-Deep dive: 3 questions. Read them with idk 6.1 --why
+Deep dive: 3 questions. Read them with idk 20.1 --why
 
 Related
   Commands  find, xargs
   Hub       idk disk Disk
-  See also  idk 6.5 xargs
-  See also  idk 6.2 grep and regex
-  See also  idk 1.4 Links, inodes and "disk full"
+  See also  idk 20.5 xargs
+  See also  idk 20.2 grep and regex
+  See also  idk 7.4 Links, inodes and "disk full"

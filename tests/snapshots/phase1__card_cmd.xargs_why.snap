@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-6.5  xargs
+20.5  xargs
 
 TL;DR
   - xargs turns its input into arguments for a command, many at a time.
@@ -33,9 +33,9 @@ Deep dive
   ▾ xargs or find -exec?
 
     find -exec cmd {} + batches arguments the same way, without a pipe (see
-    6.1). xargs is for input from anywhere (a file, grep -l, a list of URLs) and
-    for running several commands at once with -P.
+    20.1). xargs is for input from anywhere (a file, grep -l, a list of URLs)
+    and for running several commands at once with -P.
 
 Related
   Commands  xargs
-  See also  idk 6.1 find
+  See also  idk 20.1 find

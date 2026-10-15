@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-4.2  Signals
+10.2  Signals
 
 TL;DR
   - A signal is a short message the kernel hands to a process: stop, pause,
@@ -21,7 +21,7 @@ Pitfalls
   - Start with a plain kill: -9 skips cleanup, and temp files, locks and
     half-written data stay behind.
   - kill -9 does nothing to a zombie, and a process stuck in D state only dies
-    when its I/O ends (see 4.1).
+    when its I/O ends (see 10.1).
   - pkill -f matches anywhere in the command line: check what it would hit with
     pgrep -af first.
   - Closing a terminal sends SIGHUP to what runs in it. For long tasks, use
@@ -29,8 +29,8 @@ Pitfalls
   - Many daemons reload their settings on SIGHUP, but not all: prefer
     systemctl reload when the service supports it.
 
-Deep dive: 2 questions. Read them with idk 4.2 --why
+Deep dive: 2 questions. Read them with idk 10.2 --why
 
 Related
   Commands  kill, pkill, pgrep
-  See also  idk 4.1 Process states and zombies
+  See also  idk 10.1 Process states and zombies

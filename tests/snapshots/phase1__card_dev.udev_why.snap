@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-1.6  /dev and udev
+7.6  /dev and udev
 
 TL;DR
   - /dev holds device files: /dev/sda (a disk), /dev/ttyUSB0 (a serial adapter),
@@ -50,6 +50,6 @@ Related
   Commands  udevadm, lsblk
   Paths     /dev, /dev/disk/by-id/, /etc/udev/rules.d/
   Hub       idk disk Disk
-  See also  idk 1.5 fstab and mount options
-  See also  idk 10.2 Kernel modules
-  See also  idk 3.3 sudo and groups
+  See also  idk 7.5 fstab and mount options
+  See also  idk 15.2 Kernel modules
+  See also  idk 9.3 sudo and groups

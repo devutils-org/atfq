@@ -5,7 +5,7 @@ state second, the deep "why" only if you want it.
 
 ```
 $ idk free
-5.1  free vs available
+11.1  free vs available
 
 TL;DR
   - free: memory nobody is using at all, not even as cache.
@@ -37,7 +37,7 @@ This installs the `idk` command (the project and crate are called atfq).
 ```
 idk memory               # a hub: live overview, commands, paths, cards
 idk zombie               # a card, by name or alias
-idk 5.1                  # a card, by chapter number
+idk 11.1                  # a card, by chapter number
 idk free --why           # with the deep dive
 idk toc                  # table of contents
 idk search swap          # full-text search

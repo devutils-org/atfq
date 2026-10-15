@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-6.3  awk
+20.3  awk
 
 TL;DR
   - awk reads text line by line and splits each line into fields: $1, $2… and
@@ -26,9 +26,9 @@ Pitfalls
   - Debian and Ubuntu install mawk as awk, others gawk: in scripts, stay with
     the features both have.
 
-Deep dive: 2 questions. Read them with idk 6.3 --why
+Deep dive: 2 questions. Read them with idk 20.3 --why
 
 Related
   Commands  awk
-  See also  idk 6.9 sort, uniq and cut
-  See also  idk 6.4 sed
+  See also  idk 20.9 sort, uniq and cut
+  See also  idk 20.4 sed

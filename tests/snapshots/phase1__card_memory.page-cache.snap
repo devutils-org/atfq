@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-5.4  The page cache
+11.4  The page cache
 
 TL;DR
   - The page cache keeps file data in RAM after it has been read or written, so
@@ -30,11 +30,11 @@ Pitfalls
     wait while it drains.
   - Timing a disk twice in a row times the RAM the second time.
 
-Deep dive: 2 questions. Read them with idk 5.4 --why
+Deep dive: 2 questions. Read them with idk 11.4 --why
 
 Related
   Commands  free, sync
   Paths     /proc/meminfo, /proc/sys/vm/drop_caches
   Hub       idk memory Memory
-  See also  idk 5.1 free vs available
-  See also  idk 5.3 Swap and swappiness
+  See also  idk 11.1 free vs available
+  See also  idk 11.3 Swap and swappiness

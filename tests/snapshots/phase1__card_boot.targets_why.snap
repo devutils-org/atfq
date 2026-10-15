@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-9.4  systemd targets
+14.4  systemd targets
 
 TL;DR
   - A target is a stage the system can reach. multi-user.target: text mode with
@@ -29,7 +29,7 @@ Pitfalls
   - isolate stops every unit the new target doesn't need: from a desktop, going
     to multi-user.target closes your session.
   - For a single boot, add systemd.unit=rescue.target to the kernel command line
-    from the boot menu (see 9.2).
+    from the boot menu (see 14.2).
   - Rescue and emergency modes ask for the root password. Where root is locked
     (Ubuntu), they can't open a shell.
 
@@ -52,5 +52,5 @@ Related
   Commands  systemctl
   Paths     /etc/systemd/system/default.target
   Hub       idk boot Boot
-  See also  idk 11.1 Units and timers
-  See also  idk 9.2 The kernel command line
+  See also  idk 16.1 Units and timers
+  See also  idk 14.2 The kernel command line

@@ -16,7 +16,7 @@ paths: [/etc/environment, ~/.config/environment.d/]
   `NAME=value` strings.
 - `export NAME=value` sets it for the current shell and the programs it
   starts, not for its parent or for other terminals.
-- To keep it, put the `export` in a startup file (13.2). For graphical apps
+- To keep it, put the `export` in a startup file ({{shell.startup}}). For graphical apps
   on systemd desktops, use a file in `~/.config/environment.d/`.
 
 ```
@@ -32,7 +32,7 @@ LANG=C sort names.txt    # set for one command only
 - A change never reaches programs already running, nor other terminals:
   open a new one, or `source ~/.bashrc`.
 - systemd services don't read your shell files: give them variables with
-  `Environment=` in a drop-in (see 11.3).
+  `Environment=` in a drop-in (see {{systemd.overrides}}).
 - `sudo` resets most of the environment. `sudo -E` keeps it, when sudoers
   allows it.
 - Variables are visible to every process you run, in

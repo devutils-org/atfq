@@ -44,5 +44,5 @@ into as many runs as needed, each one under the limit.
 ### xargs or find -exec?
 
 `find -exec cmd {} +` batches arguments the same way, without a pipe (see
-6.1). xargs is for input from anywhere (a file, `grep -l`, a list of URLs)
+{{cmd.find}}). xargs is for input from anywhere (a file, `grep -l`, a list of URLs)
 and for running several commands at once with `-P`.

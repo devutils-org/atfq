@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-1.4  Links, inodes and "disk full"
+7.4  Links, inodes and "disk full"
 
 TL;DR
   - An inode is a file's record: owner, rights, size, where the data is. The
@@ -36,9 +36,9 @@ Pitfalls
   - A hard link can't cross filesystems or point to a folder. A symbolic link
     can, but it breaks when its target moves.
 
-Deep dive: 2 questions. Read them with idk 1.4 --why
+Deep dive: 2 questions. Read them with idk 7.4 --why
 
 Related
   Commands  ln, df, lsof
   Hub       idk disk Disk
-  See also  idk 1.1 The hierarchy in 2 minutes
+  See also  idk 7.1 The hierarchy in 2 minutes

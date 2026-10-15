@@ -34,7 +34,7 @@ echo 'blacklist pcspkr' | sudo tee /etc/modprobe.d/nobeep.conf
   from tainted kernels.
 - `blacklist` only stops automatic loading: the module can still load by
   hand or as a dependency. `install NAME /bin/false` blocks it completely.
-- With Secure Boot on, the kernel refuses unsigned modules (see 9.1).
+- With Secure Boot on, the kernel refuses unsigned modules (see {{boot.sequence}}).
 
 ## Deep dive
 

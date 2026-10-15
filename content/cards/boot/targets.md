@@ -30,7 +30,7 @@ sudo systemctl isolate rescue.target   # switch now
 - `isolate` stops every unit the new target doesn't need: from a desktop,
   going to `multi-user.target` closes your session.
 - For a single boot, add `systemd.unit=rescue.target` to the kernel
-  command line from the boot menu (see 9.2).
+  command line from the boot menu (see {{boot.cmdline}}).
 - Rescue and emergency modes ask for the root password. Where root is
   locked (Ubuntu), they can't open a shell.
 

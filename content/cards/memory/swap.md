@@ -42,7 +42,7 @@ vmstat 1        # si and so: swapped in and out, per second
 The kernel balances two uses of RAM: app memory and file cache. An app page
 nobody touched for hours is worth less than file data in active use, so
 moving it out makes the machine faster overall. `vm.swappiness` sets that
-balance (see 5.1).
+balance (see {{memory.free-vs-available}}).
 
 ### Swap partition, swap file or zram?
 

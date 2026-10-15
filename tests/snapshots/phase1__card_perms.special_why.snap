@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-3.2  setuid, setgid and sticky bit
+9.2  setuid, setgid and sticky bit
 
 TL;DR
   - setuid (s in the owner's x spot): the program runs with its owner's rights,
@@ -47,5 +47,5 @@ Deep dive
 Related
   Commands  chmod, getcap
   Paths     /usr/bin/passwd, /tmp
-  See also  idk 3.1 rwx, octal and umask
-  See also  idk 1.2 /tmp vs /var/tmp
+  See also  idk 9.1 rwx, octal and umask
+  See also  idk 7.2 /tmp vs /var/tmp

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-13.3  Redirections and file descriptors
+19.3  Redirections and file descriptors
 
 TL;DR
   - Every program starts with three open files: 0 is stdin (its input), 1 is
@@ -25,9 +25,9 @@ Pitfalls
     write 2>&1 | (or |& in bash).
   - set -o noclobber makes > refuse to overwrite an existing file; >| forces it.
 
-Deep dive: 2 questions. Read them with idk 13.3 --why
+Deep dive: 2 questions. Read them with idk 19.3 --why
 
 Related
   Commands  tee
   Paths     /dev/null
-  See also  idk 13.4 Exit codes
+  See also  idk 19.4 Exit codes

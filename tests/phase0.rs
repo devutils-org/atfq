@@ -20,17 +20,17 @@ fn embedded_content_is_valid() {
 fn queries_reach_the_right_page() {
     let lib = lib();
     for (query, first_line) in [
-        ("memory", "5. Memory  hub"),
-        ("disk", "2. Disk  hub"),
-        ("free", "5.1  free vs available"),
-        ("zombie", "4.1  Process states and zombies"),
-        ("find", "6.1  find"),
-        ("5.1", "5.1  free vs available"),
-        ("5", "5. Memory  hub"),
-        ("RAM", "5. Memory  hub"),
-        ("Memory   Full", "5.1  free vs available"),
-        ("proc.states", "4.1  Process states and zombies"),
-        ("processes", "4. Processes & scheduling  hub"),
+        ("memory", "11. Memory  hub"),
+        ("disk", "8. Disk  hub"),
+        ("free", "11.1  free vs available"),
+        ("zombie", "10.1  Process states and zombies"),
+        ("find", "20.1  find"),
+        ("11.1", "11.1  free vs available"),
+        ("11", "11. Memory  hub"),
+        ("RAM", "11. Memory  hub"),
+        ("Memory   Full", "11.1  free vs available"),
+        ("proc.states", "10.1  Process states and zombies"),
+        ("processes", "10. Processes & scheduling  hub"),
     ] {
         let out = show(&lib, query, PLAIN);
         assert_eq!(out.lines().next(), Some(first_line), "query `{query}`");
@@ -53,10 +53,10 @@ fn hub_points_to_card_sharing_its_name() {
     // "permissions" is the hub's id and an alias of card 3.1: the hub wins.
     let out = show(&lib(), "permissions", PLAIN);
     assert!(
-        out.starts_with("Looking for \"rwx, octal and umask\"? Run idk 3.1\n"),
+        out.starts_with("Looking for \"rwx, octal and umask\"? Run idk 9.1\n"),
         "{out}"
     );
-    assert!(out.contains("3. Permissions  hub"));
+    assert!(out.contains("9. Permissions  hub"));
 }
 
 #[test]
@@ -65,7 +65,7 @@ fn deep_dive_only_with_why() {
     let question = "Why is unused RAM wasted RAM?";
     let short = show(&lib, "free", PLAIN);
     assert!(!short.contains(question));
-    assert!(short.contains("Deep dive: 3 questions. Read them with idk 5.1 --why"));
+    assert!(short.contains("Deep dive: 3 questions. Read them with idk 11.1 --why"));
     let long = show(&lib, "free", WHY);
     assert!(long.contains(question));
     assert!(long.contains("What is swappiness and when should I change it?"));
@@ -87,74 +87,84 @@ fn live_block_shows_probe_results() {
 fn toc_follows_summary() {
     let toc = render::toc(&lib(), PLAIN);
     let expected = "\
-Chapters
-   1. Filesystem
-      1.1  The hierarchy in 2 minutes
-      1.2  /tmp vs /var/tmp
-      1.3  /proc and /sys
-      1.4  Links, inodes and \"disk full\"
-      1.5  fstab and mount options
-      1.6  /dev and udev
-   2. Disk  hub: idk disk
-   3. Permissions  hub: idk permissions
-      3.1  rwx, octal and umask
-      3.2  setuid, setgid and sticky bit
-      3.3  sudo and groups
-      3.4  ACLs and capabilities
-      3.5  SELinux and AppArmor
-   4. Processes & scheduling  hub: idk processes
-      4.1  Process states and zombies
-      4.2  Signals
-      4.3  nice and priorities
-      4.4  cgroups
-   5. Memory  hub: idk memory
-      5.1  free vs available
-      5.2  The OOM killer
-      5.3  Swap and swappiness
-      5.4  The page cache
-   6. Finding and transforming
-      6.1  find
-      6.2  grep and regex
-      6.3  awk
-      6.4  sed
-      6.5  xargs
-      6.6  tar
-      6.7  rsync
-      6.8  jq
-      6.9  sort, uniq and cut
-   7. CPU  hub: idk cpu
-      7.1  Load average
-   8. Network  hub: idk network
-      8.1  Who listens on which port
-      8.2  DNS resolution
-      8.3  Interfaces and routes
-      8.4  nftables vs iptables vs ufw
-   9. Boot  hub: idk boot
-      9.1  From firmware to init
-      9.2  The kernel command line
-      9.3  GRUB vs systemd-boot vs UKI
-      9.4  systemd targets
-  10. Kernel
-      10.1  sysctl
-      10.2  Kernel modules
-      10.3  dmesg and the kernel log
-      10.4  syscalls and strace
-  11. systemd
-      11.1  Units and timers
-      11.2  Why a service won't start
-      11.3  Unit files and overrides
-  12. Libraries & binaries
-      12.1  Dynamic linking and ldd
-      12.2  ELF and \"command not found\"
-      12.3  PATH and command resolution
-  13. Environment & shell
-      13.1  Where environment variables come from
-      13.2  Shell startup files
-      13.3  Redirections and file descriptors
-      13.4  Exit codes
-  14. Packages
-      14.1  Which package owns a file
-      14.2  Native packages vs Snap and Flatpak
+Part I · How it works
+   1. How the kernel works
+   2. How a CPU works
+   3. How memory works
+   4. How storage works
+   5. How a GPU works
+   6. How networks work
+
+Part II · Your system
+   7. Filesystem
+      7.1  The hierarchy in 2 minutes
+      7.2  /tmp vs /var/tmp
+      7.3  /proc and /sys
+      7.4  Links, inodes and \"disk full\"
+      7.5  fstab and mount options
+      7.6  /dev and udev
+   8. Disk  hub: idk disk
+   9. Permissions  hub: idk permissions
+      9.1  rwx, octal and umask
+      9.2  setuid, setgid and sticky bit
+      9.3  sudo and groups
+      9.4  ACLs and capabilities
+      9.5  SELinux and AppArmor
+  10. Processes & scheduling  hub: idk processes
+      10.1  Process states and zombies
+      10.2  Signals
+      10.3  nice and priorities
+      10.4  cgroups
+  11. Memory  hub: idk memory
+      11.1  free vs available
+      11.2  The OOM killer
+      11.3  Swap and swappiness
+      11.4  The page cache
+  12. CPU  hub: idk cpu
+      12.1  Load average
+  13. Network  hub: idk network
+      13.1  Who listens on which port
+      13.2  DNS resolution
+      13.3  Interfaces and routes
+      13.4  nftables vs iptables vs ufw
+  14. Boot  hub: idk boot
+      14.1  From firmware to init
+      14.2  The kernel command line
+      14.3  GRUB vs systemd-boot vs UKI
+      14.4  systemd targets
+  15. Kernel
+      15.1  sysctl
+      15.2  Kernel modules
+      15.3  dmesg and the kernel log
+      15.4  syscalls and strace
+  16. systemd
+      16.1  Units and timers
+      16.2  Why a service won't start
+      16.3  Unit files and overrides
+  17. Libraries & binaries
+      17.1  Dynamic linking and ldd
+      17.2  ELF and \"command not found\"
+      17.3  PATH and command resolution
+  18. Packages
+      18.1  Which package owns a file
+      18.2  Native packages vs Snap and Flatpak
+
+Part III · Shell and commands
+  19. Environment & shell
+      19.1  Where environment variables come from
+      19.2  Shell startup files
+      19.3  Redirections and file descriptors
+      19.4  Exit codes
+  20. Finding and transforming
+      20.1  find
+      20.2  grep and regex
+      20.3  awk
+      20.4  sed
+      20.5  xargs
+      20.6  tar
+      20.7  rsync
+      20.8  jq
+      20.9  sort, uniq and cut
 ";
     assert!(toc.ends_with(expected), "{toc}");
 }
@@ -210,7 +220,7 @@ fn idk(args: &[&str]) -> (i32, String, String) {
 fn cli_exit_codes() {
     let (code, out, _) = idk(&["free"]);
     assert_eq!(code, 0);
-    assert!(out.starts_with("5.1  free vs available"));
+    assert!(out.starts_with("11.1  free vs available"));
     // Not a TTY: no colors.
     assert!(!out.contains('\x1b'));
 
@@ -231,5 +241,5 @@ fn cli_why_and_toc() {
     assert!(out.contains("Why is unused RAM wasted RAM?"));
     let (code, out, _) = idk(&["toc"]);
     assert_eq!(code, 0);
-    assert!(out.contains("5.1  free vs available"));
+    assert!(out.contains("11.1  free vs available"));
 }

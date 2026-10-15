@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-3.5  SELinux and AppArmor
+9.5  SELinux and AppArmor
 
 TL;DR
   - Both add a second set of rules on top of rwx: even a process running as root
@@ -50,5 +50,5 @@ Related
   Commands  getenforce, setenforce, aa-status, restorecon
   Paths     /etc/selinux/config, /etc/apparmor.d/
   Hub       idk permissions Permissions
-  See also  idk 3.1 rwx, octal and umask
-  See also  idk 3.4 ACLs and capabilities
+  See also  idk 9.1 rwx, octal and umask
+  See also  idk 9.4 ACLs and capabilities

@@ -105,6 +105,8 @@ pub struct Toc {
 pub struct TocChapter {
     pub number: u32,
     pub title: String,
+    /// The part of the book, when there are parts.
+    pub part: Option<String>,
     /// The hub that serves as this chapter's page, if any.
     pub hub: Option<String>,
     pub cards: Vec<Ref>,
@@ -119,6 +121,7 @@ pub fn toc(lib: &Library) -> Toc {
             .map(|ch| TocChapter {
                 number: ch.number,
                 title: ch.title.clone(),
+                part: ch.part.clone(),
                 hub: match &ch.kind {
                     ChapterKind::Hub(id) => Some(id.clone()),
                     ChapterKind::Plain => None,

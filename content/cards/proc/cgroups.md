@@ -28,7 +28,7 @@ sudo systemctl set-property nginx.service MemoryMax=1G
 ## Pitfalls
 
 - A process that reaches its cgroup's memory limit is OOM-killed, even when
-  the machine has free RAM (see 5.2).
+  the machine has free RAM (see {{memory.oom-killer}}).
 - `systemctl set-property` is permanent: add `--runtime` for a change that
   ends at the next reboot.
 - Killing a service's main process can leave its children running;

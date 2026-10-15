@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-11.3  Unit files and overrides
+16.3  Unit files and overrides
 
 TL;DR
   - Packages install unit files in /usr/lib/systemd/system. Yours go in
@@ -29,9 +29,9 @@ Pitfalls
   - A unit linked to /dev/null in /etc/systemd/system is masked: it can't start
     at all.
 
-Deep dive: 2 questions. Read them with idk 11.3 --why
+Deep dive: 2 questions. Read them with idk 16.3 --why
 
 Related
   Commands  systemctl, systemd-delta
   Paths     /etc/systemd/system, /usr/lib/systemd/system
-  See also  idk 11.1 Units and timers
+  See also  idk 16.1 Units and timers

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: page
 ---
-2. Disk  hub
+8. Disk  hub
 
 Everything about storage devices: what's plugged in, how full it is, how it's
 mounted.
@@ -33,6 +33,6 @@ Paths
   /etc/fstab             what gets mounted at boot
 
 Cards
-  idk 1.2  /tmp vs /var/tmp
-  idk 1.4  Links, inodes and "disk full"
-  idk 6.1  find
+  idk 7.2   /tmp vs /var/tmp
+  idk 7.4   Links, inodes and "disk full"
+  idk 20.1  find

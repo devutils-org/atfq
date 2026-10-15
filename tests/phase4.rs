@@ -124,7 +124,7 @@ fn lookup_returns_card_and_live_data() {
     let v = c.call_json("lookup", json!({ "query": "free" }));
     assert_eq!(v["match"], "exact");
     assert_eq!(v["entry"]["kind"], "card");
-    assert_eq!(v["entry"]["number"], "5.1");
+    assert_eq!(v["entry"]["number"], "11.1");
     assert_eq!(v["probes"][0]["name"], "mem.summary");
 
     let v = c.call_json("lookup", json!({ "query": "memroy" }));
@@ -153,8 +153,8 @@ fn run_probe_returns_json_or_a_clear_error() {
 fn every_other_tool_returns_json() {
     let mut c = Client::start();
     let toc = c.call_json("toc", json!({}));
-    assert_eq!(toc["chapters"][4]["title"], "Memory");
-    assert_eq!(toc["chapters"][4]["cards"][0]["handle"], "5.1");
+    assert_eq!(toc["chapters"][10]["title"], "Memory");
+    assert_eq!(toc["chapters"][10]["cards"][0]["handle"], "11.1");
 
     let hits = c.call_json("search", json!({ "query": "zombie" }));
     assert_eq!(hits[0]["id"], "proc.states");

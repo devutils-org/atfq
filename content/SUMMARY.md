@@ -1,5 +1,16 @@
 # Summary
 
+# How it works
+
+- [How the kernel works](internals)
+- [How a CPU works](hw-cpu)
+- [How memory works](hw-memory)
+- [How storage works](hw-storage)
+- [How a GPU works](hw-gpu)
+- [How networks work](netmodel)
+
+# Your system
+
 - [Filesystem](fs)
   - [The hierarchy in 2 minutes](cards/fs/hierarchy.md)
   - [/tmp vs /var/tmp](cards/fs/tmp.md)
@@ -24,16 +35,6 @@
   - [The OOM killer](cards/memory/oom-killer.md)
   - [Swap and swappiness](cards/memory/swap.md)
   - [The page cache](cards/memory/page-cache.md)
-- [Finding and transforming](cmd)
-  - [find](cards/cmd/find.md)
-  - [grep and regex](cards/cmd/grep.md)
-  - [awk](cards/cmd/awk.md)
-  - [sed](cards/cmd/sed.md)
-  - [xargs](cards/cmd/xargs.md)
-  - [tar](cards/cmd/tar.md)
-  - [rsync](cards/cmd/rsync.md)
-  - [jq](cards/cmd/jq.md)
-  - [sort, uniq and cut](cards/cmd/sort-uniq-cut.md)
 - [CPU](hubs/cpu.md)
   - [Load average](cards/cpu/load-average.md)
 - [Network](hubs/network.md)
@@ -59,11 +60,24 @@
   - [Dynamic linking and ldd](cards/bin/ldd.md)
   - [ELF and "command not found"](cards/bin/elf.md)
   - [PATH and command resolution](cards/bin/path.md)
+- [Packages](pkg)
+  - [Which package owns a file](cards/pkg/owner.md)
+  - [Native packages vs Snap and Flatpak](cards/pkg/formats.md)
+
+# Shell and commands
+
 - [Environment & shell](shell)
   - [Where environment variables come from](cards/shell/env.md)
   - [Shell startup files](cards/shell/startup.md)
   - [Redirections and file descriptors](cards/shell/redirections.md)
   - [Exit codes](cards/shell/exit-codes.md)
-- [Packages](pkg)
-  - [Which package owns a file](cards/pkg/owner.md)
-  - [Native packages vs Snap and Flatpak](cards/pkg/formats.md)
+- [Finding and transforming](cmd)
+  - [find](cards/cmd/find.md)
+  - [grep and regex](cards/cmd/grep.md)
+  - [awk](cards/cmd/awk.md)
+  - [sed](cards/cmd/sed.md)
+  - [xargs](cards/cmd/xargs.md)
+  - [tar](cards/cmd/tar.md)
+  - [rsync](cards/cmd/rsync.md)
+  - [jq](cards/cmd/jq.md)
+  - [sort, uniq and cut](cards/cmd/sort-uniq-cut.md)

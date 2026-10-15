@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-9.2  The kernel command line
+14.2  The kernel command line
 
 TL;DR
   - The kernel command line is the list of options the bootloader passes to the
@@ -32,10 +32,10 @@ Pitfalls
   - quiet hides the boot messages: remove it to see where a boot hangs.
   - systemd.unit=rescue.target boots into a rescue shell, for one boot.
 
-Deep dive: 2 questions. Read them with idk 9.2 --why
+Deep dive: 2 questions. Read them with idk 14.2 --why
 
 Related
   Commands  cat
   Paths     /proc/cmdline, /etc/default/grub
   Hub       idk boot Boot
-  See also  idk 9.1 From firmware to init
+  See also  idk 14.1 From firmware to init

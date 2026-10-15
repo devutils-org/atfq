@@ -25,6 +25,8 @@ const RESERVED: &[&str] = &["toc", "search", "probe", "ask", "tui", "mcp", "help
 pub struct Chapter {
     pub number: u32,
     pub title: String,
+    /// The part of the book, when SUMMARY.md has parts.
+    pub part: Option<String>,
     pub kind: ChapterKind,
     /// Ids of the cards in this chapter, in order.
     pub cards: Vec<String>,
@@ -178,6 +180,7 @@ impl Library {
             chapters.push(Chapter {
                 number,
                 title: ch.title.clone(),
+                part: ch.part.clone(),
                 kind,
                 cards: chapter_cards,
             });
@@ -191,6 +194,44 @@ impl Library {
             if !listed.contains_key(path) {
                 problems.push(format!("{path}: not listed in {SUMMARY}"));
             }
+        }
+
+        // `{{id}}` in the text becomes the card's number, so prose references
+        // follow any renumbering, and a wrong id is caught here.
+        let numbers: HashMap<String, String> = cards
+            .values()
+            .map(|c| (c.id.clone(), c.number.to_string()))
+            .collect();
+        let hub_ids: Vec<String> = hubs.keys().cloned().collect();
+        let mut expand = |source: &str, text: &mut String| {
+            if let Some(n) = raw_reference(text) {
+                problems.push(format!(
+                    "{source}: \"see {n}\": write {{{{card.id}}}} instead of a number, so it follows renumbering"
+                ));
+            }
+            match expand_refs(text, &numbers, &hub_ids) {
+                Ok(t) => *text = t,
+                Err(unknown) => {
+                    for id in unknown {
+                        problems.push(format!("{source}: {{{{{id}}}}} names no card or hub"));
+                    }
+                }
+            }
+        };
+        for c in cards.values_mut() {
+            let source = c.source.clone();
+            expand(&source, &mut c.tldr);
+            if let Some(p) = c.pitfalls.as_mut() {
+                expand(&source, p);
+            }
+            for q in &mut c.deep_dive {
+                expand(&source, &mut q.title);
+                expand(&source, &mut q.body);
+            }
+        }
+        for h in hubs.values_mut() {
+            let source = h.source.clone();
+            expand(&source, &mut h.intro);
         }
 
         // References and probes.
@@ -302,6 +343,57 @@ impl Library {
         let i = usize::try_from(number.section).ok()?.checked_sub(1)?;
         let id = self.chapter(number.chapter)?.cards.get(i)?;
         self.card(id)
+    }
+}
+
+/// A chapter number written by hand after "see", like "see 5.2".
+fn raw_reference(text: &str) -> Option<String> {
+    let words: Vec<&str> = text.split_whitespace().collect();
+    words.windows(2).find_map(|w| {
+        let see = w[0].trim_start_matches('(').eq_ignore_ascii_case("see");
+        let n = w[1].trim_end_matches([')', '.', ',', ':', ';']);
+        let is_number = n.split_once('.').is_some_and(|(a, b)| {
+            !a.is_empty()
+                && !b.is_empty()
+                && (a.chars().chain(b.chars())).all(|c| c.is_ascii_digit())
+        });
+        (see && is_number).then(|| n.to_string())
+    })
+}
+
+/// Replaces `{{card.id}}` with the card's number and `{{hub}}` with the
+/// command that opens the hub. Returns the unknown ids on failure.
+fn expand_refs(
+    text: &str,
+    numbers: &HashMap<String, String>,
+    hubs: &[String],
+) -> Result<String, Vec<String>> {
+    let mut out = String::with_capacity(text.len());
+    let mut unknown = Vec::new();
+    let mut rest = text;
+    while let Some(start) = rest.find("{{") {
+        out.push_str(&rest[..start]);
+        let after = &rest[start + 2..];
+        let Some(end) = after.find("}}") else {
+            out.push_str(&rest[start..]);
+            rest = "";
+            break;
+        };
+        let id = after[..end].trim();
+        match numbers.get(id) {
+            Some(n) => out.push_str(n),
+            None if hubs.iter().any(|h| h == id) => {
+                out.push_str(&format!("{} {id}", crate::BIN_NAME));
+            }
+            None => unknown.push(id.to_string()),
+        }
+        rest = &after[end + 2..];
+    }
+    out.push_str(rest);
+    if unknown.is_empty() {
+        Ok(out)
+    } else {
+        Err(unknown)
     }
 }
 
@@ -447,6 +539,36 @@ mod tests {
                 section: 1
             })
             .is_none());
+    }
+
+    #[test]
+    fn references_in_text_become_numbers() {
+        let mut f = base();
+        f.insert(
+            "cards/find.md".into(),
+            "---\nid: cmd.find\nkind: concept\ntitle: find\n---\n\n## TL;DR\n\n- See {{memory.free}} and {{ memory }}.\n".into(),
+        );
+        let lib = Library::from_files(&f).unwrap();
+        assert_eq!(
+            lib.card("cmd.find").unwrap().tldr,
+            "- See 1.1 and idk memory."
+        );
+
+        f.insert(
+            "cards/find.md".into(),
+            "---\nid: cmd.find\nkind: concept\ntitle: find\n---\n\n## TL;DR\n\n- See {{nope.card}}.\n".into(),
+        );
+        assert!(problems(&f).contains("{{nope.card}} names no card or hub"));
+
+        f.insert(
+            "cards/find.md".into(),
+            "---\nid: cmd.find\nkind: concept\ntitle: find\n---\n\n## TL;DR\n\n- It's in the kernel (see 5.2).\n".into(),
+        );
+        assert!(
+            problems(&f).contains("\"see 5.2\": write {{card.id}}"),
+            "{}",
+            problems(&f)
+        );
     }
 
     #[test]

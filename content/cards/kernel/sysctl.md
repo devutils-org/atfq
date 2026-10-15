@@ -48,8 +48,8 @@ was removed in kernel 5.5.
 
 ### Which settings are worth knowing?
 
-`vm.swappiness` (see 5.3) and `vm.overcommit_memory` (5.2) for memory.
-`kernel.dmesg_restrict` (10.3) and `kernel.yama.ptrace_scope` (10.4) for
+`vm.swappiness` (see {{memory.swap}}) and `vm.overcommit_memory` ({{memory.oom-killer}}) for memory.
+`kernel.dmesg_restrict` ({{kernel.dmesg}}) and `kernel.yama.ptrace_scope` ({{kernel.strace}}) for
 what regular users may inspect. `net.ipv4.ip_forward` lets the machine
 route packets, which containers and VPN servers need.
 `fs.inotify.max_user_watches` is the one to raise when an editor or a build

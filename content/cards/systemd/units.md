@@ -41,7 +41,7 @@ systemctl list-timers
 
 A target is a named group of units that marks a stage: `multi-user.target`
 is a working system without a graphical login, `graphical.target` adds one.
-At boot, systemd starts everything the default target needs (see 9.1).
+At boot, systemd starts everything the default target needs (see {{boot.sequence}}).
 Targets replaced the numbered runlevels of the older SysV init.
 
 ### Timers or cron?

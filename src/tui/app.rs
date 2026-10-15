@@ -871,8 +871,21 @@ fn build_toc(lib: &Library) -> Vec<TocEntry> {
     for h in lib.hubs() {
         toc.push(entry(h.title.clone(), 1, Some(h.id.clone())));
     }
-    toc.push(header("Chapters"));
+    let mut part: Option<&str> = None;
+    let mut parts = 0;
+    let mut first = true;
     for ch in lib.chapters() {
+        if first || ch.part.as_deref() != part {
+            first = false;
+            part = ch.part.as_deref();
+            toc.push(match part {
+                Some(title) => {
+                    parts += 1;
+                    header(&format!("{}. {title}", render::roman(parts)))
+                }
+                None => header("Chapters"),
+            });
+        }
         let handle = match &ch.kind {
             ChapterKind::Hub(id) => Some(id.clone()),
             ChapterKind::Plain => None,

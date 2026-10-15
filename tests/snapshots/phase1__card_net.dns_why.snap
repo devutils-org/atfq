@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-8.2  DNS resolution
+13.2  DNS resolution
 
 TL;DR
   - Programs ask the system resolver to turn a name into an address. It tries
@@ -50,4 +50,4 @@ Related
   Commands  getent, resolvectl, dig
   Paths     /etc/resolv.conf, /etc/nsswitch.conf, /etc/hosts
   Hub       idk network Network
-  See also  idk 8.1 Who listens on which port
+  See also  idk 13.1 Who listens on which port
