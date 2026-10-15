@@ -198,3 +198,14 @@ gpu.devices  graphics cards, their drivers and screens, compute devices
 
   not available on this system
   note: /sys/class/drm: not found
+
+ssh.setup  SSH keys, client config, known hosts, agent, server settings
+
+  not available on this system
+  note: home folder unknown: no entry in /etc/passwd
+
+git.config  git config files, identity set or not, telling settings, aliases
+
+  Files     none: git uses its defaults
+  Identity  name and email not set: commits get a guessed identity, or fail
+  note: home folder unknown: only /etc/gitconfig was read

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-20.1  find
+21.1  find
 
 TL;DR
   - find walks a folder and everything under it, and prints each path that
@@ -67,6 +67,6 @@ Deep dive
 Related
   Commands  find, xargs
   Hub       idk disk Disk
-  See also  idk 20.5 xargs
-  See also  idk 20.2 grep and regex
+  See also  idk 21.5 xargs
+  See also  idk 21.2 grep and regex
   See also  idk 7.4 Links, inodes and "disk full"

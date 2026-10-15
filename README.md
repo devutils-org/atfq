@@ -99,10 +99,13 @@ binary, as `which idk` prints it):
 
 ## What's inside
 
-- 7 hubs (Disk, Permissions, Processes & scheduling, Memory, CPU, Network,
-  Boot) and 80 cards in 20 chapters, in three parts (how it works, your
-  system, shell and commands): `idk toc` lists them.
-- 38 live probes. They read `/proc`, `/sys` and `/etc` directly; the only
+- 8 hubs (Disk, Permissions, Processes & scheduling, Memory, CPU, Network,
+  Boot, GPU) and 90 cards in 23 chapters, in three parts (how it works,
+  your system, shell and commands): `idk toc` lists them.
+- 40 live probes. They read `/proc`, `/sys` and `/etc` directly, plus a
+  few files in your home folder: names and public keys in `~/.ssh`, and
+  git's config, of which only your name's and email's presence are
+  shown. Never a private key or a credential. The only
   external program is `systemctl`, with fixed arguments and a 500 ms
   timeout. A probe that can't answer says why ("needs root", "not
   available on this system") instead of failing.

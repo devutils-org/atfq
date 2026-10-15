@@ -24,7 +24,9 @@ fn queries_reach_the_right_page() {
         ("disk", "8. Disk  hub"),
         ("free", "11.1  free vs available"),
         ("zombie", "10.1  Process states and zombies"),
-        ("find", "20.1  find"),
+        ("find", "21.1  find"),
+        ("gpu", "19. GPU  hub"),
+        ("git", "23.1  How git stores your work"),
         ("11.1", "11.1  free vs available"),
         ("11", "11. Memory  hub"),
         ("RAM", "11. Memory  hub"),
@@ -175,23 +177,36 @@ Part II · Your system
   18. Packages
       18.1  Which package owns a file
       18.2  Native packages vs Snap and Flatpak
+  19. GPU  hub: idk gpu
 
 Part III · Shell and commands
-  19. Environment & shell
-      19.1  Where environment variables come from
-      19.2  Shell startup files
-      19.3  Redirections and file descriptors
-      19.4  Exit codes
-  20. Finding and transforming
-      20.1  find
-      20.2  grep and regex
-      20.3  awk
-      20.4  sed
-      20.5  xargs
-      20.6  tar
-      20.7  rsync
-      20.8  jq
-      20.9  sort, uniq and cut
+  20. Environment & shell
+      20.1  Where environment variables come from
+      20.2  Shell startup files
+      20.3  Redirections and file descriptors
+      20.4  Exit codes
+  21. Finding and transforming
+      21.1  find
+      21.2  grep and regex
+      21.3  awk
+      21.4  sed
+      21.5  xargs
+      21.6  tar
+      21.7  rsync
+      21.8  jq
+      21.9  sort, uniq and cut
+  22. Remote work: SSH and tmux
+      22.1  SSH keys and the agent
+      22.2  ~/.ssh/config, jump hosts and host keys
+      22.3  SSH tunnels and port forwarding
+      22.4  tmux: sessions that survive a lost connection
+      22.5  Copying files over SSH: scp, sftp and rsync
+  23. Git
+      23.1  How git stores your work
+      23.2  Undoing things in git
+      23.3  Merge or rebase?
+      23.4  Remotes: fetch, pull and push
+      23.5  Configuring git
 ";
     assert!(toc.ends_with(expected), "{toc}");
 }

@@ -11,7 +11,7 @@ use crate::probes::{
     ProcStates, Status, Sysctl, SystemdStatus, TmpDirs,
 };
 use crate::probes::{CpuCaches, CpuFeatures, CpuFreq, CpuTopology, CpuVulns, MemErrors, Numa};
-use crate::probes::{DiskHardware, DiskIo, Gpus};
+use crate::probes::{DiskHardware, DiskIo, GitConfig, Gpus, SshSetup};
 use crate::probes::{Interrupts, KernelOverview, NetLayers, VirtualMemory};
 
 /// Width of the label column (`RAM`, `Swap`, `Zombies`…).
@@ -79,6 +79,8 @@ pub(crate) fn result(r: &ProbeResult, w: usize) -> Vec<Line> {
         (_, Some(ProbeData::DiskHardware(d))) => disk_hardware(d, w),
         (_, Some(ProbeData::DiskIo(d))) => disk_io(d, w),
         (_, Some(ProbeData::Gpus(g))) => gpus(g, w),
+        (_, Some(ProbeData::Ssh(x))) => ssh(x, w),
+        (_, Some(ProbeData::Git(g))) => git(g, w),
         (_, None) => Vec::new(),
     };
     for note in &r.notes {
@@ -1638,6 +1640,159 @@ fn gpus(g: &Gpus, w: usize) -> Vec<Line> {
     }
     if !compute.is_empty() {
         out.extend(row("Compute", &compute.join(" · "), w));
+    }
+    out
+}
+
+fn ssh(x: &SshSetup, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if !x.dir {
+        out.extend(row("Folder", "no ~/.ssh yet: no keys, no known hosts", w));
+    } else if let Some(m) = x.dir_mode.filter(|m| m & 0o022 != 0) {
+        out.extend(row(
+            "Folder",
+            &format!("~/.ssh is writable by others ({m:o}): ssh may refuse its files"),
+            w,
+        ));
+    }
+    if x.dir {
+        let keys: Vec<String> = x
+            .keys
+            .iter()
+            .map(|k| {
+                let mut t = k.name.clone();
+                if let Some(kind) = &k.kind {
+                    t.push_str(&format!(" ({kind})"));
+                }
+                if let Some(m) = k.mode.filter(|m| m & 0o077 != 0) {
+                    t.push_str(&format!(" open to others ({m:o}): ssh refuses it"));
+                }
+                t
+            })
+            .collect();
+        let text = if keys.is_empty() {
+            "no key pair in ~/.ssh".to_string()
+        } else {
+            keys.join(", ")
+        };
+        out.extend(row("Keys", &text, w));
+        let mut config = match x.config_hosts {
+            0 => "no host entries in ~/.ssh/config".to_string(),
+            1 => "1 host entry in ~/.ssh/config".to_string(),
+            n => format!("{n} host entries in ~/.ssh/config"),
+        };
+        if x.jump {
+            config.push_str(", with jump hosts");
+        }
+        out.extend(row("Config", &config, w));
+        if let Some(n) = x.known_hosts {
+            let hashed = if x.hashed { ", names hashed" } else { "" };
+            out.extend(row(
+                "Known",
+                &format!("{n} host keys trusted in known_hosts{hashed}"),
+                w,
+            ));
+        }
+        if let Some(n) = x.authorized_keys {
+            out.extend(row(
+                "Login",
+                &format!(
+                    "{n} {} may log in here as you (authorized_keys)",
+                    if n == 1 { "key" } else { "keys" }
+                ),
+                w,
+            ));
+        }
+    }
+    out.extend(row(
+        "Agent",
+        if x.agent {
+            "running for this session (SSH_AUTH_SOCK is set)"
+        } else {
+            "none in this session: keys with a passphrase ask for it every time"
+        },
+        w,
+    ));
+    if let Some(s) = &x.server {
+        let val = |v: &Option<String>, default: &str| match v {
+            Some(v) => v.clone(),
+            None => format!("{default} (default)"),
+        };
+        out.extend(row(
+            "Server",
+            &format!(
+                "port {} · password login {} · root login {}",
+                val(&s.port, "22"),
+                val(&s.password_auth, "yes"),
+                val(&s.root_login, "prohibit-password")
+            ),
+            w,
+        ));
+        if s.unreadable {
+            out.extend(row(
+                "",
+                "some sshd files need root to read: values may differ",
+                w,
+            ));
+        }
+    }
+    out
+}
+
+fn git(g: &GitConfig, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    let files = if g.files.is_empty() {
+        "none: git uses its defaults".to_string()
+    } else {
+        g.files.join(", ")
+    };
+    out.extend(row("Files", &files, w));
+    let identity = match (g.name_set, g.email_set) {
+        (true, true) => "name and email set".to_string(),
+        (n, e) => {
+            let missing: Vec<&str> = [(!n).then_some("name"), (!e).then_some("email")]
+                .into_iter()
+                .flatten()
+                .collect();
+            format!(
+                "{} not set: commits get a guessed identity, or fail",
+                missing.join(" and ")
+            )
+        }
+    };
+    out.extend(row("Identity", &identity, w));
+    for (i, (k, v)) in g.settings.iter().enumerate() {
+        let label = if i == 0 { "Settings" } else { "" };
+        let mut text = format!("{k} = {v}");
+        if k == "credential.helper" && v == "store" {
+            text.push_str(" (passwords in plain text in ~/.git-credentials)");
+        }
+        out.extend(row(label, &text, w));
+    }
+    if !g.aliases.is_empty() {
+        const SHOWN: usize = 8;
+        let mut text = g
+            .aliases
+            .iter()
+            .take(SHOWN)
+            .cloned()
+            .collect::<Vec<_>>()
+            .join(", ");
+        if g.aliases.len() > SHOWN {
+            text.push_str(&format!(" and {} more", g.aliases.len() - SHOWN));
+        }
+        out.extend(row("Aliases", &text, w));
+    }
+    if g.includes > 0 {
+        out.extend(row(
+            "Includes",
+            &format!(
+                "{} more {}, read under conditions (include, includeIf)",
+                g.includes,
+                if g.includes == 1 { "file" } else { "files" }
+            ),
+            w,
+        ));
     }
     out
 }

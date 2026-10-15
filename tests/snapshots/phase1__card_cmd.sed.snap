@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-20.4  sed
+21.4  sed
 
 TL;DR
   - sed edits text line by line as it flows through. Its most used command is
@@ -26,9 +26,9 @@ Pitfalls
   - sed -i on a symbolic link replaces the link with a regular file, unless you
     add --follow-symlinks.
 
-Deep dive: 2 questions. Read them with idk 20.4 --why
+Deep dive: 2 questions. Read them with idk 21.4 --why
 
 Related
   Commands  sed
-  See also  idk 20.2 grep and regex
-  See also  idk 20.3 awk
+  See also  idk 21.2 grep and regex
+  See also  idk 21.3 awk

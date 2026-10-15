@@ -1,0 +1,31 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+22.5  Copying files over SSH: scp, sftp and rsync
+
+TL;DR
+  - Everything that copies over SSH uses the same keys and the same
+    ~/.ssh/config names: if ssh db works, scp file db: works.
+  - scp for a quick copy, rsync for folders and anything big (it resumes and
+    only sends differences), sshfs to mount a remote folder.
+  - A path without a leading / after host: starts in your home folder there.
+
+      scp report.pdf db:/tmp/
+      scp -r db:logs/ ./logs-db/
+      rsync -avP project/ db:project/      # resumable, shows progress
+
+Pitfalls
+  - rsync src/ dst and rsync src dst differ: the trailing slash copies the
+    folder's contents, not the folder (21.7).
+  - Interrupted scp starts over; rsync -P picks up where it stopped.
+  - Remote paths with spaces need quoting twice with old scp: once for your
+    shell, once for the remote one. Recent OpenSSH no longer needs it.
+  - sshfs over a slow link makes every ls slow: copy what you work on.
+
+Deep dive: 2 questions. Read them with idk 22.5 --why
+
+Related
+  Commands  scp, sftp, rsync, sshfs
+  See also  idk 21.7 rsync
+  See also  idk 22.2 ~/.ssh/config, jump hosts and host keys

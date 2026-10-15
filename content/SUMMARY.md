@@ -90,6 +90,7 @@
 - [Packages](pkg)
   - [Which package owns a file](cards/pkg/owner.md)
   - [Native packages vs Snap and Flatpak](cards/pkg/formats.md)
+- [GPU](hubs/gpu.md)
 
 # Shell and commands
 
@@ -108,3 +109,15 @@
   - [rsync](cards/cmd/rsync.md)
   - [jq](cards/cmd/jq.md)
   - [sort, uniq and cut](cards/cmd/sort-uniq-cut.md)
+- [Remote work: SSH and tmux](remote)
+  - [SSH keys and the agent](cards/remote/ssh-keys.md)
+  - [~/.ssh/config, jump hosts and host keys](cards/remote/ssh-config.md)
+  - [SSH tunnels and port forwarding](cards/remote/tunnels.md)
+  - [tmux: sessions that survive a lost connection](cards/remote/tmux.md)
+  - [Copying files over SSH: scp, sftp and rsync](cards/remote/copy.md)
+- [Git](git)
+  - [How git stores your work](cards/git/model.md)
+  - [Undoing things in git](cards/git/undo.md)
+  - [Merge or rebase?](cards/git/merge-rebase.md)
+  - [Remotes: fetch, pull and push](cards/git/remotes.md)
+  - [Configuring git](cards/git/config.md)

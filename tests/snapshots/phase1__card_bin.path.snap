@@ -10,7 +10,7 @@ TL;DR
   - type NAME says what a name is: alias, function, builtin or file. type -a
     shows every match.
   - Your own scripts usually go in ~/.local/bin. Many distros add it to PATH
-    when it exists; otherwise add it in a startup file (19.2).
+    when it exists; otherwise add it in a startup file (20.2).
 
       echo "$PATH" | tr : '\n'
       type -a python3
@@ -41,4 +41,4 @@ Related
   Commands  type, which
   Paths     /usr/local/bin, ~/.local/bin
   See also  idk 17.2 ELF and "command not found"
-  See also  idk 19.2 Shell startup files
+  See also  idk 20.2 Shell startup files

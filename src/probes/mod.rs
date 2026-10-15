@@ -8,6 +8,7 @@
 mod boot;
 mod cpu;
 mod disk;
+mod git;
 mod gpu;
 mod kernel;
 mod mem;
@@ -16,6 +17,7 @@ mod pkg;
 mod proc;
 mod security;
 mod shell;
+mod ssh;
 mod sys;
 mod systemd;
 mod user;
@@ -32,6 +34,7 @@ pub use cpu::{
 };
 pub use disk::{BlockDevice, DiskTree, Mount, Partition, TmpDir, TmpDirs};
 pub use disk::{DiskHardware, DiskHw, DiskIo, DiskStats, Fstab, FstabEntry, UdevRules};
+pub use git::GitConfig;
 pub use gpu::{Connector, GpuCard, Gpus};
 pub use kernel::{Interrupts, KernelOverview};
 pub use kernel::{Modules, Sysctl, SysctlSetting, SysctlValue};
@@ -43,6 +46,7 @@ pub use pkg::Packages;
 pub use proc::{CgroupInfo, ProcInfo, ProcStates, TopEntry, TopProcesses};
 pub use security::Lsm;
 pub use shell::{BinPath, PathEntry, ShellEnv, Startup};
+pub use ssh::{SshKey, SshServer, SshSetup};
 pub use sys::{FsSpace, IfAddr};
 pub use systemd::{DropIn, FailedUnit, Overrides, SystemdStatus};
 pub use user::Identity;
@@ -102,6 +106,8 @@ pub enum ProbeData {
     DiskHardware(DiskHardware),
     DiskIo(DiskIo),
     Gpus(Gpus),
+    Ssh(SshSetup),
+    Git(GitConfig),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -145,6 +151,8 @@ enum Calls {
         addrs: Vec<IfAddr>,
         /// Command line → output, for `run`.
         commands: BTreeMap<String, String>,
+        /// Path → permission bits, for `mode`: git doesn't keep them.
+        modes: BTreeMap<String, u32>,
     },
 }
 
@@ -184,6 +192,7 @@ impl ProbeCtx {
                 space: BTreeMap::new(),
                 addrs: Vec::new(),
                 commands: BTreeMap::new(),
+                modes: BTreeMap::new(),
             },
         }
     }
@@ -213,6 +222,14 @@ impl ProbeCtx {
     pub fn with_command(mut self, cmd: &[&str], output: &str) -> ProbeCtx {
         if let Calls::Fixed { commands, .. } = &mut self.calls {
             commands.insert(cmd.join(" "), output.to_string());
+        }
+        self
+    }
+
+    /// Sets the permission bits a fixture reports for `path`.
+    pub fn with_mode(mut self, path: &str, mode: u32) -> ProbeCtx {
+        if let Calls::Fixed { modes, .. } = &mut self.calls {
+            modes.insert(path.to_string(), mode);
         }
         self
     }
@@ -306,6 +323,25 @@ impl ProbeCtx {
         std::fs::read_link(path)
             .ok()
             .map(|p| p.to_string_lossy().into_owned())
+    }
+
+    /// Permission bits of a file, such as `0o600`; `None` if it can't be read.
+    pub(crate) fn mode(&self, abs: &str) -> Option<u32> {
+        if let Calls::Fixed { modes, .. } = &self.calls {
+            return modes.get(abs).copied();
+        }
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            std::fs::metadata(self.path(abs))
+                .ok()
+                .map(|m| m.permissions().mode() & 0o7777)
+        }
+        #[cfg(not(unix))]
+        {
+            let _ = abs;
+            None
+        }
     }
 
     pub(crate) fn exists(&self, abs: &str) -> bool {
@@ -552,6 +588,16 @@ pub const REGISTRY: &[ProbeInfo] = &[
         name: gpu::NAME,
         description: "graphics cards, their drivers and screens, compute devices",
         run: gpu::probe,
+    },
+    ProbeInfo {
+        name: ssh::NAME,
+        description: "SSH keys, client config, known hosts, agent, server settings",
+        run: ssh::probe,
+    },
+    ProbeInfo {
+        name: git::NAME,
+        description: "git config files, identity set or not, telling settings, aliases",
+        run: git::probe,
     },
 ];
 

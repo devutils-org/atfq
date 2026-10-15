@@ -1,0 +1,35 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+23.1  How git stores your work
+
+TL;DR
+  - A commit is a snapshot of the whole project, plus its author, message and
+    parent commit(s). It's named by a hash of all that.
+  - A branch is just a name pointing at one commit; committing moves it forward.
+    HEAD says which branch you're on.
+  - Changes go through three places: your files, the staging area (git add),
+    then the repository (git commit).
+
+      git status                    # what changed, what's staged
+      git log --oneline --graph --all
+      git diff --staged             # what the next commit will contain
+
+Pitfalls
+  - "detached HEAD": you checked out a commit, not a branch. New commits there
+    belong to no branch: git switch -c new-name keeps them.
+  - git add stages a file as it is now; editing it again needs another git add
+    before committing.
+  - Untracked files aren't protected by git at all: commit or stash before any
+    command that cleans the folder.
+  - Big binary files bloat every clone forever, even after deletion: keep them
+    out, or use Git LFS.
+
+Deep dive: 2 questions. Read them with idk 23.1 --why
+
+Related
+  Commands  git
+  Paths     .git/
+  See also  idk 23.2 Undoing things in git
+  See also  idk 23.3 Merge or rebase?

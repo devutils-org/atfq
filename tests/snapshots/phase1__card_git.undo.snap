@@ -1,0 +1,34 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+23.2  Undoing things in git
+
+TL;DR
+  - Committed work is almost never lost: the reflog remembers every place a
+    branch has been. Uncommitted edits are the fragile part.
+  - Pick the command by what you want back: a file, a commit, or a commit others
+    already have.
+
+      git restore --staged FILE     # unstage a file, keep the edits
+      git restore FILE              # drop your edits to it: gone for good
+      ⚠ changes or deletes data: check what it targets first
+      git reset --soft HEAD~1       # undo the last commit, keep its changes
+      git revert COMMIT             # undo a pushed commit with a new commit
+      git reflog                    # where HEAD has been: find lost commits
+
+Pitfalls
+  - git reset --hard, git restore, git checkout -- FILE and git clean -f throw
+    away uncommitted work: git has no copy of it.
+  - Don't amend or reset commits others already pulled: use git revert, which
+    undoes by adding a commit.
+  - git stash before a risky command keeps your edits aside; git stash pop
+    brings them back.
+  - git clean -n lists what git clean -f would delete.
+
+Deep dive: 2 questions. Read them with idk 23.2 --why
+
+Related
+  Commands  git
+  See also  idk 23.1 How git stores your work
+  See also  idk 23.4 Remotes: fetch, pull and push

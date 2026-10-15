@@ -1,0 +1,33 @@
+---
+source: tests/phase1.rs
+expression: page
+---
+19. GPU  hub
+
+Which graphics chip you have, which driver runs it, and whether programs can use
+it.
+
+On your machine
+  card0     Intel, driver i915, shows the boot screen
+  Screens   eDP-1 1920x1200 · free: DP-1, HDMI-A-1
+  Compute   /dev/dri/renderD128
+
+Commands
+  lspci -k | grep -A3 -E 'VGA|3D'
+                          GPUs and the kernel driver each uses
+  glxinfo -B              OpenGL renderer: your GPU, or llvmpipe for software
+                          (mesa-utils)
+  vulkaninfo --summary    Vulkan devices and drivers
+  nvidia-smi              NVIDIA: use, memory, processes, driver and CUDA
+                          version
+  echo $XDG_SESSION_TYPE  wayland or x11
+
+Paths
+  /sys/class/drm/  graphics cards and their screen outputs
+  /dev/dri/        card* to drive screens, renderD* to draw and compute
+
+Cards
+  idk 5.1  What a GPU does differently
+  idk 5.2  GPU drivers: the kernel, Mesa and NVIDIA
+  idk 5.3  How a picture reaches the screen: KMS, Wayland and X11
+  idk 5.4  Computing on the GPU, and when your program can't see it

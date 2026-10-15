@@ -1,0 +1,52 @@
+---
+id: remote.tmux
+kind: concept
+title: "tmux: sessions that survive a lost connection"
+aliases: [tmux, screen, terminal multiplexer, detach, reattach, tmux attach, nohup, disown, ssh disconnect, mosh]
+hubs: []
+probes: []
+see_also: [proc.signals, remote.ssh-keys]
+commands: [tmux, nohup]
+paths: [~/.tmux.conf]
+---
+
+## TL;DR
+
+- Closing an SSH connection hangs up its shell, and the hang-up signal
+  stops what you started there.
+- tmux runs your shells in a server that keeps going: detach, log out,
+  come back later, attach, and everything is where you left it.
+- It also splits one terminal into windows and panes.
+
+```
+tmux new -s work          # start a session named work
+                          # Ctrl-b d: detach
+tmux ls                   # sessions still running
+tmux attach -t work
+```
+
+## Pitfalls
+
+- Every tmux shortcut starts with the prefix, Ctrl-b by default: Ctrl-b
+  then `c` for a new window, `%` or `"` to split, `[` to scroll.
+- For a single command, `nohup cmd > out.log 2>&1 &` is enough: it ignores
+  the hang-up signal ({{proc.signals}}).
+- Some systems kill all your processes at logout (`KillUserProcesses=yes`
+  in logind): tmux dies too, unless `loginctl enable-linger`.
+- On a connection that drops all the time, `mosh` reconnects by itself and
+  can carry tmux.
+
+## Deep dive
+
+### Why does logging out kill my processes?
+
+When the connection closes, the terminal goes away and the kernel sends
+SIGHUP to the session's processes; most stop on it. tmux's server isn't
+attached to your SSH terminal: it owns its own pseudo-terminals and only
+displays them in yours, so losing yours changes nothing for it.
+
+### tmux or screen?
+
+GNU screen is older and found everywhere; tmux has a cleaner config and
+scripting (`tmux send-keys`, `tmux split-window`), and is the more common
+choice today. Both detach and reattach the same way.

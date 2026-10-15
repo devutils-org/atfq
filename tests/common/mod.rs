@@ -52,6 +52,9 @@ pub fn laptop() -> ProbeCtx {
         .with_addr("wlp0s20f3", "192.168.1.23/24")
         .with_addr("wlp0s20f3", "fe80::8ec6:81ff:fe2a:107f/64")
         .with_addr("docker0", "172.17.0.1/16")
+        .with_mode("/home/alice/.ssh", 0o700)
+        .with_mode("/home/alice/.ssh/id_ed25519", 0o600)
+        .with_mode("/home/alice/.ssh/id_rsa_old", 0o644)
         .with_command(&["systemctl", "is-system-running"], "degraded\n")
         .with_command(
             &[

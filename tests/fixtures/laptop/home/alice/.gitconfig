@@ -1,0 +1,14 @@
+[user]
+	name = Alice Example
+	email = alice@example.com
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true   # keep history linear
+[alias]
+	st = status -sb
+	lg = log --oneline --graph --decorate
+[credential]
+	helper = store
+[includeIf "gitdir:~/work/"]
+	path = ~/work/.gitconfig

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-20.6  tar
+21.6  tar
 
 TL;DR
   - c creates, x extracts, t lists. f names the archive file and v prints each
@@ -23,8 +23,8 @@ Pitfalls
     never writes to absolute paths unless you ask.
   - Extracting as root restores the owners stored in the archive.
 
-Deep dive: 2 questions. Read them with idk 20.6 --why
+Deep dive: 2 questions. Read them with idk 21.6 --why
 
 Related
   Commands  tar
-  See also  idk 20.7 rsync
+  See also  idk 21.7 rsync

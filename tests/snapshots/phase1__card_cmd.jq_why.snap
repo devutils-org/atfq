@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-20.8  jq
+21.8  jq
 
 TL;DR
   - jq filters JSON: give it a path, get the value back.
@@ -43,4 +43,4 @@ Deep dive
 
 Related
   Commands  jq
-  See also  idk 20.2 grep and regex
+  See also  idk 21.2 grep and regex

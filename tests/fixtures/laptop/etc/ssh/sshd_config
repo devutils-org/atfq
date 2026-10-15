@@ -1,0 +1,11 @@
+# Debian-style: drop-ins first, so they win.
+Include /etc/ssh/sshd_config.d/*.conf
+
+#PermitRootLogin prohibit-password
+PasswordAuthentication yes
+KbdInteractiveAuthentication no
+UsePAM yes
+
+Match User backup
+    PasswordAuthentication yes
+    PermitRootLogin yes

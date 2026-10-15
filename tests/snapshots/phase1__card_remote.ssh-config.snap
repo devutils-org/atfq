@@ -1,0 +1,47 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+22.2  ~/.ssh/config, jump hosts and host keys
+
+TL;DR
+  - ~/.ssh/config gives each server a short name with its address, user, port
+    and key: ssh db instead of a long command line.
+  - ProxyJump reaches a server through another one (a bastion), end to end
+    encrypted, with your keys staying on your machine.
+  - The first connection asks you to trust the server's host key and saves it in
+    known_hosts; later, a different key stops the connection.
+
+      Host db
+          HostName 10.0.4.12
+          User alice
+          ProxyJump bastion.example.com
+
+On your machine
+  Keys      id_ed25519 (ssh-ed25519), id_rsa_old (ssh-rsa) open to others (644):
+            ssh refuses it
+  Config    3 host entries in ~/.ssh/config, with jump hosts
+  Known     4 host keys trusted in known_hosts, names hashed
+  Login     1 key may log in here as you (authorized_keys)
+  Agent     none in this session: keys with a passphrase ask for it every time
+  Server    port 2222 · password login no · root login prohibit-password
+            (default)
+
+Pitfalls
+  - ssh keeps the first value it finds for each option: put specific Host blocks
+    first and Host * last.
+  - "REMOTE HOST IDENTIFICATION HAS CHANGED": the server was reinstalled, or
+    someone is in between. Check with its admin, then remove the old key:
+    ssh-keygen -R host.
+  - Changing the server's port or disabling passwords in sshd_config: keep a
+    working session open while you test a second one.
+  - ssh -G host prints the options that apply after reading every config file:
+    the quickest way to see why a setting is ignored.
+
+Deep dive: 2 questions. Read them with idk 22.2 --why
+
+Related
+  Commands  ssh, ssh-keygen
+  Paths     ~/.ssh/config, ~/.ssh/known_hosts, /etc/ssh/sshd_config
+  See also  idk 22.1 SSH keys and the agent
+  See also  idk 22.3 SSH tunnels and port forwarding

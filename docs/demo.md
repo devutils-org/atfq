@@ -199,7 +199,7 @@ One fact, four surfaces: the CLI, the TUI, the prompt and an agent.
 | a messy PATH | `idk path` | each folder once, in search order; `Repeated` for the doubles and `(doesn't exist)` for dead entries (27 entries on this VM, 13 of them repeats) |
 | the disks | `idk disk` | the btrfs root matched to `vdb1` by its source, free space as `df` counts it; on a laptop, the NVMe model and `SSD` |
 | raw data for scripts | `idk probe mem.summary --json \| jq .data.available` | bytes, the same figure as the live block |
-| search | `idk search delete matches` | `idk 20.1 find`, with the line that matched |
+| search | `idk search delete matches` | `idk 21.1 find`, with the line that matched |
 | boot | `idk boot` | on this VM `device tree (no UEFI)`; on a laptop `UEFI · Secure Boot on` and the bootloader |
 | dangerous commands | `idk find` | under `find . -name '*.tmp' -delete`, the line `⚠ changes or deletes data: check what it targets first`; a pitfall says to run it without `-delete` first and check the list |
 

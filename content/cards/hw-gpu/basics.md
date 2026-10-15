@@ -2,7 +2,7 @@
 id: hw-gpu.basics
 kind: concept
 title: What a GPU does differently
-aliases: [gpu, gpus, graphics card, video card, vram, video memory, integrated graphics, discrete gpu, igpu, dgpu, simt, shader, shaders]
+aliases: [vram, video memory, integrated graphics, discrete gpu, igpu, dgpu, simt, shader, shaders]
 hubs: []
 probes: [gpu.devices]
 see_also: [hw-gpu.compute, hw-cpu.cores]

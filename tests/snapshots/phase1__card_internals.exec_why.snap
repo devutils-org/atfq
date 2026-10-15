@@ -29,7 +29,7 @@ Pitfalls
   - After exec, the PID stays the same: it's the same process running another
     program.
   - Environment variables and open files survive exec: that's how export and
-    redirections reach the program (19.3).
+    redirections reach the program (20.3).
   - A parent that never waits for its children leaves zombies (10.1).
 
 Deep dive
@@ -55,4 +55,4 @@ Related
   Hub       idk processes Processes & scheduling
   See also  idk 17.2 ELF and "command not found"
   See also  idk 10.1 Process states and zombies
-  See also  idk 19.3 Redirections and file descriptors
+  See also  idk 20.3 Redirections and file descriptors

@@ -1,0 +1,58 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+23.5  Configuring git
+
+TL;DR
+  - Three levels: system (/etc/gitconfig), yours (~/.gitconfig) and the
+    repository's (.git/config). The closest one wins.
+  - Set your name and email once; commits carry them forever.
+  - .gitignore lists files git should never track: build output, secrets, editor
+    files.
+
+      git config --global user.name "Alice Example"
+      git config --global user.email alice@example.com
+      git config --list --show-origin     # every setting, and its file
+
+On your machine
+  Files     /etc/gitconfig, ~/.gitconfig
+  Identity  name and email set
+  Settings  init.defaultbranch = main
+            pull.rebase = true
+            core.autocrlf = input
+            credential.helper = store (passwords in plain text in
+            ~/.git-credentials)
+  Aliases   st, lg
+  Includes  1 more file, read under conditions (include, includeIf)
+
+Pitfalls
+  - A work and a personal email: [includeIf "gitdir:~/work/"] loads a second
+    file for repositories under ~/work/.
+  - .gitignore doesn't affect files already committed: git rm --cached FILE
+    stops tracking one, keeping it on disk.
+  - credential.helper = store keeps tokens in plain text; use your desktop
+    keyring (libsecret) or SSH keys instead.
+  - On Linux, core.autocrlf should be input or unset; true is for Windows.
+
+Deep dive
+
+  ▾ Which settings are worth setting?
+
+    init.defaultBranch (the first branch's name), pull.rebase (how pull
+    integrates), push.autoSetupRemote, merge.conflictstyle = zdiff3,
+    rebase.autoStash (stash and restore around a rebase) and fetch.prune (forget
+    branches deleted on the remote). Aliases
+    (git config --global alias.st "status -sb") shorten what you type daily.
+
+  ▾ Where do personal ignores go?
+
+    Files only you produce, like your editor's, belong in ~/.config/git/ignore,
+    read for every repository. The project's .gitignore is for what every
+    contributor generates.
+
+Related
+  Commands  git
+  Paths     ~/.gitconfig, ~/.config/git/config, /etc/gitconfig, .git/config
+  See also  idk 23.4 Remotes: fetch, pull and push
+  See also  idk 20.1 Where environment variables come from
