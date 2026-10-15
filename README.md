@@ -1,10 +1,10 @@
-# atfq — `idk`
+# atfq
 
 A Linux companion for the terminal: short answers first, your machine's real
 state second, the deep "why" only if you want it.
 
 ```
-$ idk free
+$ atfq free
 17.1  free vs available
 
 TL;DR
@@ -19,38 +19,49 @@ On your machine
 ...
 ```
 
-`idk` is read-only: it never runs your commands, never changes the system,
+`atfq` is read-only: it never runs your commands, never changes the system,
 never uses the network. One binary, content embedded, no root needed.
 
 ## Install
 
-With a Rust toolchain (stable):
+A prebuilt binary, for x86-64 or ARM64 Linux (glibc 2.35 or later):
+
+```
+curl -LO https://github.com/moha-bekh/atfq/releases/latest/download/atfq-x86_64-linux.tar.gz
+tar xzf atfq-x86_64-linux.tar.gz
+install -m 755 atfq-x86_64-linux/atfq ~/.local/bin/
+```
+
+Replace `x86_64` with `aarch64` on ARM. Each release lists SHA-256 sums.
+
+From source, with a Rust toolchain:
 
 ```
 cargo install --path .
 ```
 
-This installs the `idk` command (the project and crate are called atfq).
+*atfq* stands for "Ask The F\*cking Question": the project grew out of a
+knowledge base of that name.
 
 ## Use
 
 ```
-idk memory               # a hub: live overview, commands, paths, cards
-idk zombie               # a card, by name or alias
-idk 17.1                  # a card, by chapter number
-idk free --why           # with the deep dive
-idk toc                  # table of contents
-idk search swap          # full-text search
-idk probe                # list the live probes; idk probe disk.tree runs one
-idk free --json          # structured output, for scripts
-idk tui                  # interactive mode (also: idk, alone, in a terminal)
-idk ask memory "why is my laptop swapping?"   # a prompt to paste into an AI
-idk ask disk --redact    # without hostname, username and home paths
-idk mcp                  # MCP server on stdio, for AI agents
+atfq memory              # a hub: live overview, commands, paths, cards
+atfq zombie              # a card, by name or alias
+atfq 17.1                # a card, by chapter number
+atfq free --why          # with the deep dive
+atfq toc                 # table of contents
+atfq search swap         # full-text search
+atfq probe               # list the live probes; atfq probe disk.tree runs one
+atfq free --json         # structured output, for scripts
+atfq tui                 # interactive mode (also: atfq, alone, in a terminal)
+atfq ask memory "why is my laptop swapping?"   # a prompt to paste into an AI
+atfq ask disk --redact   # without hostname, username and home paths
+atfq mcp                 # MCP server on stdio, for AI agents
 ```
 
-Typos are forgiven (`idk memroy` shows Memory), and error messages work as
-queries: `idk "command not found"`, `idk "exec format error"`, `idk degraded`.
+Typos are forgiven (`atfq memroy` shows Memory), and error messages work as
+queries: `atfq "command not found"`, `atfq "exec format error"`, `atfq degraded`.
 
 Exit codes: 0 found, 1 no match, 2 usage error, 3 internal error.
 
@@ -77,22 +88,22 @@ the wheel scrolls the pane under the pointer. In tmux, mouse support needs
 
 ### MCP server
 
-`idk mcp` serves five read-only tools over stdio: `lookup`, `search`, `toc`,
+`atfq mcp` serves five read-only tools over stdio: `lookup`, `search`, `toc`,
 `run_probe` and `list_probes`. Every answer is JSON.
 
 Claude Code:
 
 ```
-claude mcp add idk -- idk mcp
+claude mcp add atfq -- atfq mcp
 ```
 
 Claude Desktop, in `claude_desktop_config.json` (use the full path of the
-binary, as `which idk` prints it):
+binary, as `which atfq` prints it):
 
 ```json
 {
   "mcpServers": {
-    "idk": { "command": "/home/you/.cargo/bin/idk", "args": ["mcp"] }
+    "atfq": { "command": "/home/you/.cargo/bin/atfq", "args": ["mcp"] }
   }
 }
 ```
@@ -101,7 +112,7 @@ binary, as `which idk` prints it):
 
 - 9 hubs (Disk, Permissions, Processes & scheduling, Memory, CPU, Network,
   Boot, GPU, Logs) and 121 cards in 30 chapters, in three parts (how it
-  works, your system, shell and commands): `idk toc` lists them.
+  works, your system, shell and commands): `atfq toc` lists them.
 - 49 live probes. They read `/proc`, `/sys` and `/etc` directly, plus a
   few files in your home folder: names and public keys in `~/.ssh`, and
   git's config, of which only your name's and email's presence are
@@ -135,6 +146,24 @@ INSTA_UPDATE=always cargo test   # accept changed snapshots (review the diff!)
 - Probes read through a `ProbeCtx` whose root is `/` in production and a
   folder under `tests/fixtures/` in tests.
 
+## Contributing
+
+Found a mistake in a card? That matters most in a tool people learn from:
+open an issue with the card number and what's wrong, ideally with a
+source. `CONTRIBUTING.md` explains how to add or fix a card, a probe or
+code.
+
 ## License
 
-Not chosen yet.
+Licensed under either of
+
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE))
+- MIT license ([LICENSE-MIT](LICENSE-MIT))
+
+at your option. This covers the code and the content (the cards in
+`content/`).
+
+Unless you explicitly state otherwise, any contribution intentionally
+submitted for inclusion in the work by you, as defined in the Apache-2.0
+license, shall be dual licensed as above, without any additional terms or
+conditions.

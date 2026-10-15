@@ -29,11 +29,11 @@ Pitfalls
     still carries part of older spikes.
   - To see what keeps the CPUs busy, run top and press 1 for one line per CPU.
 
-Deep dive: 2 questions. Read them with idk 18.1 --why
+Deep dive: 2 questions. Read them with atfq 18.1 --why
 
 Related
   Commands  uptime, nproc, top
   Paths     /proc/loadavg
-  Hub       idk cpu CPU
-  See also  idk 16.1 Process states and zombies
-  See also  idk 16.3 nice and priorities
+  Hub       atfq cpu CPU
+  See also  atfq 16.1 Process states and zombies
+  See also  atfq 16.3 nice and priorities

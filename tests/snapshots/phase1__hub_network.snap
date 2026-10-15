@@ -33,12 +33,12 @@ Paths
   /sys/class/net/   one folder per interface: state, MAC, speed
 
 Cards
-  idk 19.1  Who listens on which port
-  idk 19.2  DNS resolution
-  idk 19.3  Interfaces and routes
-  idk 19.4  nftables vs iptables vs ufw
-  idk 6.1   Network layers: OSI and TCP/IP
-  idk 6.2   What happens when you open a website
-  idk 6.3   IP addresses, subnets and NAT
-  idk 6.4   TCP, UDP and connections
-  idk 6.5   Ethernet, MAC addresses and ARP
+  atfq 19.1  Who listens on which port
+  atfq 19.2  DNS resolution
+  atfq 19.3  Interfaces and routes
+  atfq 19.4  nftables vs iptables vs ufw
+  atfq 6.1   Network layers: OSI and TCP/IP
+  atfq 6.2   What happens when you open a website
+  atfq 6.3   IP addresses, subnets and NAT
+  atfq 6.4   TCP, UDP and connections
+  atfq 6.5   Ethernet, MAC addresses and ARP

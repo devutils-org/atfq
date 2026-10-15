@@ -29,8 +29,8 @@ Pitfalls
   - Many daemons reload their settings on SIGHUP, but not all: prefer
     systemctl reload when the service supports it.
 
-Deep dive: 2 questions. Read them with idk 16.2 --why
+Deep dive: 2 questions. Read them with atfq 16.2 --why
 
 Related
   Commands  kill, pkill, pgrep
-  See also  idk 16.1 Process states and zombies
+  See also  atfq 16.1 Process states and zombies

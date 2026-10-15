@@ -35,8 +35,8 @@ Pitfalls
   - A failing call isn't always a problem: programs often try several paths and
     use the first that exists.
 
-Deep dive: 2 questions. Read them with idk 21.4 --why
+Deep dive: 2 questions. Read them with atfq 21.4 --why
 
 Related
   Commands  strace
-  See also  idk 16.2 Signals
+  See also  atfq 16.2 Signals

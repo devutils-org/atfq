@@ -24,10 +24,10 @@ Pitfalls
   - A file's capabilities are lost when the file is replaced, by a rebuild or an
     update: set them again.
 
-Deep dive: 2 questions. Read them with idk 15.4 --why
+Deep dive: 2 questions. Read them with atfq 15.4 --why
 
 Related
   Commands  getfacl, setfacl, getcap, setcap
-  Hub       idk permissions Permissions
-  See also  idk 15.1 rwx, octal and umask
-  See also  idk 15.2 setuid, setgid and sticky bit
+  Hub       atfq permissions Permissions
+  See also  atfq 15.1 rwx, octal and umask
+  See also  atfq 15.2 setuid, setgid and sticky bit

@@ -36,11 +36,11 @@ Pitfalls
   - Run the application as a non-root user inside the image (USER in the
     Dockerfile): defence in depth.
 
-Deep dive: 2 questions. Read them with idk 7.5 --why
+Deep dive: 2 questions. Read them with atfq 7.5 --why
 
 Related
   Commands  id, podman, docker
   Paths     /etc/subuid, /etc/subgid, /run/docker.sock
-  See also  idk 7.2 Namespaces: a private view of the system
-  See also  idk 15.4 ACLs and capabilities
-  See also  idk 15.3 sudo and groups
+  See also  atfq 7.2 Namespaces: a private view of the system
+  See also  atfq 15.4 ACLs and capabilities
+  See also  atfq 15.3 sudo and groups

@@ -56,6 +56,6 @@ Deep dive
 Related
   Commands  grep, journalctl
   Paths     /sys/devices/system/cpu/vulnerabilities/
-  Hub       idk cpu CPU
-  See also  idk 2.1 What a CPU does: instructions and architectures
-  See also  idk 20.2 The kernel command line
+  Hub       atfq cpu CPU
+  See also  atfq 2.1 What a CPU does: instructions and architectures
+  See also  atfq 20.2 The kernel command line

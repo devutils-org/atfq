@@ -48,5 +48,5 @@ Deep dive
 Related
   Commands  watch
   Paths     /proc/interrupts, /proc/softirqs
-  See also  idk 1.2 How the kernel shares the CPUs
-  See also  idk 21.3 dmesg and the kernel log
+  See also  atfq 1.2 How the kernel shares the CPUs
+  See also  atfq 21.3 dmesg and the kernel log

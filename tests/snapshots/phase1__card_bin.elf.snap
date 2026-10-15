@@ -33,10 +33,10 @@ Pitfalls
   - To find the package that provides a command: apt-file search bin/NAME
     (Debian, Ubuntu), dnf provides '*/bin/NAME' (Fedora), pacman -F NAME (Arch).
 
-Deep dive: 2 questions. Read them with idk 23.2 --why
+Deep dive: 2 questions. Read them with atfq 23.2 --why
 
 Related
   Commands  file, readelf
-  See also  idk 23.3 PATH and command resolution
-  See also  idk 23.1 Dynamic linking and ldd
-  See also  idk 15.1 rwx, octal and umask
+  See also  atfq 23.3 PATH and command resolution
+  See also  atfq 23.1 Dynamic linking and ldd
+  See also  atfq 15.1 rwx, octal and umask

@@ -61,6 +61,6 @@ Deep dive
 Related
   Commands  uname
   Paths     /proc/version
-  See also  idk 1.2 How the kernel shares the CPUs
-  See also  idk 1.3 How virtual memory works
-  See also  idk 21.4 syscalls and strace
+  See also  atfq 1.2 How the kernel shares the CPUs
+  See also  atfq 1.3 How virtual memory works
+  See also  atfq 21.4 syscalls and strace

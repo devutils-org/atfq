@@ -23,9 +23,9 @@ Pitfalls
     shell, once for the remote one. Recent OpenSSH no longer needs it.
   - sshfs over a slow link makes every ls slow: copy what you work on.
 
-Deep dive: 2 questions. Read them with idk 29.5 --why
+Deep dive: 2 questions. Read them with atfq 29.5 --why
 
 Related
   Commands  scp, sftp, rsync, sshfs
-  See also  idk 28.7 rsync
-  See also  idk 29.2 ~/.ssh/config, jump hosts and host keys
+  See also  atfq 28.7 rsync
+  See also  atfq 29.2 ~/.ssh/config, jump hosts and host keys

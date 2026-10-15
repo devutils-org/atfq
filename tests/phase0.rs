@@ -66,7 +66,7 @@ fn hub_points_to_card_sharing_its_name() {
     // "permissions" is the hub's id and an alias of card 15.1: the hub wins.
     let out = show(&lib(), "permissions", PLAIN);
     assert!(
-        out.starts_with("Looking for \"rwx, octal and umask\"? Run idk 15.1\n"),
+        out.starts_with("Looking for \"rwx, octal and umask\"? Run atfq 15.1\n"),
         "{out}"
     );
     assert!(out.contains("15. Permissions  hub"));
@@ -78,7 +78,7 @@ fn deep_dive_only_with_why() {
     let question = "Why is unused RAM wasted RAM?";
     let short = show(&lib, "free", PLAIN);
     assert!(!short.contains(question));
-    assert!(short.contains("Deep dive: 3 questions. Read them with idk 17.1 --why"));
+    assert!(short.contains("Deep dive: 3 questions. Read them with atfq 17.1 --why"));
     let long = show(&lib, "free", WHY);
     assert!(long.contains(question));
     assert!(long.contains("What is swappiness and when should I change it?"));
@@ -176,31 +176,31 @@ Part II · Your system
       13.4  Links, inodes and \"disk full\"
       13.5  fstab and mount options
       13.6  /dev and udev
-  14. Disk  hub: idk disk
-  15. Permissions  hub: idk permissions
+  14. Disk  hub: atfq disk
+  15. Permissions  hub: atfq permissions
       15.1  rwx, octal and umask
       15.2  setuid, setgid and sticky bit
       15.3  sudo and groups
       15.4  ACLs and capabilities
       15.5  SELinux and AppArmor
-  16. Processes & scheduling  hub: idk processes
+  16. Processes & scheduling  hub: atfq processes
       16.1  Process states and zombies
       16.2  Signals
       16.3  nice and priorities
       16.4  cgroups
-  17. Memory  hub: idk memory
+  17. Memory  hub: atfq memory
       17.1  free vs available
       17.2  The OOM killer
       17.3  Swap and swappiness
       17.4  The page cache
-  18. CPU  hub: idk cpu
+  18. CPU  hub: atfq cpu
       18.1  Load average
-  19. Network  hub: idk network
+  19. Network  hub: atfq network
       19.1  Who listens on which port
       19.2  DNS resolution
       19.3  Interfaces and routes
       19.4  nftables vs iptables vs ufw
-  20. Boot  hub: idk boot
+  20. Boot  hub: atfq boot
       20.1  From firmware to init
       20.2  The kernel command line
       20.3  GRUB vs systemd-boot vs UKI
@@ -221,8 +221,8 @@ Part II · Your system
   24. Packages
       24.1  Which package owns a file
       24.2  Native packages vs Snap and Flatpak
-  25. GPU  hub: idk gpu
-  26. Logs  hub: idk logs
+  25. GPU  hub: atfq gpu
+  26. Logs  hub: atfq logs
       26.1  Reading the journal with journalctl
       26.2  Where logs go: journald, syslog and /var/log
       26.3  Log rotation and logs that fill the disk
@@ -295,11 +295,11 @@ fn dangerous_commands_are_marked() {
     assert!(out.contains("⚠ changes or deletes data"), "{out}");
 }
 
-fn idk(args: &[&str]) -> (i32, String, String) {
-    let out = Command::new(env!("CARGO_BIN_EXE_idk"))
+fn atfq(args: &[&str]) -> (i32, String, String) {
+    let out = Command::new(env!("CARGO_BIN_EXE_atfq"))
         .args(args)
         .output()
-        .expect("run idk");
+        .expect("run atfq");
     (
         out.status.code().unwrap_or(-1),
         String::from_utf8_lossy(&out.stdout).into_owned(),
@@ -309,28 +309,28 @@ fn idk(args: &[&str]) -> (i32, String, String) {
 
 #[test]
 fn cli_exit_codes() {
-    let (code, out, _) = idk(&["free"]);
+    let (code, out, _) = atfq(&["free"]);
     assert_eq!(code, 0);
     assert!(out.starts_with("17.1  free vs available"));
     // Not a TTY: no colors.
     assert!(!out.contains('\x1b'));
 
-    let (code, out, err) = idk(&["nothing", "here"]);
+    let (code, out, err) = atfq(&["nothing", "here"]);
     assert_eq!(code, 1);
     assert!(out.is_empty());
     assert!(err.contains("Nothing matches \"nothing here\""));
 
-    assert_eq!(idk(&["--bogus"]).0, 2);
-    assert_eq!(idk(&[]).0, 2);
-    assert_eq!(idk(&["toc", "extra"]).0, 2);
+    assert_eq!(atfq(&["--bogus"]).0, 2);
+    assert_eq!(atfq(&[]).0, 2);
+    assert_eq!(atfq(&["toc", "extra"]).0, 2);
 }
 
 #[test]
 fn cli_why_and_toc() {
-    let (code, out, _) = idk(&["free", "--why"]);
+    let (code, out, _) = atfq(&["free", "--why"]);
     assert_eq!(code, 0);
     assert!(out.contains("Why is unused RAM wasted RAM?"));
-    let (code, out, _) = idk(&["toc"]);
+    let (code, out, _) = atfq(&["toc"]);
     assert_eq!(code, 0);
     assert!(out.contains("17.1  free vs available"));
 }

@@ -35,11 +35,11 @@ Pitfalls
   - A slow machine with a low load may be throttling: check temperatures and the
     fan before blaming software.
 
-Deep dive: 2 questions. Read them with idk 2.4 --why
+Deep dive: 2 questions. Read them with atfq 2.4 --why
 
 Related
   Commands  cpupower, sensors, grep
   Paths     /sys/devices/system/cpu/cpu0/cpufreq/, /sys/class/thermal/
-  Hub       idk cpu CPU
-  See also  idk 2.2 Cores, threads and sockets
-  See also  idk 18.1 Load average
+  Hub       atfq cpu CPU
+  See also  atfq 2.2 Cores, threads and sockets
+  See also  atfq 18.1 Load average

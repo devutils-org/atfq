@@ -175,7 +175,7 @@ pub(crate) fn top(ctx: &ProbeCtx) -> ProbeResult {
 pub struct CgroupInfo {
     /// 2 for the unified hierarchy, 1 for the legacy one.
     pub version: u8,
-    /// Where this process (idk, so your session) sits.
+    /// Where this process (atfq, so your session) sits.
     pub path: String,
     /// Controllers available at the root (v2).
     pub controllers: Vec<String>,

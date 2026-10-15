@@ -53,5 +53,5 @@ Deep dive
 Related
   Commands  dmesg, journalctl
   Paths     /dev/kmsg
-  See also  idk 21.2 Kernel modules
-  See also  idk 17.2 The OOM killer
+  See also  atfq 21.2 Kernel modules
+  See also  atfq 17.2 The OOM killer

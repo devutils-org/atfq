@@ -32,12 +32,12 @@ Pitfalls
   - Shared libraries count in the RSS of every process using them, but sit in
     RAM once: adding up RSS overstates. PSS in smaps splits them fairly.
 
-Deep dive: 2 questions. Read them with idk 1.3 --why
+Deep dive: 2 questions. Read them with atfq 1.3 --why
 
 Related
   Commands  ps, top
   Paths     /proc/PID/maps, /proc/PID/smaps, /proc/vmstat
-  Hub       idk memory Memory
-  See also  idk 17.4 The page cache
-  See also  idk 17.3 Swap and swappiness
-  See also  idk 1.5 How a program starts: fork and exec
+  Hub       atfq memory Memory
+  See also  atfq 17.4 The page cache
+  See also  atfq 17.3 Swap and swappiness
+  See also  atfq 1.5 How a program starts: fork and exec

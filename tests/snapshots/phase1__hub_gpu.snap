@@ -27,7 +27,7 @@ Paths
   /dev/dri/        card* to drive screens, renderD* to draw and compute
 
 Cards
-  idk 5.1  What a GPU does differently
-  idk 5.2  GPU drivers: the kernel, Mesa and NVIDIA
-  idk 5.3  How a picture reaches the screen: KMS, Wayland and X11
-  idk 5.4  Computing on the GPU, and when your program can't see it
+  atfq 5.1  What a GPU does differently
+  atfq 5.2  GPU drivers: the kernel, Mesa and NVIDIA
+  atfq 5.3  How a picture reaches the screen: KMS, Wayland and X11
+  atfq 5.4  Computing on the GPU, and when your program can't see it

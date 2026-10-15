@@ -43,6 +43,6 @@ Deep dive
 
 Related
   Commands  getfacl, setfacl, getcap, setcap
-  Hub       idk permissions Permissions
-  See also  idk 15.1 rwx, octal and umask
-  See also  idk 15.2 setuid, setgid and sticky bit
+  Hub       atfq permissions Permissions
+  See also  atfq 15.1 rwx, octal and umask
+  See also  atfq 15.2 setuid, setgid and sticky bit

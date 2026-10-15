@@ -29,10 +29,10 @@ Pitfalls
   - Tearing is an image changed in the middle of a refresh. Compositors avoid it
     by flipping only between refreshes, at a small latency cost.
 
-Deep dive: 2 questions. Read them with idk 5.3 --why
+Deep dive: 2 questions. Read them with atfq 5.3 --why
 
 Related
   Commands  echo, cat
   Paths     /sys/class/drm/
-  See also  idk 5.2 GPU drivers: the kernel, Mesa and NVIDIA
-  See also  idk 20.2 The kernel command line
+  See also  atfq 5.2 GPU drivers: the kernel, Mesa and NVIDIA
+  See also  atfq 20.2 The kernel command line

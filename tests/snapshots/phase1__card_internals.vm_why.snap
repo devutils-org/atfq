@@ -52,7 +52,7 @@ Deep dive
 Related
   Commands  ps, top
   Paths     /proc/PID/maps, /proc/PID/smaps, /proc/vmstat
-  Hub       idk memory Memory
-  See also  idk 17.4 The page cache
-  See also  idk 17.3 Swap and swappiness
-  See also  idk 1.5 How a program starts: fork and exec
+  Hub       atfq memory Memory
+  See also  atfq 17.4 The page cache
+  See also  atfq 17.3 Swap and swappiness
+  See also  atfq 1.5 How a program starts: fork and exec

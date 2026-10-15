@@ -53,6 +53,6 @@ Deep dive
 Related
   Commands  journalctl, tail, less
   Paths     /var/log/, /etc/systemd/journald.conf, /etc/rsyslog.conf
-  Hub       idk logs Logs
-  See also  idk 26.1 Reading the journal with journalctl
-  See also  idk 26.3 Log rotation and logs that fill the disk
+  Hub       atfq logs Logs
+  See also  atfq 26.1 Reading the journal with journalctl
+  See also  atfq 26.3 Log rotation and logs that fill the disk

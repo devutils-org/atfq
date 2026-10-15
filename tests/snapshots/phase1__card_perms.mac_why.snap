@@ -49,6 +49,6 @@ Deep dive
 Related
   Commands  getenforce, setenforce, aa-status, restorecon
   Paths     /etc/selinux/config, /etc/apparmor.d/
-  Hub       idk permissions Permissions
-  See also  idk 15.1 rwx, octal and umask
-  See also  idk 15.4 ACLs and capabilities
+  Hub       atfq permissions Permissions
+  See also  atfq 15.1 rwx, octal and umask
+  See also  atfq 15.4 ACLs and capabilities

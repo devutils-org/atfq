@@ -54,5 +54,5 @@ Deep dive
 Related
   Commands  git
   Paths     ~/.gitconfig, ~/.config/git/config, /etc/gitconfig, .git/config
-  See also  idk 30.4 Remotes: fetch, pull and push
-  See also  idk 27.1 Where environment variables come from
+  See also  atfq 30.4 Remotes: fetch, pull and push
+  See also  atfq 27.1 Where environment variables come from

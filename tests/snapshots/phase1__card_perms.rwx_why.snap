@@ -54,5 +54,5 @@ Deep dive
 
 Related
   Commands  chmod, chown, umask
-  See also  idk 15.2 setuid, setgid and sticky bit
-  See also  idk 15.3 sudo and groups
+  See also  atfq 15.2 setuid, setgid and sticky bit
+  See also  atfq 15.3 sudo and groups

@@ -53,6 +53,6 @@ Deep dive
 
 Related
   Commands  ip
-  Hub       idk network Network
-  See also  idk 19.3 Interfaces and routes
-  See also  idk 6.5 Ethernet, MAC addresses and ARP
+  Hub       atfq network Network
+  See also  atfq 19.3 Interfaces and routes
+  See also  atfq 6.5 Ethernet, MAC addresses and ARP

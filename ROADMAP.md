@@ -1,10 +1,10 @@
-# ROADMAP — atfq (`idk`)
+# ROADMAP — atfq
 
 > A Linux companion for the terminal: short answers first, your machine's real state second, the deep "why" only if you want it.
 
 This file is the single source of truth for building the proof of concept. Read it fully before writing code. When a decision here conflicts with your instinct, follow this file and note the disagreement in `DECISIONS.md`.
 
-**Naming:** the project and the crate are called **atfq** (*Ask The F\*cking Question*, the heritage of the original ATFQ knowledge-base project). The command users type is **`idk`** ("I don't know"), the same way the `ripgrep` package installs the `rg` command. In `Cargo.toml`: package `name = "atfq"`, with a `[[bin]]` section `name = "idk"`. Keep the binary name in one `const BIN_NAME` for help texts. Before release, check that no common distro package already ships an `idk` binary.
+**Naming:** the project, the crate and the command are all called **atfq** (*Ask The F\*cking Question*, the heritage of the original ATFQ knowledge-base project). The command was first `idk` ("I don't know"); it was renamed before the first release because another tool already installs an `idk` binary (see `DECISIONS.md`). Keep the binary name in one `const BIN_NAME` for help texts.
 
 ---
 
@@ -15,12 +15,12 @@ Two problems, one tool:
 1. **Commands are hard to remember.** `find`, `awk`, `xargs`, regex: the syntax is dense and man pages are written for people who already know the answer.
 2. **The system is opaque.** Which path is for what, which scheduler is running, why RAM looks "full", what a zombie process is, how boot works.
 
-`idk` answers both with **cards** organized like a book (inspired by *The Rust Programming Language*: a flat, numbered table of contents, no deep trees). Every card leads with a TL;DR, then shows what is true **on this machine** (live probes), then pitfalls, then an optional deep dive.
+`atfq` answers both with **cards** organized like a book (inspired by *The Rust Programming Language*: a flat, numbered table of contents, no deep trees). Every card leads with a TL;DR, then shows what is true **on this machine** (live probes), then pitfalls, then an optional deep dive.
 
 Entry points:
 
-- **Hubs** for a device or domain (`idk disk`, `idk memory`, `idk cpu`): live overview + links to commands, paths and cards.
-- **Concept cards** for a precise question (`idk free`, `idk setuid`, `idk find`).
+- **Hubs** for a device or domain (`atfq disk`, `atfq memory`, `atfq cpu`): live overview + links to commands, paths and cards.
+- **Concept cards** for a precise question (`atfq free`, `atfq setuid`, `atfq find`).
 
 The same core is exposed three ways: CLI, TUI, and an MCP server so AI agents can use it as a read-only knowledge + introspection tool.
 
@@ -29,7 +29,7 @@ The same core is exposed three ways: CLI, TUI, and an MCP server so AI agents ca
 1. **Answer first.** The first screen solves the problem. Explanations come after, and are hidden by default.
 2. **Plain English, not man pages.** See the writing guide (section 9). If a sentence would fit in a man page, rewrite it.
 3. **Live over static.** When the machine can answer, show the machine's answer.
-4. **Read-only, always.** `idk` never executes the user's commands and never modifies the system. It only shows commands and reads state.
+4. **Read-only, always.** `atfq` never executes the user's commands and never modifies the system. It only shows commands and reads state.
 5. **Works offline, needs nothing.** One binary, content embedded, no network, no root, no config required.
 6. **Degrade gracefully.** A missing file, tool or permission produces a short note ("needs root", "not available on this system"), never a crash or a stack trace.
 7. **One core, many surfaces.** CLI, TUI and MCP consume the same structured data. No logic lives in a surface.
@@ -225,30 +225,30 @@ Rules:
 
 ## 7. Query resolution
 
-`idk <query>` resolves in this order:
+`atfq <query>` resolves in this order:
 
 1. Exact hub id or hub alias → hub.
 2. Exact card id or card alias → card.
 3. Chapter number (`5.1`) → card.
 4. Fuzzy match on titles and aliases → best match shown, up to 3 "Did you mean" suggestions.
-5. Nothing → short message + suggestion to try `idk search` or `idk ask`.
+5. Nothing → short message + suggestion to try `atfq search` or `atfq ask`.
 
-If a word matches both a hub and a card, show the hub and point to the card at the top ("Looking for *free vs available*? → `idk 5.1`").
+If a word matches both a hub and a card, show the hub and point to the card at the top ("Looking for *free vs available*? → `atfq 5.1`").
 
 ## 8. Surfaces
 
 ### 8.1 CLI
 
 ```
-idk <query>              TL;DR + live block + pitfalls (deep dive hidden)
-idk <query> --why        everything, deep dive expanded
-idk <query> --json       structured output (card + probe results)
-idk toc                  table of contents
-idk search <words>       full-text search, ranked list
-idk probe <name>         run one probe, print its result
-idk ask <query> [text]   print an AI-ready prompt (phase 3)
-idk tui                  interactive mode (phase 2); also when run with no args in a TTY
-idk mcp                  run the MCP server on stdio (phase 4)
+atfq <query>              TL;DR + live block + pitfalls (deep dive hidden)
+atfq <query> --why        everything, deep dive expanded
+atfq <query> --json       structured output (card + probe results)
+atfq toc                  table of contents
+atfq search <words>       full-text search, ranked list
+atfq probe <name>         run one probe, print its result
+atfq ask <query> [text]   print an AI-ready prompt (phase 3)
+atfq tui                  interactive mode (phase 2); also when run with no args in a TTY
+atfq mcp                  run the MCP server on stdio (phase 4)
 ```
 
 Output rules:
@@ -292,7 +292,7 @@ Layout inspired by the TRPL sidebar:
 
 ### 8.3 Ask AI (prompt builder)
 
-`idk ask memory "why is my laptop swapping?"` prints a prompt to stdout containing:
+`atfq ask memory "why is my laptop swapping?"` prints a prompt to stdout containing:
 
 1. The user's question.
 2. System context: distro, kernel version, architecture.
@@ -345,7 +345,7 @@ Each phase ends with every acceptance criterion passing. Do not start a phase be
 
 Deliverables:
 
-- Crate setup, CLI skeleton with `idk <query>`, `--why`, `idk toc`.
+- Crate setup, CLI skeleton with `atfq <query>`, `--why`, `atfq toc`.
 - Content parsing (frontmatter + sections), SUMMARY.md parsing, chapter numbering, embedding in the binary.
 - Validation test (section 6.3).
 - Resolution steps 1–3 (exact matches and chapter numbers).
@@ -357,9 +357,9 @@ Deliverables:
 Acceptance:
 
 - `cargo test` passes, including validation.
-- `idk memory`, `idk disk`, `idk free`, `idk zombie`, `idk find`, `idk 5.1` each show the right content.
-- `idk free --why` shows deep dive questions; `idk free` does not.
-- `idk toc` matches SUMMARY.md with correct numbers.
+- `atfq memory`, `atfq disk`, `atfq free`, `atfq zombie`, `atfq find`, `atfq 5.1` each show the right content.
+- `atfq free --why` shows deep dive questions; `atfq free` does not.
+- `atfq toc` matches SUMMARY.md with correct numbers.
 - `cargo clippy -- -D warnings` is clean.
 
 ### Phase 1 — Live probes and search
@@ -369,15 +369,15 @@ Deliverables:
 - Probe framework: `ProbeCtx` with root path, `ProbeResult` with status, registry.
 - Probes: `mem.summary` (from `/proc/meminfo` + swappiness), `disk.tree` (from `/sys/block`, `/proc/self/mountinfo`, `statvfs`), `proc.states` (count of processes per state from `/proc/*/stat`).
 - Live block in the renderer for cards and hubs.
-- `idk probe <name>`, `--json`.
-- Fuzzy matching (resolution step 4) and `idk search`.
+- `atfq probe <name>`, `--json`.
+- Fuzzy matching (resolution step 4) and `atfq search`.
 
 Acceptance:
 
 - Each probe has unit tests against fixture trees in `tests/fixtures/`, including a missing-file case.
 - Snapshot tests (`insta`) for rendered output of each hub and card, using fixtures.
 - Running on a real Linux machine shows plausible values; no panic when a file is unreadable.
-- `idk memroy` suggests `memory`.
+- `atfq memroy` suggests `memory`.
 
 ### Phase 2 — TUI
 
@@ -393,7 +393,7 @@ Acceptance:
 
 ### Phase 3 — Ask AI prompt
 
-Deliverables: `idk ask` per section 8.3, `--redact`, `?` key in the TUI that shows the prompt.
+Deliverables: `atfq ask` per section 8.3, `--redact`, `?` key in the TUI that shows the prompt.
 
 Acceptance:
 
@@ -402,7 +402,7 @@ Acceptance:
 
 ### Phase 4 — MCP server
 
-Deliverables: `idk mcp` with the tools from section 8.4.
+Deliverables: `atfq mcp` with the tools from section 8.4.
 
 Acceptance:
 

@@ -35,11 +35,11 @@ Pitfalls
   - In dual boot, a Windows update may change the boot order: fix it in the
     firmware menu or with sudo efibootmgr -o.
 
-Deep dive: 2 questions. Read them with idk 20.3 --why
+Deep dive: 2 questions. Read them with atfq 20.3 --why
 
 Related
   Commands  bootctl, efibootmgr
   Paths     /boot/grub, /boot/efi/EFI
-  Hub       idk boot Boot
-  See also  idk 20.1 From firmware to init
-  See also  idk 20.2 The kernel command line
+  Hub       atfq boot Boot
+  See also  atfq 20.1 From firmware to init
+  See also  atfq 20.2 The kernel command line

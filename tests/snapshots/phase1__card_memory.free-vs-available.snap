@@ -26,11 +26,11 @@ Pitfalls
   - A little swap in use is not a problem by itself. What hurts is constant
     swapping: watch the si and so columns of vmstat 1.
 
-Deep dive: 3 questions. Read them with idk 17.1 --why
+Deep dive: 3 questions. Read them with atfq 17.1 --why
 
 Related
   Commands  free, vmstat
   Paths     /proc/meminfo
-  Hub       idk memory Memory
-  See also  idk 17.3 Swap and swappiness
-  See also  idk 17.2 The OOM killer
+  Hub       atfq memory Memory
+  See also  atfq 17.3 Swap and swappiness
+  See also  atfq 17.2 The OOM killer

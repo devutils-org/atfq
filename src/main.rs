@@ -60,7 +60,7 @@ enum Command {
     },
     /// Serve the knowledge and probes to AI agents over MCP (stdio, read-only)
     Mcp,
-    /// Browse interactively (also what `idk` alone does in a terminal)
+    /// Browse interactively (also what `atfq` alone does in a terminal)
     Tui {
         /// A page to open first
         query: Vec<String>,
@@ -72,7 +72,7 @@ const NO_MATCH: u8 = 1;
 const USAGE: u8 = 2;
 const INTERNAL: u8 = 3;
 
-/// Results shown by `idk search`.
+/// Results shown by `atfq search`.
 const SEARCH_LIMIT: usize = 10;
 
 /// What to print, and where.
@@ -181,7 +181,7 @@ fn main() -> ExitCode {
         Out::Stdout(s) => io::stdout().lock().write_all(s.as_bytes()),
         Out::Stderr(s) => io::stderr().lock().write_all(s.as_bytes()),
     };
-    // A closed pipe (`idk find | head`) is not an error worth reporting.
+    // A closed pipe (`atfq find | head`) is not an error worth reporting.
     match written {
         Err(e) if e.kind() != io::ErrorKind::BrokenPipe => {
             eprintln!("{BIN_NAME}: {e}");

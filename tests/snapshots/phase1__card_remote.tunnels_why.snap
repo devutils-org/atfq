@@ -52,5 +52,5 @@ Deep dive
 
 Related
   Commands  ssh, ss
-  See also  idk 29.2 ~/.ssh/config, jump hosts and host keys
-  See also  idk 19.1 Who listens on which port
+  See also  atfq 29.2 ~/.ssh/config, jump hosts and host keys
+  See also  atfq 19.1 Who listens on which port

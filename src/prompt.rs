@@ -1,4 +1,4 @@
-//! `idk ask`: a ready-to-paste prompt for an AI assistant (ROADMAP.md 8.3).
+//! `atfq ask`: a ready-to-paste prompt for an AI assistant (ROADMAP.md 8.3).
 //! Nothing is sent anywhere: the prompt is printed, the user decides.
 
 use serde::Serialize;
@@ -89,7 +89,7 @@ pub fn build(l: &Lookup<'_>, question: Option<&str>, sys: &SystemInfo, redact: b
             Target::Hub(h) => format!("hub \"{}\"", h.title),
             Target::Card(c) => format!("card {} \"{}\"", c.number, c.title),
         };
-        out.push_str(&format!("## Background (from the idk {source})\n\n"));
+        out.push_str(&format!("## Background (from the atfq {source})\n\n"));
         out.push_str(&background(target));
         out.push_str("\n\n");
     }

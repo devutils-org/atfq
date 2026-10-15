@@ -22,9 +22,9 @@ Pitfalls
   - In top, NI is the niceness and PR the kernel's priority: 20 + niceness for
     normal processes.
 
-Deep dive: 2 questions. Read them with idk 16.3 --why
+Deep dive: 2 questions. Read them with atfq 16.3 --why
 
 Related
   Commands  nice, renice, ionice, chrt
-  Hub       idk cpu CPU
-  See also  idk 18.1 Load average
+  Hub       atfq cpu CPU
+  See also  atfq 18.1 Load average

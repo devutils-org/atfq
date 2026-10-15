@@ -51,6 +51,6 @@ Deep dive
 Related
   Commands  lsns, unshare, nsenter
   Paths     /proc/self/ns/
-  See also  idk 7.1 What a container really is
-  See also  idk 7.5 Root in a container: users, capabilities and the docker
+  See also  atfq 7.1 What a container really is
+  See also  atfq 7.5 Root in a container: users, capabilities and the docker
             group

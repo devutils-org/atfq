@@ -49,6 +49,6 @@ Deep dive
 Related
   Commands  free, sync
   Paths     /proc/meminfo, /proc/sys/vm/drop_caches
-  Hub       idk memory Memory
-  See also  idk 17.1 free vs available
-  See also  idk 17.3 Swap and swappiness
+  Hub       atfq memory Memory
+  See also  atfq 17.1 free vs available
+  See also  atfq 17.3 Swap and swappiness

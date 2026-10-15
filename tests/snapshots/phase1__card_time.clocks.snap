@@ -31,10 +31,10 @@ Pitfalls
   - Comparing timestamps from two machines assumes both clocks are right: their
     difference is only as good as NTP (10.2).
 
-Deep dive: 2 questions. Read them with idk 10.1 --why
+Deep dive: 2 questions. Read them with atfq 10.1 --why
 
 Related
   Commands  date, timedatectl
   Paths     /sys/devices/system/clocksource/
-  See also  idk 10.2 Keeping the clock right: NTP
-  See also  idk 1.4 Interrupts: how devices get attention
+  See also  atfq 10.2 Keeping the clock right: NTP
+  See also  atfq 1.4 Interrupts: how devices get attention

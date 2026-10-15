@@ -51,6 +51,6 @@ Deep dive
 Related
   Commands  systemd-cgls, systemd-cgtop, systemctl
   Paths     /sys/fs/cgroup, /proc/self/cgroup
-  Hub       idk processes Processes & scheduling
-  See also  idk 17.2 The OOM killer
-  See also  idk 22.1 Units and timers
+  Hub       atfq processes Processes & scheduling
+  See also  atfq 17.2 The OOM killer
+  See also  atfq 22.1 Units and timers

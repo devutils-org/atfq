@@ -3,9 +3,14 @@ name = "atfq"
 version = "0.1.0"
 edition = "2021"
 description = "A Linux companion for the terminal: short answers first, your machine's real state second."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/moha-bekh/atfq"
+readme = "README.md"
+keywords = ["linux", "cli", "documentation", "sysadmin", "tui"]
+categories = ["command-line-utilities"]
 
 [[bin]]
-name = "idk"
+name = "atfq"
 path = "src/main.rs"
 
 [dependencies]

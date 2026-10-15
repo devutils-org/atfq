@@ -29,10 +29,10 @@ Pitfalls
     one has to be requested (prime-run, or the desktop's "run with dedicated
     GPU" option).
 
-Deep dive: 2 questions. Read them with idk 5.1 --why
+Deep dive: 2 questions. Read them with atfq 5.1 --why
 
 Related
   Commands  lspci
   Paths     /sys/class/drm/
-  See also  idk 5.4 Computing on the GPU, and when your program can't see it
-  See also  idk 2.2 Cores, threads and sockets
+  See also  atfq 5.4 Computing on the GPU, and when your program can't see it
+  See also  atfq 2.2 Cores, threads and sockets

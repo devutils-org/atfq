@@ -1,4 +1,4 @@
-//! Phase 3 acceptance: the AI prompt built by `idk ask`.
+//! Phase 3 acceptance: the AI prompt built by `atfq ask`.
 
 mod common;
 
@@ -74,7 +74,7 @@ fn redact_hides_host_user_and_home() {
 
 #[test]
 fn cli_ask() {
-    let out = Command::new(env!("CARGO_BIN_EXE_idk"))
+    let out = Command::new(env!("CARGO_BIN_EXE_atfq"))
         .args(["ask", "memory", "why", "is", "my", "laptop", "swapping?"])
         .output()
         .unwrap();
@@ -92,7 +92,7 @@ fn cli_ask() {
 #[test]
 fn cli_ask_redact() {
     let user = std::env::var("USER").unwrap_or_default();
-    let out = Command::new(env!("CARGO_BIN_EXE_idk"))
+    let out = Command::new(env!("CARGO_BIN_EXE_atfq"))
         .args([
             "ask",
             "disk",

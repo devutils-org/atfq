@@ -50,5 +50,5 @@ Deep dive
 Related
   Commands  echo, cat
   Paths     /sys/class/drm/
-  See also  idk 5.2 GPU drivers: the kernel, Mesa and NVIDIA
-  See also  idk 20.2 The kernel command line
+  See also  atfq 5.2 GPU drivers: the kernel, Mesa and NVIDIA
+  See also  atfq 20.2 The kernel command line

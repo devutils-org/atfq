@@ -54,5 +54,5 @@ Deep dive
 Related
   Commands  ss
   Paths     /proc/net/tcp
-  Hub       idk network Network
-  See also  idk 15.2 setuid, setgid and sticky bit
+  Hub       atfq network Network
+  See also  atfq 15.2 setuid, setgid and sticky bit

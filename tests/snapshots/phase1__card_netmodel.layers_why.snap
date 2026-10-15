@@ -53,7 +53,7 @@ Deep dive
 
 Related
   Commands  ip, ping, dig, curl
-  Hub       idk network Network
-  See also  idk 6.2 What happens when you open a website
-  See also  idk 6.5 Ethernet, MAC addresses and ARP
-  See also  idk 6.4 TCP, UDP and connections
+  Hub       atfq network Network
+  See also  atfq 6.2 What happens when you open a website
+  See also  atfq 6.5 Ethernet, MAC addresses and ARP
+  See also  atfq 6.4 TCP, UDP and connections

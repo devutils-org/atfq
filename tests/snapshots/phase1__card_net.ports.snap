@@ -34,10 +34,10 @@ Pitfalls
   - "Address already in use" means another process holds the port: find it with
     sudo ss -ltnp 'sport = :8080'.
 
-Deep dive: 2 questions. Read them with idk 19.1 --why
+Deep dive: 2 questions. Read them with atfq 19.1 --why
 
 Related
   Commands  ss
   Paths     /proc/net/tcp
-  Hub       idk network Network
-  See also  idk 15.2 setuid, setgid and sticky bit
+  Hub       atfq network Network
+  See also  atfq 15.2 setuid, setgid and sticky bit

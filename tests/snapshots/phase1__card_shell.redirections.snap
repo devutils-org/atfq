@@ -25,9 +25,9 @@ Pitfalls
     write 2>&1 | (or |& in bash).
   - set -o noclobber makes > refuse to overwrite an existing file; >| forces it.
 
-Deep dive: 2 questions. Read them with idk 27.3 --why
+Deep dive: 2 questions. Read them with atfq 27.3 --why
 
 Related
   Commands  tee
   Paths     /dev/null
-  See also  idk 27.4 Exit codes
+  See also  atfq 27.4 Exit codes

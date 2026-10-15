@@ -29,11 +29,11 @@ Pitfalls
   - swapoff -a on a busy machine pulls everything back into RAM, and can wake
     the OOM killer.
 
-Deep dive: 2 questions. Read them with idk 17.3 --why
+Deep dive: 2 questions. Read them with atfq 17.3 --why
 
 Related
   Commands  swapon, vmstat
   Paths     /proc/swaps, /proc/sys/vm/swappiness
-  Hub       idk memory Memory
-  See also  idk 17.1 free vs available
-  See also  idk 17.2 The OOM killer
+  Hub       atfq memory Memory
+  See also  atfq 17.1 free vs available
+  See also  atfq 17.2 The OOM killer

@@ -30,8 +30,8 @@ Paths
   /etc/logrotate.d/           rotation rules for text logs
 
 Cards
-  idk 26.1  Reading the journal with journalctl
-  idk 26.2  Where logs go: journald, syslog and /var/log
-  idk 26.3  Log rotation and logs that fill the disk
-  idk 26.4  Logging from your own programs and services
-  idk 21.3  dmesg and the kernel log
+  atfq 26.1  Reading the journal with journalctl
+  atfq 26.2  Where logs go: journald, syslog and /var/log
+  atfq 26.3  Log rotation and logs that fill the disk
+  atfq 26.4  Logging from your own programs and services
+  atfq 21.3  dmesg and the kernel log

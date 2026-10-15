@@ -108,7 +108,7 @@ fn command(s: &str) -> String {
     format!("{BIN_NAME} {s}")
 }
 
-/// `idk <handle>`, opening the page when activated.
+/// `atfq <handle>`, opening the page when activated.
 fn open(handle: &str) -> Span {
     Span::new(command(handle), Kind::Code).with(Action::Open(handle.to_string()))
 }
@@ -208,7 +208,7 @@ fn list(items: &[String]) -> Vec<Span> {
     spans
 }
 
-/// `idk <handle>  Title`, all of it a link.
+/// `atfq <handle>  Title`, all of it a link.
 fn link(handle: &str, title: &str) -> Vec<Span> {
     let action = Action::Open(handle.to_string());
     vec![
@@ -449,7 +449,7 @@ pub fn lookup(lib: &Library, l: &Lookup<'_>, opts: Options) -> Option<String> {
     lookup_doc(lib, l, &Layout::cli(opts)).map(|d| d.to_text(opts.color))
 }
 
-/// `Did you mean: idk 5.1 (free vs available), idk disk (Disk)`
+/// `Did you mean: atfq 5.1 (free vs available), atfq disk (Disk)`
 fn did_you_mean(intro: &str, refs: &[Ref], width: usize) -> Vec<Line> {
     if refs.is_empty() {
         return Vec::new();
@@ -527,7 +527,7 @@ pub fn live_text(live: &[ProbeResult], width: usize) -> String {
     .to_text(false)
 }
 
-/// `idk probe <name>`: one probe result.
+/// `atfq probe <name>`: one probe result.
 pub fn probe(info: &ProbeInfo, r: &ProbeResult, opts: Options) -> String {
     let mut page = Page::default();
     page.block(vec![Line::new(vec![
@@ -539,7 +539,7 @@ pub fn probe(info: &ProbeInfo, r: &ProbeResult, opts: Options) -> String {
     page.finish().to_text(opts.color)
 }
 
-/// `idk probe` alone: the list of probes.
+/// `atfq probe` alone: the list of probes.
 pub fn probe_list(probes: &[ProbeInfo], opts: Options) -> String {
     let rows: Vec<_> = probes
         .iter()

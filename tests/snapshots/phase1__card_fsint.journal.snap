@@ -31,12 +31,12 @@ Pitfalls
     rescue system, or let it run at boot.
   - fsck -n only reports problems; without it, fsck changes the disk.
 
-Deep dive: 2 questions. Read them with idk 9.2 --why
+Deep dive: 2 questions. Read them with atfq 9.2 --why
 
 Related
   Commands  fsck, dmesg, mount
   Paths     /etc/fstab
-  Hub       idk disk Disk
-  See also  idk 9.1 How a filesystem stores a file
-  See also  idk 4.5 fsync: when is data really on disk?
-  See also  idk 21.3 dmesg and the kernel log
+  Hub       atfq disk Disk
+  See also  atfq 9.1 How a filesystem stores a file
+  See also  atfq 4.5 fsync: when is data really on disk?
+  See also  atfq 21.3 dmesg and the kernel log

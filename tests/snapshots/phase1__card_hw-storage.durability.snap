@@ -39,11 +39,11 @@ Pitfalls
     consistent, not your file's latest contents: that's still fsync's job.
   - Calling fsync after every small write is slow; batch writes, then sync once.
 
-Deep dive: 2 questions. Read them with idk 4.5 --why
+Deep dive: 2 questions. Read them with atfq 4.5 --why
 
 Related
   Commands  sync
   Paths     /proc/sys/vm/dirty_expire_centisecs
-  Hub       idk disk Disk
-  See also  idk 17.4 The page cache
-  See also  idk 4.3 From write() to the disk: the block layer
+  Hub       atfq disk Disk
+  See also  atfq 17.4 The page cache
+  See also  atfq 4.3 From write() to the disk: the block layer

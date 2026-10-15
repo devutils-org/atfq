@@ -31,10 +31,10 @@ Pitfalls
     clock is ahead.
   - In containers, the clock is the host's: fix time on the host.
 
-Deep dive: 2 questions. Read them with idk 10.2 --why
+Deep dive: 2 questions. Read them with atfq 10.2 --why
 
 Related
   Commands  timedatectl, chronyc
   Paths     /etc/chrony.conf, /etc/systemd/timesyncd.conf
-  See also  idk 10.1 Wall clock and monotonic clock: measuring time right
-  See also  idk 11.3 Certificates: how HTTPS proves who it is
+  See also  atfq 10.1 Wall clock and monotonic clock: measuring time right
+  See also  atfq 11.3 Certificates: how HTTPS proves who it is

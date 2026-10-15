@@ -36,11 +36,11 @@ Pitfalls
   - The fio command above creates a 1 GiB test file in the current folder: run
     it on the disk you want to test, and delete the file after.
 
-Deep dive: 2 questions. Read them with idk 4.4 --why
+Deep dive: 2 questions. Read them with atfq 4.4 --why
 
 Related
   Commands  iostat, fio, iotop
   Paths     /proc/diskstats
-  Hub       idk disk Disk
-  See also  idk 4.1 Hard drives, SSDs and NVMe
-  See also  idk 16.1 Process states and zombies
+  Hub       atfq disk Disk
+  See also  atfq 4.1 Hard drives, SSDs and NVMe
+  See also  atfq 16.1 Process states and zombies

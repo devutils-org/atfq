@@ -51,6 +51,6 @@ Deep dive
 Related
   Commands  ps, top
   Paths     /proc/PID/task/
-  See also  idk 1.2 How the kernel shares the CPUs
-  See also  idk 8.2 Race conditions, locks and atomics
-  See also  idk 8.3 Event loops: one thread, thousands of connections
+  See also  atfq 1.2 How the kernel shares the CPUs
+  See also  atfq 8.2 Race conditions, locks and atomics
+  See also  atfq 8.3 Event loops: one thread, thousands of connections

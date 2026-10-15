@@ -35,11 +35,11 @@ Pitfalls
   - OSI layers 5 and 6 (session, presentation) have no clear place of their own
     on the Internet; TLS is usually put between 4 and 7.
 
-Deep dive: 2 questions. Read them with idk 6.1 --why
+Deep dive: 2 questions. Read them with atfq 6.1 --why
 
 Related
   Commands  ip, ping, dig, curl
-  Hub       idk network Network
-  See also  idk 6.2 What happens when you open a website
-  See also  idk 6.5 Ethernet, MAC addresses and ARP
-  See also  idk 6.4 TCP, UDP and connections
+  Hub       atfq network Network
+  See also  atfq 6.2 What happens when you open a website
+  See also  atfq 6.5 Ethernet, MAC addresses and ARP
+  See also  atfq 6.4 TCP, UDP and connections

@@ -33,9 +33,9 @@ Pitfalls
   - "bind: Address already in use": something already listens on that local port
     (19.1).
 
-Deep dive: 2 questions. Read them with idk 29.3 --why
+Deep dive: 2 questions. Read them with atfq 29.3 --why
 
 Related
   Commands  ssh, ss
-  See also  idk 29.2 ~/.ssh/config, jump hosts and host keys
-  See also  idk 19.1 Who listens on which port
+  See also  atfq 29.2 ~/.ssh/config, jump hosts and host keys
+  See also  atfq 19.1 Who listens on which port

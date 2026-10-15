@@ -58,5 +58,5 @@ Deep dive
 Related
   Commands  ssh, ssh-keygen
   Paths     ~/.ssh/config, ~/.ssh/known_hosts, /etc/ssh/sshd_config
-  See also  idk 29.1 SSH keys and the agent
-  See also  idk 29.3 SSH tunnels and port forwarding
+  See also  atfq 29.1 SSH keys and the agent
+  See also  atfq 29.3 SSH tunnels and port forwarding

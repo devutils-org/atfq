@@ -33,12 +33,12 @@ Pitfalls
   - curl -k turns all checking off: it hides the problem and invites a man in
     the middle.
 
-Deep dive: 2 questions. Read them with idk 11.3 --why
+Deep dive: 2 questions. Read them with atfq 11.3 --why
 
 Related
   Commands  openssl, curl, update-ca-certificates, update-ca-trust
   Paths     /etc/ssl/certs/, /etc/pki/tls/certs/,
             /usr/local/share/ca-certificates/
-  See also  idk 6.2 What happens when you open a website
-  See also  idk 11.2 Public-key cryptography
-  See also  idk 10.2 Keeping the clock right: NTP
+  See also  atfq 6.2 What happens when you open a website
+  See also  atfq 11.2 Public-key cryptography
+  See also  atfq 10.2 Keeping the clock right: NTP

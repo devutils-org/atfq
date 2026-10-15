@@ -28,9 +28,9 @@ Pitfalls
   - -a doesn't keep hard links, ACLs or extended attributes: add -H, -A and -X
     when they matter.
 
-Deep dive: 2 questions. Read them with idk 28.7 --why
+Deep dive: 2 questions. Read them with atfq 28.7 --why
 
 Related
   Commands  rsync
-  Hub       idk disk Disk
-  See also  idk 28.6 tar
+  Hub       atfq disk Disk
+  See also  atfq 28.6 tar

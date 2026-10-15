@@ -29,10 +29,10 @@ Pitfalls
   - Cloning a VM from a snapshot used to duplicate its random state; current
     kernels reseed when the hypervisor reports a clone.
 
-Deep dive: 2 questions. Read them with idk 11.4 --why
+Deep dive: 2 questions. Read them with atfq 11.4 --why
 
 Related
   Commands  head, openssl
   Paths     /dev/urandom, /proc/sys/kernel/random/
-  See also  idk 11.1 Hashes, encryption and signatures
-  See also  idk 1.4 Interrupts: how devices get attention
+  See also  atfq 11.1 Hashes, encryption and signatures
+  See also  atfq 1.4 Interrupts: how devices get attention

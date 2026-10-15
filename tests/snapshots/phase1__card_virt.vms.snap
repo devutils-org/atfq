@@ -39,10 +39,10 @@ Pitfalls
   - WSL 2, Docker Desktop and OrbStack are Linux virtual machines; files shared
     with the host cross a slower boundary.
 
-Deep dive: 2 questions. Read them with idk 7.4 --why
+Deep dive: 2 questions. Read them with atfq 7.4 --why
 
 Related
   Commands  systemd-detect-virt, virsh, lscpu
   Paths     /dev/kvm
-  See also  idk 7.1 What a container really is
-  See also  idk 2.1 What a CPU does: instructions and architectures
+  See also  atfq 7.1 What a container really is
+  See also  atfq 2.1 What a CPU does: instructions and architectures

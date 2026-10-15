@@ -26,9 +26,9 @@ Pitfalls
   - Debian and Ubuntu install mawk as awk, others gawk: in scripts, stay with
     the features both have.
 
-Deep dive: 2 questions. Read them with idk 28.3 --why
+Deep dive: 2 questions. Read them with atfq 28.3 --why
 
 Related
   Commands  awk
-  See also  idk 28.9 sort, uniq and cut
-  See also  idk 28.4 sed
+  See also  atfq 28.9 sort, uniq and cut
+  See also  atfq 28.4 sed

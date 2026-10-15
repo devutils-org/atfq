@@ -1,0 +1,5 @@
+# The toolchain CI and releases use. Bump it on purpose: a newer clippy can
+# add lints that fail `-D warnings`.
+[toolchain]
+channel = "1.99.0"
+components = ["clippy", "rustfmt"]

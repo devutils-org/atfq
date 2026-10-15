@@ -54,5 +54,5 @@ Deep dive
 Related
   Commands  ldd, ldconfig, objdump
   Paths     /etc/ld.so.conf.d/
-  See also  idk 23.2 ELF and "command not found"
-  See also  idk 21.4 syscalls and strace
+  See also  atfq 23.2 ELF and "command not found"
+  See also  atfq 21.4 syscalls and strace

@@ -34,11 +34,11 @@ Pitfalls
   - Docker, VPNs and VMs add their own interfaces and routes (docker0, tun0,
     virbr0): that's normal.
 
-Deep dive: 2 questions. Read them with idk 19.3 --why
+Deep dive: 2 questions. Read them with atfq 19.3 --why
 
 Related
   Commands  ip, nmcli
   Paths     /sys/class/net/, /proc/net/route
-  Hub       idk network Network
-  See also  idk 19.2 DNS resolution
-  See also  idk 19.4 nftables vs iptables vs ufw
+  Hub       atfq network Network
+  See also  atfq 19.2 DNS resolution
+  See also  atfq 19.4 nftables vs iptables vs ufw

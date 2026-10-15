@@ -2,7 +2,7 @@
 source: tests/phase2.rs
 expression: t.screen()
 ---
-"┌ Prompt for an AI assistant (same as idk ask) ────────────────────────────────┐"
+"┌ Prompt for an AI assistant (same as atfq ask) ───────────────────────────────┐"
 "│I have a question about my Linux machine.                                     │"
 "│                                                                              │"
 "│## My question                                                                │"
@@ -15,7 +15,7 @@ expression: t.screen()
 "│- Kernel: 6.12.48-amd64                                                       │"
 "│- Architecture: x86_64                                                        │"
 "│                                                                              │"
-"│## Background (from the idk hub "Memory")                                     │"
+"│## Background (from the atfq hub "Memory")                                    │"
 "│                                                                              │"
 "│How much RAM you have, who is using it, and why "used" doesn't mean what you  │"
 "│think.                                                                        │"

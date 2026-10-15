@@ -29,9 +29,9 @@ Pitfalls
   - They take more disk space: each app bundles, or shares, a runtime.
   - On Ubuntu, some deb packages (firefox, chromium) only install the snap.
 
-Deep dive: 2 questions. Read them with idk 24.2 --why
+Deep dive: 2 questions. Read them with atfq 24.2 --why
 
 Related
   Commands  snap, flatpak
   Paths     /var/lib/snapd, /var/lib/flatpak
-  See also  idk 24.1 Which package owns a file
+  See also  atfq 24.1 Which package owns a file

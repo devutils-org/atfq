@@ -49,6 +49,6 @@ Deep dive
 Related
   Commands  uptime, nproc, top
   Paths     /proc/loadavg
-  Hub       idk cpu CPU
-  See also  idk 16.1 Process states and zombies
-  See also  idk 16.3 nice and priorities
+  Hub       atfq cpu CPU
+  See also  atfq 16.1 Process states and zombies
+  See also  atfq 16.3 nice and priorities

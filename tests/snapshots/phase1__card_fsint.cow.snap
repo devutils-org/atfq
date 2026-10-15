@@ -34,10 +34,10 @@ Pitfalls
   - ZFS isn't in the Linux kernel (license): it comes as a separate module,
     which must be rebuilt for each new kernel.
 
-Deep dive: 2 questions. Read them with idk 9.3 --why
+Deep dive: 2 questions. Read them with atfq 9.3 --why
 
 Related
   Commands  btrfs, zfs, cp
-  Hub       idk disk Disk
-  See also  idk 9.2 Journaling: how a filesystem survives a crash
-  See also  idk 9.4 ext4, XFS, btrfs or ZFS?
+  Hub       atfq disk Disk
+  See also  atfq 9.2 Journaling: how a filesystem survives a crash
+  See also  atfq 9.4 ext4, XFS, btrfs or ZFS?

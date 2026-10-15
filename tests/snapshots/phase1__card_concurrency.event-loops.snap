@@ -29,10 +29,10 @@ Pitfalls
   - Regular files are always "ready" for epoll: disk reads still block, which is
     why runtimes use threads, or io_uring, for files.
 
-Deep dive: 2 questions. Read them with idk 8.3 --why
+Deep dive: 2 questions. Read them with atfq 8.3 --why
 
 Related
   Commands  strace
-  See also  idk 8.1 Processes, threads and async: doing several things at once
-  See also  idk 8.4 Too many open files: limits on processes
-  See also  idk 21.4 syscalls and strace
+  See also  atfq 8.1 Processes, threads and async: doing several things at once
+  See also  atfq 8.4 Too many open files: limits on processes
+  See also  atfq 21.4 syscalls and strace

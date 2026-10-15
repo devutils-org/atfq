@@ -40,5 +40,5 @@ Deep dive
 
 Related
   Commands  scp, sftp, rsync, sshfs
-  See also  idk 28.7 rsync
-  See also  idk 29.2 ~/.ssh/config, jump hosts and host keys
+  See also  atfq 28.7 rsync
+  See also  atfq 29.2 ~/.ssh/config, jump hosts and host keys

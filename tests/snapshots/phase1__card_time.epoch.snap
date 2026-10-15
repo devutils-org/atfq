@@ -30,9 +30,9 @@ Pitfalls
   - ext4 filesystems made with small (128-byte) inodes can't store dates past
     2038; tune2fs -l shows the inode size.
 
-Deep dive: 2 questions. Read them with idk 10.4 --why
+Deep dive: 2 questions. Read them with atfq 10.4 --why
 
 Related
   Commands  date
-  See also  idk 10.3 Time zones, UTC and daylight saving
-  See also  idk 10.1 Wall clock and monotonic clock: measuring time right
+  See also  atfq 10.3 Time zones, UTC and daylight saving
+  See also  atfq 10.1 Wall clock and monotonic clock: measuring time right

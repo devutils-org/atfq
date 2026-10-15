@@ -30,11 +30,11 @@ Pitfalls
     desktop board often run without it.
   - No EDAC entries doesn't prove good RAM: it may only mean there's no ECC.
 
-Deep dive: 2 questions. Read them with idk 3.3 --why
+Deep dive: 2 questions. Read them with atfq 3.3 --why
 
 Related
   Commands  ras-mc-ctl, journalctl
   Paths     /sys/devices/system/edac/mc/
-  Hub       idk memory Memory
-  See also  idk 3.1 RAM and the memory hierarchy
-  See also  idk 21.3 dmesg and the kernel log
+  Hub       atfq memory Memory
+  See also  atfq 3.1 RAM and the memory hierarchy
+  See also  atfq 21.3 dmesg and the kernel log

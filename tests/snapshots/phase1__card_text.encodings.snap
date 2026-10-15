@@ -33,9 +33,9 @@ Pitfalls
   - Excel and some Windows tools expect a BOM or another encoding for CSV: a
     UTF-8 file may open garbled there.
 
-Deep dive: 2 questions. Read them with idk 12.1 --why
+Deep dive: 2 questions. Read them with atfq 12.1 --why
 
 Related
   Commands  file, iconv, hexdump
-  See also  idk 12.2 Locales: why sorting, dates and numbers change
-  See also  idk 12.3 Line endings, BOMs and invisible characters
+  See also  atfq 12.2 Locales: why sorting, dates and numbers change
+  See also  atfq 12.3 Line endings, BOMs and invisible characters

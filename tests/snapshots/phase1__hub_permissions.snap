@@ -30,8 +30,8 @@ Paths
   /etc/sudoers.d/  who may use sudo, and for what
 
 Cards
-  idk 15.1  rwx, octal and umask
-  idk 15.2  setuid, setgid and sticky bit
-  idk 15.3  sudo and groups
-  idk 15.4  ACLs and capabilities
-  idk 15.5  SELinux and AppArmor
+  atfq 15.1  rwx, octal and umask
+  atfq 15.2  setuid, setgid and sticky bit
+  atfq 15.3  sudo and groups
+  atfq 15.4  ACLs and capabilities
+  atfq 15.5  SELinux and AppArmor

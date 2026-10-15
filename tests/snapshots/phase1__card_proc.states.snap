@@ -34,10 +34,10 @@ Pitfalls
   - ps adds letters after the state: s session leader, + foreground, < high
     priority, N low priority, l multithreaded.
 
-Deep dive: 3 questions. Read them with idk 16.1 --why
+Deep dive: 3 questions. Read them with atfq 16.1 --why
 
 Related
   Commands  ps, top
   Paths     /proc/PID/stat, /proc/PID/status
-  See also  idk 16.2 Signals
-  See also  idk 18.1 Load average
+  See also  atfq 16.2 Signals
+  See also  atfq 18.1 Load average

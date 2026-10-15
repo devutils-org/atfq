@@ -59,6 +59,6 @@ Deep dive
 Related
   Commands  lspci, glxinfo, vulkaninfo, modinfo
   Paths     /sys/class/drm/, /proc/driver/nvidia/version
-  See also  idk 21.2 Kernel modules
-  See also  idk 5.3 How a picture reaches the screen: KMS, Wayland and X11
-  See also  idk 20.2 The kernel command line
+  See also  atfq 21.2 Kernel modules
+  See also  atfq 5.3 How a picture reaches the screen: KMS, Wayland and X11
+  See also  atfq 20.2 The kernel command line

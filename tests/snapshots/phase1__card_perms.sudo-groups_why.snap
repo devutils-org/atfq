@@ -52,4 +52,4 @@ Deep dive
 Related
   Commands  sudo, id, usermod, visudo
   Paths     /etc/sudoers, /etc/sudoers.d/, /etc/group
-  See also  idk 15.1 rwx, octal and umask
+  See also  atfq 15.1 rwx, octal and umask

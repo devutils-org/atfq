@@ -51,6 +51,6 @@ Deep dive
 Related
   Commands  systemctl
   Paths     /etc/systemd/system/default.target
-  Hub       idk boot Boot
-  See also  idk 22.1 Units and timers
-  See also  idk 20.2 The kernel command line
+  Hub       atfq boot Boot
+  See also  atfq 22.1 Units and timers
+  See also  atfq 20.2 The kernel command line

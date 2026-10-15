@@ -80,7 +80,7 @@ pub fn laptop() -> ProbeCtx {
         )
 }
 
-/// Renders a query the way `idk` prints it, against the laptop fixture.
+/// Renders a query the way `atfq` prints it, against the laptop fixture.
 pub fn show(lib: &Library, query: &str, opts: Options) -> String {
     let l = lookup(lib, query, &laptop());
     render::lookup(lib, &l, opts).unwrap_or_else(|| panic!("`{query}` matched nothing"))

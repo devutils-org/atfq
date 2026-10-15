@@ -33,11 +33,11 @@ Pitfalls
   - A public key alone proves nothing about who owns it: you need a trusted way
     to get it (a certificate, a fingerprint checked in person).
 
-Deep dive: 2 questions. Read them with idk 11.2 --why
+Deep dive: 2 questions. Read them with atfq 11.2 --why
 
 Related
   Commands  ssh-keygen, gpg
   Paths     ~/.ssh/, ~/.gnupg/
-  See also  idk 11.1 Hashes, encryption and signatures
-  See also  idk 11.3 Certificates: how HTTPS proves who it is
-  See also  idk 29.1 SSH keys and the agent
+  See also  atfq 11.1 Hashes, encryption and signatures
+  See also  atfq 11.3 Certificates: how HTTPS proves who it is
+  See also  atfq 29.1 SSH keys and the agent

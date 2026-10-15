@@ -25,9 +25,9 @@ Paths
   /proc/PID/status         memory of one process (VmRSS line)
 
 Cards
-  idk 17.1  free vs available
-  idk 17.2  The OOM killer
-  idk 17.3  Swap and swappiness
-  idk 17.4  The page cache
-  idk 1.3   How virtual memory works
-  idk 3.1   RAM and the memory hierarchy
+  atfq 17.1  free vs available
+  atfq 17.2  The OOM killer
+  atfq 17.3  Swap and swappiness
+  atfq 17.4  The page cache
+  atfq 1.3   How virtual memory works
+  atfq 3.1   RAM and the memory hierarchy

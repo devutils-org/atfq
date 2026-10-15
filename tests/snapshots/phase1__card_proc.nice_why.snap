@@ -43,5 +43,5 @@ Deep dive
 
 Related
   Commands  nice, renice, ionice, chrt
-  Hub       idk cpu CPU
-  See also  idk 18.1 Load average
+  Hub       atfq cpu CPU
+  See also  atfq 18.1 Load average

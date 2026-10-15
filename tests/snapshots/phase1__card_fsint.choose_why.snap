@@ -51,6 +51,6 @@ Deep dive
 Related
   Commands  lsblk, findmnt
   Paths     /etc/fstab
-  Hub       idk disk Disk
-  See also  idk 9.3 Copy-on-write filesystems: snapshots and checksums
-  See also  idk 9.2 Journaling: how a filesystem survives a crash
+  Hub       atfq disk Disk
+  See also  atfq 9.3 Copy-on-write filesystems: snapshots and checksums
+  See also  atfq 9.2 Journaling: how a filesystem survives a crash

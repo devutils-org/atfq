@@ -36,10 +36,10 @@ Pitfalls
   - Tuning lists copied from the web often do nothing, or harm: change one
     setting at a time, for a reason you can measure.
 
-Deep dive: 2 questions. Read them with idk 21.1 --why
+Deep dive: 2 questions. Read them with atfq 21.1 --why
 
 Related
   Commands  sysctl
   Paths     /proc/sys, /etc/sysctl.d/
-  See also  idk 13.3 /proc and /sys
-  See also  idk 17.3 Swap and swappiness
+  See also  atfq 13.3 /proc and /sys
+  See also  atfq 17.3 Swap and swappiness

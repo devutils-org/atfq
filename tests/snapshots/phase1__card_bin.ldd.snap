@@ -34,10 +34,10 @@ Pitfalls
   - LD_LIBRARY_PATH set for everything breaks other programs: set it only for
     the command that needs it.
 
-Deep dive: 2 questions. Read them with idk 23.1 --why
+Deep dive: 2 questions. Read them with atfq 23.1 --why
 
 Related
   Commands  ldd, ldconfig, objdump
   Paths     /etc/ld.so.conf.d/
-  See also  idk 23.2 ELF and "command not found"
-  See also  idk 21.4 syscalls and strace
+  See also  atfq 23.2 ELF and "command not found"
+  See also  atfq 21.4 syscalls and strace

@@ -35,10 +35,10 @@ Pitfalls
   - Behind NAT, outside machines can't open a connection to yours unless the
     router forwards a port.
 
-Deep dive: 2 questions. Read them with idk 6.3 --why
+Deep dive: 2 questions. Read them with atfq 6.3 --why
 
 Related
   Commands  ip
-  Hub       idk network Network
-  See also  idk 19.3 Interfaces and routes
-  See also  idk 6.5 Ethernet, MAC addresses and ARP
+  Hub       atfq network Network
+  See also  atfq 19.3 Interfaces and routes
+  See also  atfq 6.5 Ethernet, MAC addresses and ARP

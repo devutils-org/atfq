@@ -33,11 +33,11 @@ Pitfalls
   - /var/log/wtmp and btmp are binary login records: read them with last and
     lastb.
 
-Deep dive: 2 questions. Read them with idk 26.2 --why
+Deep dive: 2 questions. Read them with atfq 26.2 --why
 
 Related
   Commands  journalctl, tail, less
   Paths     /var/log/, /etc/systemd/journald.conf, /etc/rsyslog.conf
-  Hub       idk logs Logs
-  See also  idk 26.1 Reading the journal with journalctl
-  See also  idk 26.3 Log rotation and logs that fill the disk
+  Hub       atfq logs Logs
+  See also  atfq 26.1 Reading the journal with journalctl
+  See also  atfq 26.3 Log rotation and logs that fill the disk

@@ -36,9 +36,9 @@ Pitfalls
   - push.autoSetupRemote = true saves the -u origin BRANCH on a new branch's
     first push.
 
-Deep dive: 2 questions. Read them with idk 30.4 --why
+Deep dive: 2 questions. Read them with atfq 30.4 --why
 
 Related
   Commands  git
-  See also  idk 30.3 Merge or rebase?
-  See also  idk 29.1 SSH keys and the agent
+  See also  atfq 30.3 Merge or rebase?
+  See also  atfq 29.1 SSH keys and the agent

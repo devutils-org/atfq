@@ -32,10 +32,10 @@ Pitfalls
   - quiet hides the boot messages: remove it to see where a boot hangs.
   - systemd.unit=rescue.target boots into a rescue shell, for one boot.
 
-Deep dive: 2 questions. Read them with idk 20.2 --why
+Deep dive: 2 questions. Read them with atfq 20.2 --why
 
 Related
   Commands  cat
   Paths     /proc/cmdline, /etc/default/grub
-  Hub       idk boot Boot
-  See also  idk 20.1 From firmware to init
+  Hub       atfq boot Boot
+  See also  atfq 20.1 From firmware to init

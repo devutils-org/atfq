@@ -50,6 +50,6 @@ Deep dive
 Related
   Commands  nft, ufw, firewall-cmd
   Paths     /etc/nftables.conf, /etc/ufw/
-  Hub       idk network Network
-  See also  idk 19.1 Who listens on which port
-  See also  idk 19.3 Interfaces and routes
+  Hub       atfq network Network
+  See also  atfq 19.1 Who listens on which port
+  See also  atfq 19.3 Interfaces and routes

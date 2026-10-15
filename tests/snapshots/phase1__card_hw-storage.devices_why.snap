@@ -51,6 +51,6 @@ Deep dive
 Related
   Commands  lsblk
   Paths     /sys/block/
-  Hub       idk disk Disk
-  See also  idk 4.2 Inside an SSD: flash, TRIM and wear
-  See also  idk 4.4 IOPS, throughput and latency: how fast is a disk?
+  Hub       atfq disk Disk
+  See also  atfq 4.2 Inside an SSD: flash, TRIM and wear
+  See also  atfq 4.4 IOPS, throughput and latency: how fast is a disk?

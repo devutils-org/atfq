@@ -551,7 +551,7 @@ mod tests {
         let lib = Library::from_files(&f).unwrap();
         assert_eq!(
             lib.card("cmd.find").unwrap().tldr,
-            "- See 1.1 and idk memory."
+            "- See 1.1 and atfq memory."
         );
 
         f.insert(

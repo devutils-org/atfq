@@ -49,5 +49,5 @@ Deep dive
 
 Related
   Commands  systemctl, journalctl
-  See also  idk 22.1 Units and timers
-  See also  idk 19.1 Who listens on which port
+  See also  atfq 22.1 Units and timers
+  See also  atfq 19.1 Who listens on which port

@@ -1,4 +1,4 @@
-//! `idk tui`: the interactive mode. This module owns the terminal; all the
+//! `atfq tui`: the interactive mode. This module owns the terminal; all the
 //! behaviour lives in [`App`].
 
 mod app;

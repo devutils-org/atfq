@@ -38,9 +38,9 @@ Paths
   /etc/fstab             what gets mounted at boot
 
 Cards
-  idk 4.1   Hard drives, SSDs and NVMe
-  idk 4.2   Inside an SSD: flash, TRIM and wear
-  idk 4.4   IOPS, throughput and latency: how fast is a disk?
-  idk 13.2  /tmp vs /var/tmp
-  idk 13.4  Links, inodes and "disk full"
-  idk 28.1  find
+  atfq 4.1   Hard drives, SSDs and NVMe
+  atfq 4.2   Inside an SSD: flash, TRIM and wear
+  atfq 4.4   IOPS, throughput and latency: how fast is a disk?
+  atfq 13.2  /tmp vs /var/tmp
+  atfq 13.4  Links, inodes and "disk full"
+  atfq 28.1  find

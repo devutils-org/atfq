@@ -59,5 +59,5 @@ Deep dive
 Related
   Commands  systemd-detect-virt, virsh, lscpu
   Paths     /dev/kvm
-  See also  idk 7.1 What a container really is
-  See also  idk 2.1 What a CPU does: instructions and architectures
+  See also  atfq 7.1 What a container really is
+  See also  atfq 2.1 What a CPU does: instructions and architectures

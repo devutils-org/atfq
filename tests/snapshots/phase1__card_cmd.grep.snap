@@ -26,9 +26,9 @@ Pitfalls
   - grep -r reads binary files too: add -I to skip them. It doesn't follow
     symbolic links; -R does.
 
-Deep dive: 2 questions. Read them with idk 28.2 --why
+Deep dive: 2 questions. Read them with atfq 28.2 --why
 
 Related
   Commands  grep, rg
-  See also  idk 28.1 find
-  See also  idk 28.4 sed
+  See also  atfq 28.1 find
+  See also  atfq 28.4 sed

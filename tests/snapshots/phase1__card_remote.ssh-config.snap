@@ -38,10 +38,10 @@ Pitfalls
   - ssh -G host prints the options that apply after reading every config file:
     the quickest way to see why a setting is ignored.
 
-Deep dive: 2 questions. Read them with idk 29.2 --why
+Deep dive: 2 questions. Read them with atfq 29.2 --why
 
 Related
   Commands  ssh, ssh-keygen
   Paths     ~/.ssh/config, ~/.ssh/known_hosts, /etc/ssh/sshd_config
-  See also  idk 29.1 SSH keys and the agent
-  See also  idk 29.3 SSH tunnels and port forwarding
+  See also  atfq 29.1 SSH keys and the agent
+  See also  atfq 29.3 SSH tunnels and port forwarding

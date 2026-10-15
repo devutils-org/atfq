@@ -36,11 +36,11 @@ Pitfalls
     ulimit -u, or a cgroup's pids.max (systemd's TasksMax=).
   - Containers have their own limits: docker run --ulimit nofile=….
 
-Deep dive: 2 questions. Read them with idk 8.4 --why
+Deep dive: 2 questions. Read them with atfq 8.4 --why
 
 Related
   Commands  ulimit, prlimit, ls
   Paths     /proc/PID/limits, /etc/security/limits.conf
-  See also  idk 8.3 Event loops: one thread, thousands of connections
-  See also  idk 22.3 Unit files and overrides
-  See also  idk 16.4 cgroups
+  See also  atfq 8.3 Event loops: one thread, thousands of connections
+  See also  atfq 22.3 Unit files and overrides
+  See also  atfq 16.4 cgroups

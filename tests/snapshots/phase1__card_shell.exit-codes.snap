@@ -25,9 +25,9 @@ Pitfalls
     and ||.
   - Codes wrap around at 256: exit 256 gives 0.
 
-Deep dive: 2 questions. Read them with idk 27.4 --why
+Deep dive: 2 questions. Read them with atfq 27.4 --why
 
 Related
   Commands  echo
-  See also  idk 27.3 Redirections and file descriptors
-  See also  idk 16.2 Signals
+  See also  atfq 27.3 Redirections and file descriptors
+  See also  atfq 16.2 Signals

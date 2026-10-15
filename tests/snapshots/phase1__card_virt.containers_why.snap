@@ -52,6 +52,6 @@ Deep dive
 Related
   Commands  docker, podman, uname
   Paths     /sys/fs/cgroup/, /proc/self/ns/
-  See also  idk 7.2 Namespaces: a private view of the system
-  See also  idk 16.4 cgroups
-  See also  idk 7.4 Virtual machines and hypervisors
+  See also  atfq 7.2 Namespaces: a private view of the system
+  See also  atfq 16.4 cgroups
+  See also  atfq 7.4 Virtual machines and hypervisors

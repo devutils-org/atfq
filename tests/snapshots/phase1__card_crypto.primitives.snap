@@ -31,11 +31,11 @@ Pitfalls
   - Don't invent your own scheme: use a library's high-level API (libsodium,
     your language's standard crypto).
 
-Deep dive: 2 questions. Read them with idk 11.1 --why
+Deep dive: 2 questions. Read them with atfq 11.1 --why
 
 Related
   Commands  sha256sum, openssl
   Paths     /proc/crypto
-  See also  idk 11.2 Public-key cryptography
-  See also  idk 11.4 Random numbers: /dev/urandom and entropy
-  See also  idk 2.1 What a CPU does: instructions and architectures
+  See also  atfq 11.2 Public-key cryptography
+  See also  atfq 11.4 Random numbers: /dev/urandom and entropy
+  See also  atfq 2.1 What a CPU does: instructions and architectures

@@ -55,6 +55,6 @@ Deep dive
 Related
   Commands  ss
   Paths     /proc/net/snmp
-  Hub       idk network Network
-  See also  idk 19.1 Who listens on which port
-  See also  idk 6.2 What happens when you open a website
+  Hub       atfq network Network
+  See also  atfq 19.1 Who listens on which port
+  See also  atfq 6.2 What happens when you open a website

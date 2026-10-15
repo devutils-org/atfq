@@ -34,11 +34,11 @@ Pitfalls
   - Connecting to a local database through its socket is faster than through
     localhost TCP.
 
-Deep dive: 2 questions. Read them with idk 8.5 --why
+Deep dive: 2 questions. Read them with atfq 8.5 --why
 
 Related
   Commands  ss, ipcs, busctl
   Paths     /run/, /dev/shm/
-  See also  idk 8.1 Processes, threads and async: doing several things at once
-  See also  idk 27.3 Redirections and file descriptors
-  See also  idk 19.1 Who listens on which port
+  See also  atfq 8.1 Processes, threads and async: doing several things at once
+  See also  atfq 27.3 Redirections and file descriptors
+  See also  atfq 19.1 Who listens on which port

@@ -32,10 +32,10 @@ Pitfalls
   - Dual boot with Windows: Windows keeps the hardware clock in local time,
     Linux in UTC, so one of them shows the wrong hour.
 
-Deep dive: 2 questions. Read them with idk 10.3 --why
+Deep dive: 2 questions. Read them with atfq 10.3 --why
 
 Related
   Commands  timedatectl, date
   Paths     /etc/localtime, /usr/share/zoneinfo/
-  See also  idk 10.4 Timestamps: Unix time, 2038 and leap seconds
-  See also  idk 10.1 Wall clock and monotonic clock: measuring time right
+  See also  atfq 10.4 Timestamps: Unix time, 2038 and leap seconds
+  See also  atfq 10.1 Wall clock and monotonic clock: measuring time right

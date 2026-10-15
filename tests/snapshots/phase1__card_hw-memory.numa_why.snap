@@ -50,6 +50,6 @@ Deep dive
 Related
   Commands  numactl, numastat, lscpu
   Paths     /sys/devices/system/node/
-  Hub       idk memory Memory
-  See also  idk 2.2 Cores, threads and sockets
-  See also  idk 3.1 RAM and the memory hierarchy
+  Hub       atfq memory Memory
+  See also  atfq 2.2 Cores, threads and sockets
+  See also  atfq 3.1 RAM and the memory hierarchy

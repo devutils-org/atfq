@@ -1,6 +1,5 @@
 ---
 source: tests/phase3.rs
-assertion_line: 28
 expression: p.text
 ---
 I have a question about my Linux machine.
@@ -15,7 +14,7 @@ why is my laptop swapping?
 - Kernel: 6.12.48-amd64
 - Architecture: x86_64
 
-## Background (from the idk hub "Memory")
+## Background (from the atfq hub "Memory")
 
 How much RAM you have, who is using it, and why "used" doesn't mean what you
 think.

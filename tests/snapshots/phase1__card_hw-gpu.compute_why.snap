@@ -50,6 +50,6 @@ Deep dive
 Related
   Commands  nvidia-smi, rocminfo, clinfo, groups
   Paths     /dev/dri/, /dev/kfd, /dev/nvidia0
-  See also  idk 5.1 What a GPU does differently
-  See also  idk 5.2 GPU drivers: the kernel, Mesa and NVIDIA
-  See also  idk 15.3 sudo and groups
+  See also  atfq 5.1 What a GPU does differently
+  See also  atfq 5.2 GPU drivers: the kernel, Mesa and NVIDIA
+  See also  atfq 15.3 sudo and groups

@@ -1,0 +1,66 @@
+# Push a tag such as v0.1.0 to build Linux binaries and open a draft
+# release with them. Review the draft on GitHub, then publish it.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build (${{ matrix.arch }})
+    strategy:
+      matrix:
+        include:
+          # Ubuntu 22.04 builds against glibc 2.35, so the binaries run on
+          # older distributions too.
+          - { os: ubuntu-22.04, arch: x86_64 }
+          - { os: ubuntu-22.04-arm, arch: aarch64 }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install
+      - name: Tag matches Cargo.toml
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 \
+            | sed -n 's/.*"name":"atfq","version":"\([^"]*\)".*/\1/p')
+          test "v$version" = "$GITHUB_REF_NAME" || {
+            echo "tag $GITHUB_REF_NAME, but Cargo.toml says $version"; exit 1; }
+      - run: cargo test --locked
+      - run: cargo build --release --locked
+      - name: Package
+        run: |
+          dir=atfq-${{ matrix.arch }}-linux
+          mkdir "$dir"
+          cp target/release/atfq README.md LICENSE-MIT LICENSE-APACHE "$dir"/
+          tar czf "$dir.tar.gz" "$dir"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: atfq-${{ matrix.arch }}-linux
+          path: atfq-${{ matrix.arch }}-linux.tar.gz
+
+  release:
+    name: Draft release
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - run: cd dist && sha256sum *.tar.gz > SHA256SUMS
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --repo "$GITHUB_REPOSITORY" --draft --verify-tag \
+            --title "atfq $GITHUB_REF_NAME" --generate-notes

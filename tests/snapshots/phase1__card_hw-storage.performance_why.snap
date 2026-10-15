@@ -56,6 +56,6 @@ Deep dive
 Related
   Commands  iostat, fio, iotop
   Paths     /proc/diskstats
-  Hub       idk disk Disk
-  See also  idk 4.1 Hard drives, SSDs and NVMe
-  See also  idk 16.1 Process states and zombies
+  Hub       atfq disk Disk
+  See also  atfq 4.1 Hard drives, SSDs and NVMe
+  See also  atfq 16.1 Process states and zombies

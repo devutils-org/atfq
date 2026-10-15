@@ -47,5 +47,5 @@ Deep dive
 
 Related
   Commands  gdb
-  See also  idk 8.1 Processes, threads and async: doing several things at once
-  See also  idk 2.3 CPU caches: why memory layout matters
+  See also  atfq 8.1 Processes, threads and async: doing several things at once
+  See also  atfq 2.3 CPU caches: why memory layout matters

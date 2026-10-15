@@ -55,6 +55,6 @@ Deep dive
 Related
   Commands  uname, lscpu, grep
   Paths     /proc/cpuinfo
-  Hub       idk cpu CPU
-  See also  idk 2.2 Cores, threads and sockets
-  See also  idk 23.2 ELF and "command not found"
+  Hub       atfq cpu CPU
+  See also  atfq 2.2 Cores, threads and sockets
+  See also  atfq 23.2 ELF and "command not found"

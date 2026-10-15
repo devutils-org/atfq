@@ -36,9 +36,9 @@ Pitfalls
   - A hard link can't cross filesystems or point to a folder. A symbolic link
     can, but it breaks when its target moves.
 
-Deep dive: 2 questions. Read them with idk 13.4 --why
+Deep dive: 2 questions. Read them with atfq 13.4 --why
 
 Related
   Commands  ln, df, lsof
-  Hub       idk disk Disk
-  See also  idk 13.1 The hierarchy in 2 minutes
+  Hub       atfq disk Disk
+  See also  atfq 13.1 The hierarchy in 2 minutes

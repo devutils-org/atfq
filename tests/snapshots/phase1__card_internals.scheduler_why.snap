@@ -53,7 +53,7 @@ Deep dive
 Related
   Commands  vmstat, top
   Paths     /proc/PID/status
-  Hub       idk cpu CPU
-  See also  idk 16.3 nice and priorities
-  See also  idk 18.1 Load average
-  See also  idk 1.4 Interrupts: how devices get attention
+  Hub       atfq cpu CPU
+  See also  atfq 16.3 nice and priorities
+  See also  atfq 18.1 Load average
+  See also  atfq 1.4 Interrupts: how devices get attention

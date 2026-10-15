@@ -35,10 +35,10 @@ Pitfalls
     keyring (libsecret) or SSH keys instead.
   - On Linux, core.autocrlf should be input or unset; true is for Windows.
 
-Deep dive: 2 questions. Read them with idk 30.5 --why
+Deep dive: 2 questions. Read them with atfq 30.5 --why
 
 Related
   Commands  git
   Paths     ~/.gitconfig, ~/.config/git/config, /etc/gitconfig, .git/config
-  See also  idk 30.4 Remotes: fetch, pull and push
-  See also  idk 27.1 Where environment variables come from
+  See also  atfq 30.4 Remotes: fetch, pull and push
+  See also  atfq 27.1 Where environment variables come from

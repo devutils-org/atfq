@@ -31,9 +31,9 @@ Pitfalls
   - "degraded" from systemctl is-system-running means at least one unit failed;
     systemctl --failed says which.
 
-Deep dive: 2 questions. Read them with idk 22.2 --why
+Deep dive: 2 questions. Read them with atfq 22.2 --why
 
 Related
   Commands  systemctl, journalctl
-  See also  idk 22.1 Units and timers
-  See also  idk 19.1 Who listens on which port
+  See also  atfq 22.1 Units and timers
+  See also  atfq 19.1 Who listens on which port

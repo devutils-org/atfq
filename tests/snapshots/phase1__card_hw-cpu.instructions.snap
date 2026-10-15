@@ -33,11 +33,11 @@ Pitfalls
   - Some distros now need a minimum level: RHEL 9 needs x86-64-v2, RHEL 10 needs
     v3. Older CPUs can't install them.
 
-Deep dive: 2 questions. Read them with idk 2.1 --why
+Deep dive: 2 questions. Read them with atfq 2.1 --why
 
 Related
   Commands  uname, lscpu, grep
   Paths     /proc/cpuinfo
-  Hub       idk cpu CPU
-  See also  idk 2.2 Cores, threads and sockets
-  See also  idk 23.2 ELF and "command not found"
+  Hub       atfq cpu CPU
+  See also  atfq 2.2 Cores, threads and sockets
+  See also  atfq 23.2 ELF and "command not found"

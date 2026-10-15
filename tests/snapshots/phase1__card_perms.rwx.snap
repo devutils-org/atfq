@@ -33,9 +33,9 @@ Pitfalls
   - The umask never adds rights: new files start from 666, folders from 777, so
     a new file is never executable.
 
-Deep dive: 2 questions. Read them with idk 15.1 --why
+Deep dive: 2 questions. Read them with atfq 15.1 --why
 
 Related
   Commands  chmod, chown, umask
-  See also  idk 15.2 setuid, setgid and sticky bit
-  See also  idk 15.3 sudo and groups
+  See also  atfq 15.2 setuid, setgid and sticky bit
+  See also  atfq 15.3 sudo and groups

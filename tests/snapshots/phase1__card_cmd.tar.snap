@@ -23,8 +23,8 @@ Pitfalls
     never writes to absolute paths unless you ask.
   - Extracting as root restores the owners stored in the archive.
 
-Deep dive: 2 questions. Read them with idk 28.6 --why
+Deep dive: 2 questions. Read them with atfq 28.6 --why
 
 Related
   Commands  tar
-  See also  idk 28.7 rsync
+  See also  atfq 28.7 rsync

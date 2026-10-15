@@ -50,5 +50,5 @@ Deep dive
 Related
   Commands  lspci
   Paths     /sys/class/drm/
-  See also  idk 5.4 Computing on the GPU, and when your program can't see it
-  See also  idk 2.2 Cores, threads and sockets
+  See also  atfq 5.4 Computing on the GPU, and when your program can't see it
+  See also  atfq 2.2 Cores, threads and sockets

@@ -34,11 +34,11 @@ Pitfalls
   - IPv6 doesn't use ARP: neighbour discovery (NDP) does the same job, with
     ICMPv6.
 
-Deep dive: 2 questions. Read them with idk 6.5 --why
+Deep dive: 2 questions. Read them with atfq 6.5 --why
 
 Related
   Commands  ip
   Paths     /proc/net/arp
-  Hub       idk network Network
-  See also  idk 6.3 IP addresses, subnets and NAT
-  See also  idk 6.1 Network layers: OSI and TCP/IP
+  Hub       atfq network Network
+  See also  atfq 6.3 IP addresses, subnets and NAT
+  See also  atfq 6.1 Network layers: OSI and TCP/IP

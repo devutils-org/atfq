@@ -129,11 +129,11 @@ fn lookup_json_has_card_and_probes() {
     assert_eq!(v["probes"][0]["data"]["total"], 16_264_712u64 * 1024);
 }
 
-fn idk(args: &[&str]) -> (i32, String) {
-    let out = Command::new(env!("CARGO_BIN_EXE_idk"))
+fn atfq(args: &[&str]) -> (i32, String) {
+    let out = Command::new(env!("CARGO_BIN_EXE_atfq"))
         .args(args)
         .output()
-        .expect("run idk");
+        .expect("run atfq");
     (
         out.status.code().unwrap_or(-1),
         String::from_utf8_lossy(&out.stdout).into_owned(),
@@ -142,41 +142,41 @@ fn idk(args: &[&str]) -> (i32, String) {
 
 #[test]
 fn cli_typo_and_search() {
-    let (code, out) = idk(&["memroy"]);
+    let (code, out) = atfq(&["memroy"]);
     assert_eq!(code, 0);
     assert!(out.contains("showing \"Memory\""));
 
-    let (code, out) = idk(&["search", "zombie"]);
+    let (code, out) = atfq(&["search", "zombie"]);
     assert_eq!(code, 0);
-    assert!(out.contains("idk 16.1"));
-    assert_eq!(idk(&["search", "qwertyuiop"]).0, 1);
-    assert_eq!(idk(&["search"]).0, 2);
+    assert!(out.contains("atfq 16.1"));
+    assert_eq!(atfq(&["search", "qwertyuiop"]).0, 1);
+    assert_eq!(atfq(&["search"]).0, 2);
 }
 
 #[test]
 fn cli_probe_and_json() {
     // Real machine: whatever the values, it must not crash and must be JSON.
     for p in probes::REGISTRY {
-        let (code, out) = idk(&["probe", p.name, "--json"]);
+        let (code, out) = atfq(&["probe", p.name, "--json"]);
         assert_eq!(code, 0, "{}", p.name);
         let v: serde_json::Value = serde_json::from_str(&out).expect("valid JSON");
         assert_eq!(v["name"], p.name);
     }
-    assert_eq!(idk(&["probe", "nope"]).0, 1);
-    let (code, out) = idk(&["probe"]);
+    assert_eq!(atfq(&["probe", "nope"]).0, 1);
+    let (code, out) = atfq(&["probe"]);
     assert_eq!(code, 0);
-    assert!(out.contains("idk probe mem.summary"));
+    assert!(out.contains("atfq probe mem.summary"));
 
     for args in [
         &["free", "--json"][..],
         &["toc", "--json"],
         &["search", "swap", "--json"],
     ] {
-        let (code, out) = idk(args);
+        let (code, out) = atfq(args);
         assert_eq!(code, 0, "{args:?}");
         serde_json::from_str::<serde_json::Value>(&out).expect("valid JSON");
     }
-    let (code, out) = idk(&["nothing", "--json"]);
+    let (code, out) = atfq(&["nothing", "--json"]);
     assert_eq!(code, 1);
     let v: serde_json::Value = serde_json::from_str(&out).unwrap();
     assert_eq!(v["match"], "none");

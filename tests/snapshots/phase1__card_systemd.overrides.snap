@@ -29,9 +29,9 @@ Pitfalls
   - A unit linked to /dev/null in /etc/systemd/system is masked: it can't start
     at all.
 
-Deep dive: 2 questions. Read them with idk 22.3 --why
+Deep dive: 2 questions. Read them with atfq 22.3 --why
 
 Related
   Commands  systemctl, systemd-delta
   Paths     /etc/systemd/system, /usr/lib/systemd/system
-  See also  idk 22.1 Units and timers
+  See also  atfq 22.1 Units and timers

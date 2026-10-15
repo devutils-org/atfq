@@ -129,7 +129,7 @@ impl<'a> App<'a> {
         }
     }
 
-    /// Opens what `query` resolves to, as `idk <query>` would.
+    /// Opens what `query` resolves to, as `atfq <query>` would.
     pub fn open(&mut self, query: &str) -> bool {
         self.navigate(query)
     }
@@ -614,9 +614,9 @@ impl<'a> App<'a> {
             (_, Some(p)) => match p.lookup.entry {
                 Some(Target::Card(c)) => format!(" {} {} ", c.number, c.title),
                 Some(Target::Hub(h)) => format!(" {} ", h.title),
-                None => " idk ".to_string(),
+                None => " atfq ".to_string(),
             },
-            (_, None) => " idk ".to_string(),
+            (_, None) => " atfq ".to_string(),
         };
         let block = self.block(title, focused);
         let mut inner = block.inner(area);
@@ -676,7 +676,7 @@ impl<'a> App<'a> {
         let block = Block::default()
             .borders(Borders::ALL)
             .border_style(Style::default().fg(Color::Cyan))
-            .title(" Prompt for an AI assistant (same as idk ask) ");
+            .title(" Prompt for an AI assistant (same as atfq ask) ");
         let inner = block.inner(area);
         f.render_widget(Clear, area);
         f.render_widget(block, area);
@@ -903,7 +903,7 @@ fn build_toc(lib: &Library) -> Vec<TocEntry> {
 
 /// The page shown before anything is opened.
 fn welcome(lib: &Library, width: usize) -> Doc {
-    let mut lines = vec![Line::styled("Welcome to idk", Kind::Bold), Line::default()];
+    let mut lines = vec![Line::styled("Welcome to atfq", Kind::Bold), Line::default()];
     lines.extend(wrap(
         &[Span::plain(
             "Pick a hub or a chapter on the left, or press / to search. \

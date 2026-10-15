@@ -52,5 +52,5 @@ Deep dive
 Related
   Commands  docker, podman
   Paths     /var/lib/docker/, /var/lib/containers/
-  See also  idk 7.1 What a container really is
-  See also  idk 13.5 fstab and mount options
+  See also  atfq 7.1 What a container really is
+  See also  atfq 13.5 fstab and mount options

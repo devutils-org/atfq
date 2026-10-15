@@ -29,10 +29,10 @@ Pitfalls
   - Old answers can stay cached after a change: resolvectl flush-caches.
   - Browsers may use their own DNS over HTTPS and skip the system resolver.
 
-Deep dive: 2 questions. Read them with idk 19.2 --why
+Deep dive: 2 questions. Read them with atfq 19.2 --why
 
 Related
   Commands  getent, resolvectl, dig
   Paths     /etc/resolv.conf, /etc/nsswitch.conf, /etc/hosts
-  Hub       idk network Network
-  See also  idk 19.1 Who listens on which port
+  Hub       atfq network Network
+  See also  atfq 19.1 Who listens on which port

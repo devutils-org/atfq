@@ -66,6 +66,6 @@ Deep dive
 Related
   Commands  free, vmstat
   Paths     /proc/meminfo
-  Hub       idk memory Memory
-  See also  idk 17.3 Swap and swappiness
-  See also  idk 17.2 The OOM killer
+  Hub       atfq memory Memory
+  See also  atfq 17.3 Swap and swappiness
+  See also  atfq 17.2 The OOM killer

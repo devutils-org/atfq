@@ -32,11 +32,11 @@ Pitfalls
     machine (a "kernel panic"). That's the price of full control.
   - A new kernel only runs after a reboot.
 
-Deep dive: 3 questions. Read them with idk 1.1 --why
+Deep dive: 3 questions. Read them with atfq 1.1 --why
 
 Related
   Commands  uname
   Paths     /proc/version
-  See also  idk 1.2 How the kernel shares the CPUs
-  See also  idk 1.3 How virtual memory works
-  See also  idk 21.4 syscalls and strace
+  See also  atfq 1.2 How the kernel shares the CPUs
+  See also  atfq 1.3 How virtual memory works
+  See also  atfq 21.4 syscalls and strace

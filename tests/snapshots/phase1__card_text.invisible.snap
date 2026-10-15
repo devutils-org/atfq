@@ -26,10 +26,10 @@ Pitfalls
   - grep -nP '[^\x00-\x7F]' file finds non-ASCII characters hiding in code or
     config.
 
-Deep dive: 2 questions. Read them with idk 12.3 --why
+Deep dive: 2 questions. Read them with atfq 12.3 --why
 
 Related
   Commands  cat, hexdump, dos2unix, sed
-  See also  idk 12.1 Bytes and characters: ASCII, Unicode and UTF-8
-  See also  idk 30.5 Configuring git
-  See also  idk 28.4 sed
+  See also  atfq 12.1 Bytes and characters: ASCII, Unicode and UTF-8
+  See also  atfq 30.5 Configuring git
+  See also  atfq 28.4 sed

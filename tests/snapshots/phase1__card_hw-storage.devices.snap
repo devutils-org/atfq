@@ -31,11 +31,11 @@ Pitfalls
   - Speeds on the box are for sequential transfers at their best. Small random
     writes are a fraction of that (4.4).
 
-Deep dive: 2 questions. Read them with idk 4.1 --why
+Deep dive: 2 questions. Read them with atfq 4.1 --why
 
 Related
   Commands  lsblk
   Paths     /sys/block/
-  Hub       idk disk Disk
-  See also  idk 4.2 Inside an SSD: flash, TRIM and wear
-  See also  idk 4.4 IOPS, throughput and latency: how fast is a disk?
+  Hub       atfq disk Disk
+  See also  atfq 4.2 Inside an SSD: flash, TRIM and wear
+  See also  atfq 4.4 IOPS, throughput and latency: how fast is a disk?

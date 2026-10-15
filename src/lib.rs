@@ -1,4 +1,4 @@
-//! atfq: the core behind the `idk` command. Surfaces (CLI, TUI, and later
+//! atfq: the core of the `atfq` command. Surfaces (CLI, TUI, and later
 //! MCP) only call into this library.
 
 pub mod content;
@@ -12,4 +12,4 @@ pub mod tui;
 pub mod view;
 
 /// The command users type. Help texts use this, never a literal.
-pub const BIN_NAME: &str = "idk";
+pub const BIN_NAME: &str = "atfq";

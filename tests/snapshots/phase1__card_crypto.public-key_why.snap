@@ -53,6 +53,6 @@ Deep dive
 Related
   Commands  ssh-keygen, gpg
   Paths     ~/.ssh/, ~/.gnupg/
-  See also  idk 11.1 Hashes, encryption and signatures
-  See also  idk 11.3 Certificates: how HTTPS proves who it is
-  See also  idk 29.1 SSH keys and the agent
+  See also  atfq 11.1 Hashes, encryption and signatures
+  See also  atfq 11.3 Certificates: how HTTPS proves who it is
+  See also  atfq 29.1 SSH keys and the agent

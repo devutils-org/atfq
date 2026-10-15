@@ -44,5 +44,5 @@ Deep dive
 Related
   Commands  tmux, nohup
   Paths     ~/.tmux.conf
-  See also  idk 16.2 Signals
-  See also  idk 29.1 SSH keys and the agent
+  See also  atfq 16.2 Signals
+  See also  atfq 29.1 SSH keys and the agent

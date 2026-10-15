@@ -26,10 +26,10 @@ Pitfalls
   - On a connection that drops all the time, mosh reconnects by itself and can
     carry tmux.
 
-Deep dive: 2 questions. Read them with idk 29.4 --why
+Deep dive: 2 questions. Read them with atfq 29.4 --why
 
 Related
   Commands  tmux, nohup
   Paths     ~/.tmux.conf
-  See also  idk 16.2 Signals
-  See also  idk 29.1 SSH keys and the agent
+  See also  atfq 16.2 Signals
+  See also  atfq 29.1 SSH keys and the agent

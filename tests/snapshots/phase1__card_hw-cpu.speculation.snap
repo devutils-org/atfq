@@ -35,11 +35,11 @@ Pitfalls
   - Mitigations cost most on older CPUs and system-call-heavy work; newer CPUs
     fix several flaws in hardware.
 
-Deep dive: 2 questions. Read them with idk 2.5 --why
+Deep dive: 2 questions. Read them with atfq 2.5 --why
 
 Related
   Commands  grep, journalctl
   Paths     /sys/devices/system/cpu/vulnerabilities/
-  Hub       idk cpu CPU
-  See also  idk 2.1 What a CPU does: instructions and architectures
-  See also  idk 20.2 The kernel command line
+  Hub       atfq cpu CPU
+  See also  atfq 2.1 What a CPU does: instructions and architectures
+  See also  atfq 20.2 The kernel command line

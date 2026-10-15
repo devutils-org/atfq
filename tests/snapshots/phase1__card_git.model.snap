@@ -26,10 +26,10 @@ Pitfalls
   - Big binary files bloat every clone forever, even after deletion: keep them
     out, or use Git LFS.
 
-Deep dive: 2 questions. Read them with idk 30.1 --why
+Deep dive: 2 questions. Read them with atfq 30.1 --why
 
 Related
   Commands  git
   Paths     .git/
-  See also  idk 30.2 Undoing things in git
-  See also  idk 30.3 Merge or rebase?
+  See also  atfq 30.2 Undoing things in git
+  See also  atfq 30.3 Merge or rebase?

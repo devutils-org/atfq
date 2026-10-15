@@ -47,9 +47,9 @@ file, arranged by the kernel's model of devices and drivers. New device
 information goes to `/sys`; `/proc` keeps processes and its historical
 files.
 
-### How does idk read your machine?
+### How does atfq read your machine?
 
 Mostly from these two trees: memory from `/proc/meminfo`, processes from
 `/proc/PID/stat`, disks from `/sys/block`, network interfaces from
 `/sys/class/net`. Reading files needs no root and runs no other program,
-which is why `idk` can stay read-only.
+which is why `atfq` can stay read-only.

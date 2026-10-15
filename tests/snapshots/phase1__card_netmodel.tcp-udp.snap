@@ -35,11 +35,11 @@ Pitfalls
   - Retransmissions mean lost packets. A small share is normal, especially on
     Wi-Fi; a steady high rate slows every transfer.
 
-Deep dive: 2 questions. Read them with idk 6.4 --why
+Deep dive: 2 questions. Read them with atfq 6.4 --why
 
 Related
   Commands  ss
   Paths     /proc/net/snmp
-  Hub       idk network Network
-  See also  idk 19.1 Who listens on which port
-  See also  idk 6.2 What happens when you open a website
+  Hub       atfq network Network
+  See also  atfq 19.1 Who listens on which port
+  See also  atfq 6.2 What happens when you open a website

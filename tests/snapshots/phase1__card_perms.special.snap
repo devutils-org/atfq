@@ -25,10 +25,10 @@ Pitfalls
   - A filesystem mounted with nosuid (common for USB drives and /tmp) ignores
     these bits.
 
-Deep dive: 2 questions. Read them with idk 15.2 --why
+Deep dive: 2 questions. Read them with atfq 15.2 --why
 
 Related
   Commands  chmod, getcap
   Paths     /usr/bin/passwd, /tmp
-  See also  idk 15.1 rwx, octal and umask
-  See also  idk 13.2 /tmp vs /var/tmp
+  See also  atfq 15.1 rwx, octal and umask
+  See also  atfq 13.2 /tmp vs /var/tmp

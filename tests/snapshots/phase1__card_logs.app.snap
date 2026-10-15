@@ -26,11 +26,11 @@ Pitfalls
   - Python's output to a pipe is buffered: set PYTHONUNBUFFERED=1, or lines
     reach the journal late.
 
-Deep dive: 2 questions. Read them with idk 26.4 --why
+Deep dive: 2 questions. Read them with atfq 26.4 --why
 
 Related
   Commands  logger, systemd-cat, journalctl
-  Hub       idk logs Logs
-  See also  idk 26.1 Reading the journal with journalctl
-  See also  idk 22.1 Units and timers
-  See also  idk 27.3 Redirections and file descriptors
+  Hub       atfq logs Logs
+  See also  atfq 26.1 Reading the journal with journalctl
+  See also  atfq 22.1 Units and timers
+  See also  atfq 27.3 Redirections and file descriptors

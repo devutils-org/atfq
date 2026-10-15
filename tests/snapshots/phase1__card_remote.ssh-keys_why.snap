@@ -55,5 +55,5 @@ Deep dive
 Related
   Commands  ssh-keygen, ssh-copy-id, ssh-add, ssh
   Paths     ~/.ssh/, ~/.ssh/authorized_keys
-  See also  idk 29.2 ~/.ssh/config, jump hosts and host keys
-  See also  idk 15.1 rwx, octal and umask
+  See also  atfq 29.2 ~/.ssh/config, jump hosts and host keys
+  See also  atfq 15.1 rwx, octal and umask

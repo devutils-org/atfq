@@ -35,10 +35,10 @@ Pitfalls
   - Agent forwarding (ssh -A) lets anyone with root on that server use your keys
     while you're connected.
 
-Deep dive: 2 questions. Read them with idk 29.1 --why
+Deep dive: 2 questions. Read them with atfq 29.1 --why
 
 Related
   Commands  ssh-keygen, ssh-copy-id, ssh-add, ssh
   Paths     ~/.ssh/, ~/.ssh/authorized_keys
-  See also  idk 29.2 ~/.ssh/config, jump hosts and host keys
-  See also  idk 15.1 rwx, octal and umask
+  See also  atfq 29.2 ~/.ssh/config, jump hosts and host keys
+  See also  atfq 15.1 rwx, octal and umask

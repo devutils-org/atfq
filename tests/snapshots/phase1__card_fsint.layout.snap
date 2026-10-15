@@ -32,11 +32,11 @@ Pitfalls
   - Defragmenting rarely helps on SSDs, and on btrfs it un-shares blocks between
     snapshots, multiplying the space used.
 
-Deep dive: 2 questions. Read them with idk 9.1 --why
+Deep dive: 2 questions. Read them with atfq 9.1 --why
 
 Related
   Commands  stat, du, filefrag
-  Hub       idk disk Disk
-  See also  idk 13.4 Links, inodes and "disk full"
-  See also  idk 9.2 Journaling: how a filesystem survives a crash
-  See also  idk 4.3 From write() to the disk: the block layer
+  Hub       atfq disk Disk
+  See also  atfq 13.4 Links, inodes and "disk full"
+  See also  atfq 9.2 Journaling: how a filesystem survives a crash
+  See also  atfq 4.3 From write() to the disk: the block layer

@@ -30,7 +30,7 @@ Paths
   /etc/default/grub  GRUB settings, kernel options included
 
 Cards
-  idk 20.1  From firmware to init
-  idk 20.2  The kernel command line
-  idk 20.3  GRUB vs systemd-boot vs UKI
-  idk 20.4  systemd targets
+  atfq 20.1  From firmware to init
+  atfq 20.2  The kernel command line
+  atfq 20.3  GRUB vs systemd-boot vs UKI
+  atfq 20.4  systemd targets

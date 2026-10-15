@@ -1,4 +1,4 @@
-//! Full-text search over hubs and cards (`idk search`).
+//! Full-text search over hubs and cards (`atfq search`).
 //!
 //! Each query word scores in the best field it appears in: a title is worth
 //! more than a deep dive. A word matches a whole word (full score), or at

@@ -40,12 +40,12 @@ Pitfalls
   - File locking and inotify watches don't work reliably on every network
     filesystem.
 
-Deep dive: 2 questions. Read them with idk 9.5 --why
+Deep dive: 2 questions. Read them with atfq 9.5 --why
 
 Related
   Commands  findmnt, mount
   Paths     /proc/filesystems
-  Hub       idk disk Disk
-  See also  idk 13.3 /proc and /sys
-  See also  idk 29.5 Copying files over SSH: scp, sftp and rsync
-  See also  idk 9.1 How a filesystem stores a file
+  Hub       atfq disk Disk
+  See also  atfq 13.3 /proc and /sys
+  See also  atfq 29.5 Copying files over SSH: scp, sftp and rsync
+  See also  atfq 9.1 How a filesystem stores a file

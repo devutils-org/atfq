@@ -60,7 +60,7 @@ Deep dive
 Related
   Commands  cryptsetup, systemd-cryptenroll, lsblk
   Paths     /etc/crypttab
-  Hub       idk disk Disk
-  See also  idk 11.1 Hashes, encryption and signatures
-  See also  idk 20.1 From firmware to init
-  See also  idk 4.2 Inside an SSD: flash, TRIM and wear
+  Hub       atfq disk Disk
+  See also  atfq 11.1 Hashes, encryption and signatures
+  See also  atfq 20.1 From firmware to init
+  See also  atfq 4.2 Inside an SSD: flash, TRIM and wear

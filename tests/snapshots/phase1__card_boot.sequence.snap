@@ -38,13 +38,13 @@ Pitfalls
     Rebuild it from a live USB with your distro's tool: update-initramfs, dracut
     or mkinitcpio.
 
-Deep dive: 2 questions. Read them with idk 20.1 --why
+Deep dive: 2 questions. Read them with atfq 20.1 --why
 
 Related
   Commands  systemd-analyze, journalctl, efibootmgr
   Paths     /boot, /boot/efi
-  Hub       idk boot Boot
-  See also  idk 20.3 GRUB vs systemd-boot vs UKI
-  See also  idk 20.4 systemd targets
-  See also  idk 20.2 The kernel command line
-  See also  idk 21.2 Kernel modules
+  Hub       atfq boot Boot
+  See also  atfq 20.3 GRUB vs systemd-boot vs UKI
+  See also  atfq 20.4 systemd targets
+  See also  atfq 20.2 The kernel command line
+  See also  atfq 21.2 Kernel modules

@@ -52,6 +52,6 @@ Deep dive
 
 Related
   Commands  file, readelf
-  See also  idk 23.3 PATH and command resolution
-  See also  idk 23.1 Dynamic linking and ldd
-  See also  idk 15.1 rwx, octal and umask
+  See also  atfq 23.3 PATH and command resolution
+  See also  atfq 23.1 Dynamic linking and ldd
+  See also  atfq 15.1 rwx, octal and umask

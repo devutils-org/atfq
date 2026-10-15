@@ -5,15 +5,15 @@ expression: "render::toc(&lib(), PLAIN)"
 Contents
 
 Hubs
-  idk disk         Disk
-  idk permissions  Permissions
-  idk processes    Processes & scheduling
-  idk memory       Memory
-  idk cpu          CPU
-  idk network      Network
-  idk boot         Boot
-  idk gpu          GPU
-  idk logs         Logs
+  atfq disk         Disk
+  atfq permissions  Permissions
+  atfq processes    Processes & scheduling
+  atfq memory       Memory
+  atfq cpu          CPU
+  atfq network      Network
+  atfq boot         Boot
+  atfq gpu          GPU
+  atfq logs         Logs
 
 Part I · How it works
    1. How the kernel works
@@ -91,31 +91,31 @@ Part II · Your system
       13.4  Links, inodes and "disk full"
       13.5  fstab and mount options
       13.6  /dev and udev
-  14. Disk  hub: idk disk
-  15. Permissions  hub: idk permissions
+  14. Disk  hub: atfq disk
+  15. Permissions  hub: atfq permissions
       15.1  rwx, octal and umask
       15.2  setuid, setgid and sticky bit
       15.3  sudo and groups
       15.4  ACLs and capabilities
       15.5  SELinux and AppArmor
-  16. Processes & scheduling  hub: idk processes
+  16. Processes & scheduling  hub: atfq processes
       16.1  Process states and zombies
       16.2  Signals
       16.3  nice and priorities
       16.4  cgroups
-  17. Memory  hub: idk memory
+  17. Memory  hub: atfq memory
       17.1  free vs available
       17.2  The OOM killer
       17.3  Swap and swappiness
       17.4  The page cache
-  18. CPU  hub: idk cpu
+  18. CPU  hub: atfq cpu
       18.1  Load average
-  19. Network  hub: idk network
+  19. Network  hub: atfq network
       19.1  Who listens on which port
       19.2  DNS resolution
       19.3  Interfaces and routes
       19.4  nftables vs iptables vs ufw
-  20. Boot  hub: idk boot
+  20. Boot  hub: atfq boot
       20.1  From firmware to init
       20.2  The kernel command line
       20.3  GRUB vs systemd-boot vs UKI
@@ -136,8 +136,8 @@ Part II · Your system
   24. Packages
       24.1  Which package owns a file
       24.2  Native packages vs Snap and Flatpak
-  25. GPU  hub: idk gpu
-  26. Logs  hub: idk logs
+  25. GPU  hub: atfq gpu
+  26. Logs  hub: atfq logs
       26.1  Reading the journal with journalctl
       26.2  Where logs go: journald, syslog and /var/log
       26.3  Log rotation and logs that fill the disk

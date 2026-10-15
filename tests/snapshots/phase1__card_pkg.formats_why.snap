@@ -48,4 +48,4 @@ Deep dive
 Related
   Commands  snap, flatpak
   Paths     /var/lib/snapd, /var/lib/flatpak
-  See also  idk 24.1 Which package owns a file
+  See also  atfq 24.1 Which package owns a file

@@ -50,6 +50,6 @@ Deep dive
 Related
   Commands  sha256sum, openssl
   Paths     /proc/crypto
-  See also  idk 11.2 Public-key cryptography
-  See also  idk 11.4 Random numbers: /dev/urandom and entropy
-  See also  idk 2.1 What a CPU does: instructions and architectures
+  See also  atfq 11.2 Public-key cryptography
+  See also  atfq 11.4 Random numbers: /dev/urandom and entropy
+  See also  atfq 2.1 What a CPU does: instructions and architectures

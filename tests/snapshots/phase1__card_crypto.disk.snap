@@ -41,12 +41,12 @@ Pitfalls
   - Changing a passphrase is instant (another key slot); changing the master key
     means re-encrypting the disk.
 
-Deep dive: 2 questions. Read them with idk 11.5 --why
+Deep dive: 2 questions. Read them with atfq 11.5 --why
 
 Related
   Commands  cryptsetup, systemd-cryptenroll, lsblk
   Paths     /etc/crypttab
-  Hub       idk disk Disk
-  See also  idk 11.1 Hashes, encryption and signatures
-  See also  idk 20.1 From firmware to init
-  See also  idk 4.2 Inside an SSD: flash, TRIM and wear
+  Hub       atfq disk Disk
+  See also  atfq 11.1 Hashes, encryption and signatures
+  See also  atfq 20.1 From firmware to init
+  See also  atfq 4.2 Inside an SSD: flash, TRIM and wear

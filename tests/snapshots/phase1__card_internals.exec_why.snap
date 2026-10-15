@@ -52,7 +52,7 @@ Deep dive
 
 Related
   Commands  pstree, strace
-  Hub       idk processes Processes & scheduling
-  See also  idk 23.2 ELF and "command not found"
-  See also  idk 16.1 Process states and zombies
-  See also  idk 27.3 Redirections and file descriptors
+  Hub       atfq processes Processes & scheduling
+  See also  atfq 23.2 ELF and "command not found"
+  See also  atfq 16.1 Process states and zombies
+  See also  atfq 27.3 Redirections and file descriptors

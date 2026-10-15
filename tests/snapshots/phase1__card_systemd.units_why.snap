@@ -52,6 +52,6 @@ Deep dive
 Related
   Commands  systemctl
   Paths     /etc/systemd/system, /usr/lib/systemd/system
-  See also  idk 22.2 Why a service won't start
-  See also  idk 22.3 Unit files and overrides
-  See also  idk 20.1 From firmware to init
+  See also  atfq 22.2 Why a service won't start
+  See also  atfq 22.3 Unit files and overrides
+  See also  atfq 20.1 From firmware to init

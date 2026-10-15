@@ -32,11 +32,11 @@ Pitfalls
   - [a-z] can match accented or uppercase letters, depending on the locale and
     the tool's version; [[:lower:]] or LC_ALL=C say what you mean.
 
-Deep dive: 2 questions. Read them with idk 12.2 --why
+Deep dive: 2 questions. Read them with atfq 12.2 --why
 
 Related
   Commands  locale, localectl, sort
   Paths     /etc/locale.conf, /etc/default/locale, /etc/locale.gen
-  See also  idk 12.1 Bytes and characters: ASCII, Unicode and UTF-8
-  See also  idk 27.1 Where environment variables come from
-  See also  idk 28.9 sort, uniq and cut
+  See also  atfq 12.1 Bytes and characters: ASCII, Unicode and UTF-8
+  See also  atfq 27.1 Where environment variables come from
+  See also  atfq 28.9 sort, uniq and cut

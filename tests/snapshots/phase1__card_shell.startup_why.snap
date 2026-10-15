@@ -50,5 +50,5 @@ Deep dive
 Related
   Commands  source
   Paths     ~/.bashrc, ~/.profile, /etc/profile, /etc/profile.d/
-  See also  idk 27.1 Where environment variables come from
-  See also  idk 23.3 PATH and command resolution
+  See also  atfq 27.1 Where environment variables come from
+  See also  atfq 23.3 PATH and command resolution

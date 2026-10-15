@@ -1,4 +1,4 @@
-//! Phase 4 acceptance: `idk mcp` driven over stdio with JSON-RPC, as an MCP
+//! Phase 4 acceptance: `atfq mcp` driven over stdio with JSON-RPC, as an MCP
 //! client would.
 
 use std::io::{BufRead, BufReader, Write};
@@ -17,13 +17,13 @@ struct Client {
 
 impl Client {
     fn start() -> Client {
-        let mut child = Command::new(env!("CARGO_BIN_EXE_idk"))
+        let mut child = Command::new(env!("CARGO_BIN_EXE_atfq"))
             .arg("mcp")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::null())
             .spawn()
-            .expect("start idk mcp");
+            .expect("start atfq mcp");
         let stdin = child.stdin.take().unwrap();
         let stdout = child.stdout.take().unwrap();
         let (tx, lines) = mpsc::channel();
@@ -48,7 +48,7 @@ impl Client {
                 "clientInfo": { "name": "atfq-test", "version": "0" }
             }),
         );
-        assert_eq!(init["result"]["serverInfo"]["name"], "idk");
+        assert_eq!(init["result"]["serverInfo"]["name"], "atfq");
         c.send(json!({ "jsonrpc": "2.0", "method": "notifications/initialized" }));
         c
     }
@@ -66,7 +66,7 @@ impl Client {
             let line = self
                 .lines
                 .recv_timeout(Duration::from_secs(10))
-                .expect("no answer from idk mcp within 10 s");
+                .expect("no answer from atfq mcp within 10 s");
             let msg: Value = serde_json::from_str(&line).expect("server sent invalid JSON");
             if msg["id"] == id {
                 return msg;

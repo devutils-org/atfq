@@ -30,11 +30,11 @@ Pitfalls
   - Rules added by hand with nft or iptables vanish at reboot unless your
     distro's service saves them.
 
-Deep dive: 2 questions. Read them with idk 19.4 --why
+Deep dive: 2 questions. Read them with atfq 19.4 --why
 
 Related
   Commands  nft, ufw, firewall-cmd
   Paths     /etc/nftables.conf, /etc/ufw/
-  Hub       idk network Network
-  See also  idk 19.1 Who listens on which port
-  See also  idk 19.3 Interfaces and routes
+  Hub       atfq network Network
+  See also  atfq 19.1 Who listens on which port
+  See also  atfq 19.3 Interfaces and routes

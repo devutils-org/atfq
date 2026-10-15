@@ -26,9 +26,9 @@ Pitfalls
   - sed -i on a symbolic link replaces the link with a regular file, unless you
     add --follow-symlinks.
 
-Deep dive: 2 questions. Read them with idk 28.4 --why
+Deep dive: 2 questions. Read them with atfq 28.4 --why
 
 Related
   Commands  sed
-  See also  idk 28.2 grep and regex
-  See also  idk 28.3 awk
+  See also  atfq 28.2 grep and regex
+  See also  atfq 28.3 awk

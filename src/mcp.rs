@@ -1,4 +1,4 @@
-//! `idk mcp`: the same knowledge and probes for AI agents, as an MCP server
+//! `atfq mcp`: the same knowledge and probes for AI agents, as an MCP server
 //! on stdio (ROADMAP.md 8.4). Every tool is read-only.
 
 use std::io;
@@ -19,7 +19,7 @@ use crate::BIN_NAME;
 /// Results returned by the `search` tool.
 const SEARCH_LIMIT: usize = 10;
 
-const INSTRUCTIONS: &str = "idk explains Linux in plain English and reads the live state of \
+const INSTRUCTIONS: &str = "atfq explains Linux in plain English and reads the live state of \
 this machine (memory, disks, processes). It is strictly read-only: it never runs commands, \
 never changes files or settings, and never uses the network. Use `lookup` for a topic, a \
 command or a chapter number (`free`, `zombie`, `find`, `5.1`), `search` for free text, and \

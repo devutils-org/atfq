@@ -1,4 +1,4 @@
-//! `user.identity`: who `idk` runs as, its groups and its umask.
+//! `user.identity`: who `atfq` runs as, its groups and its umask.
 
 use std::collections::HashMap;
 

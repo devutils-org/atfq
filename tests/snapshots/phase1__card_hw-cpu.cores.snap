@@ -30,12 +30,12 @@ Pitfalls
   - Benchmarks vary between runs partly because of this: pin them with
     taskset -c 2 ./bench.
 
-Deep dive: 2 questions. Read them with idk 2.2 --why
+Deep dive: 2 questions. Read them with atfq 2.2 --why
 
 Related
   Commands  nproc, lscpu
   Paths     /sys/devices/system/cpu/
-  Hub       idk cpu CPU
-  See also  idk 1.2 How the kernel shares the CPUs
-  See also  idk 2.3 CPU caches: why memory layout matters
-  See also  idk 3.2 NUMA: when some memory is closer
+  Hub       atfq cpu CPU
+  See also  atfq 1.2 How the kernel shares the CPUs
+  See also  atfq 2.3 CPU caches: why memory layout matters
+  See also  atfq 3.2 NUMA: when some memory is closer

@@ -32,11 +32,11 @@ Pitfalls
     for parity RAID.
   - Changing filesystem means reformatting: back up first.
 
-Deep dive: 2 questions. Read them with idk 9.4 --why
+Deep dive: 2 questions. Read them with atfq 9.4 --why
 
 Related
   Commands  lsblk, findmnt
   Paths     /etc/fstab
-  Hub       idk disk Disk
-  See also  idk 9.3 Copy-on-write filesystems: snapshots and checksums
-  See also  idk 9.2 Journaling: how a filesystem survives a crash
+  Hub       atfq disk Disk
+  See also  atfq 9.3 Copy-on-write filesystems: snapshots and checksums
+  See also  atfq 9.2 Journaling: how a filesystem survives a crash

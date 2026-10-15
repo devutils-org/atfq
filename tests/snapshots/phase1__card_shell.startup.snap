@@ -31,10 +31,10 @@ Pitfalls
   - A change to ~/.profile only applies at the next login, not in a new terminal
     tab.
 
-Deep dive: 2 questions. Read them with idk 27.2 --why
+Deep dive: 2 questions. Read them with atfq 27.2 --why
 
 Related
   Commands  source
   Paths     ~/.bashrc, ~/.profile, /etc/profile, /etc/profile.d/
-  See also  idk 27.1 Where environment variables come from
-  See also  idk 23.3 PATH and command resolution
+  See also  atfq 27.1 Where environment variables come from
+  See also  atfq 23.3 PATH and command resolution
