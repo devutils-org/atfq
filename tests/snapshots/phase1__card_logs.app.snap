@@ -1,0 +1,36 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+26.4  Logging from your own programs and services
+
+TL;DR
+  - Under systemd, a service only has to print to standard output or error:
+    journald stores each line with the time, unit and PID.
+  - Prefix a line with <3> (error) to <7> (debug) to set its priority;
+    journalctl -p can then filter it.
+  - From a shell script, logger sends a message to the journal; systemd-cat
+    sends a whole command's output.
+
+      logger -p user.err "backup failed: disk full"
+      systemd-cat -t backup ./backup.sh
+      journalctl -t backup                  # by tag
+
+Pitfalls
+  - Writing your own log file from a service means handling rotation,
+    permissions and disk space yourself: standard output is simpler.
+  - Never log secrets: passwords, tokens and full request bodies end up in files
+    many people and tools can read.
+  - Logging every request at full detail can cost more than the work: keep debug
+    logs off in production, behind a level setting.
+  - Python's output to a pipe is buffered: set PYTHONUNBUFFERED=1, or lines
+    reach the journal late.
+
+Deep dive: 2 questions. Read them with idk 26.4 --why
+
+Related
+  Commands  logger, systemd-cat, journalctl
+  Hub       idk logs Logs
+  See also  idk 26.1 Reading the journal with journalctl
+  See also  idk 22.1 Units and timers
+  See also  idk 27.3 Redirections and file descriptors

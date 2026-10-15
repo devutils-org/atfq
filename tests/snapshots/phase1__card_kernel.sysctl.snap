@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-17.1  sysctl
+21.1  sysctl
 
 TL;DR
   - Kernel settings are files under /proc/sys. sysctl reads and writes them with
@@ -36,10 +36,10 @@ Pitfalls
   - Tuning lists copied from the web often do nothing, or harm: change one
     setting at a time, for a reason you can measure.
 
-Deep dive: 2 questions. Read them with idk 17.1 --why
+Deep dive: 2 questions. Read them with idk 21.1 --why
 
 Related
   Commands  sysctl
   Paths     /proc/sys, /etc/sysctl.d/
-  See also  idk 9.3 /proc and /sys
-  See also  idk 13.3 Swap and swappiness
+  See also  idk 13.3 /proc and /sys
+  See also  idk 17.3 Swap and swappiness

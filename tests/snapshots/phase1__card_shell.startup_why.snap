@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-22.2  Shell startup files
+27.2  Shell startup files
 
 TL;DR
   - A login shell (console, SSH) reads the profile files. bash reads only the
@@ -50,5 +50,5 @@ Deep dive
 Related
   Commands  source
   Paths     ~/.bashrc, ~/.profile, /etc/profile, /etc/profile.d/
-  See also  idk 22.1 Where environment variables come from
-  See also  idk 19.3 PATH and command resolution
+  See also  idk 27.1 Where environment variables come from
+  See also  idk 23.3 PATH and command resolution

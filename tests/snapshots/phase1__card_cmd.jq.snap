@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-23.8  jq
+28.8  jq
 
 TL;DR
   - jq filters JSON: give it a path, get the value back.
@@ -22,8 +22,8 @@ Pitfalls
   - jq can't edit a file in place: write to a temporary file, then move it over
     the original.
 
-Deep dive: 2 questions. Read them with idk 23.8 --why
+Deep dive: 2 questions. Read them with idk 28.8 --why
 
 Related
   Commands  jq
-  See also  idk 23.2 grep and regex
+  See also  idk 28.2 grep and regex

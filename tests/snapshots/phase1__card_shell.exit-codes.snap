@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-22.4  Exit codes
+27.4  Exit codes
 
 TL;DR
   - Every command ends with a number: 0 means success, anything else (1 to 255)
@@ -25,9 +25,9 @@ Pitfalls
     and ||.
   - Codes wrap around at 256: exit 256 gives 0.
 
-Deep dive: 2 questions. Read them with idk 22.4 --why
+Deep dive: 2 questions. Read them with idk 27.4 --why
 
 Related
   Commands  echo
-  See also  idk 22.3 Redirections and file descriptors
-  See also  idk 12.2 Signals
+  See also  idk 27.3 Redirections and file descriptors
+  See also  idk 16.2 Signals

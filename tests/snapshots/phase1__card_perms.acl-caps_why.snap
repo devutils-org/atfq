@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-11.4  ACLs and capabilities
+15.4  ACLs and capabilities
 
 TL;DR
   - An ACL gives rights to more people than owner, group and others: "bob may
@@ -44,5 +44,5 @@ Deep dive
 Related
   Commands  getfacl, setfacl, getcap, setcap
   Hub       idk permissions Permissions
-  See also  idk 11.1 rwx, octal and umask
-  See also  idk 11.2 setuid, setgid and sticky bit
+  See also  idk 15.1 rwx, octal and umask
+  See also  idk 15.2 setuid, setgid and sticky bit

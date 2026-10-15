@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-16.1  From firmware to init
+20.1  From firmware to init
 
 TL;DR
   - The firmware (UEFI or BIOS) checks the hardware and starts a bootloader from
@@ -38,13 +38,13 @@ Pitfalls
     Rebuild it from a live USB with your distro's tool: update-initramfs, dracut
     or mkinitcpio.
 
-Deep dive: 2 questions. Read them with idk 16.1 --why
+Deep dive: 2 questions. Read them with idk 20.1 --why
 
 Related
   Commands  systemd-analyze, journalctl, efibootmgr
   Paths     /boot, /boot/efi
   Hub       idk boot Boot
-  See also  idk 16.3 GRUB vs systemd-boot vs UKI
-  See also  idk 16.4 systemd targets
-  See also  idk 16.2 The kernel command line
-  See also  idk 17.2 Kernel modules
+  See also  idk 20.3 GRUB vs systemd-boot vs UKI
+  See also  idk 20.4 systemd targets
+  See also  idk 20.2 The kernel command line
+  See also  idk 21.2 Kernel modules

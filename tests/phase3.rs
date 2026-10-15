@@ -40,7 +40,7 @@ fn prompt_for_a_card() {
 #[test]
 fn default_question_and_no_match() {
     let lib = lib();
-    let l = lookup(&lib, "12.1", &laptop());
+    let l = lookup(&lib, "16.1", &laptop());
     let p = build(&l, None, &sys(), false);
     assert!(p
         .text

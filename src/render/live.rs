@@ -11,6 +11,7 @@ use crate::probes::{
     ProcStates, Status, Sysctl, SystemdStatus, TmpDirs,
 };
 use crate::probes::{CpuCaches, CpuFeatures, CpuFreq, CpuTopology, CpuVulns, MemErrors, Numa};
+use crate::probes::{CryptoInfo, FsMounts, LocaleInfo, LogInfo, TimeInfo};
 use crate::probes::{DiskHardware, DiskIo, GitConfig, Gpus, SshSetup};
 use crate::probes::{Interrupts, KernelOverview, NetLayers, VirtualMemory};
 use crate::probes::{Ipc, Limit, Limits, Threads, VirtInfo};
@@ -86,6 +87,11 @@ pub(crate) fn result(r: &ProbeResult, w: usize) -> Vec<Line> {
         (_, Some(ProbeData::Threads(t))) => threads(t, w),
         (_, Some(ProbeData::Limits(l))) => limits(l, w),
         (_, Some(ProbeData::Ipc(i))) => ipc(i, w),
+        (_, Some(ProbeData::FsMounts(m))) => fs_mounts(m, w),
+        (_, Some(ProbeData::Time(t))) => time(t, w),
+        (_, Some(ProbeData::Crypto(c))) => crypto(c, w),
+        (_, Some(ProbeData::Locale(l))) => locale(l, w),
+        (_, Some(ProbeData::Logs(l))) => logs(l, w),
         (_, None) => Vec::new(),
     };
     for note in &r.notes {
@@ -1986,6 +1992,260 @@ fn ipc(i: &Ipc, w: usize) -> Vec<Line> {
     out
 }
 
+/// What a mount option changes, in a few words.
+fn mount_option(o: &str) -> String {
+    match o {
+        "ro" => "read-only".to_string(),
+        "noatime" => "access times not written".to_string(),
+        "strictatime" => "access time written on every read".to_string(),
+        "nodatacow" => "copy-on-write off".to_string(),
+        "nodatasum" => "no data checksums".to_string(),
+        "ssd" => "SSD mode".to_string(),
+        "sync" => "every write waits for the disk".to_string(),
+        "nobarrier" | "barrier=0" => "no write barriers: unsafe on power loss".to_string(),
+        "data=journal" => "data journaled too".to_string(),
+        "data=ordered" => "journal: data written before metadata".to_string(),
+        "data=writeback" => "journal: metadata only, no ordering".to_string(),
+        "errors=remount-ro" => "read-only after an error".to_string(),
+        _ if o.starts_with("compress") => match o.split_once('=') {
+            Some((_, alg)) => format!("compressed ({alg})"),
+            None => "compressed".to_string(),
+        },
+        _ if o.starts_with("discard") => "TRIM on delete".to_string(),
+        _ if o.starts_with("commit=") => format!("journal commit every {} s", &o[7..]),
+        _ => o.to_string(),
+    }
+}
+
+fn fs_mounts(m: &FsMounts, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if m.mounts.is_empty() {
+        out.extend(row("Mounts", "no disk or network filesystem mounted", w));
+    }
+    /// Mounts listed; the rest are counted.
+    const SHOWN: usize = 6;
+    for mount in m.mounts.iter().take(SHOWN) {
+        let mut parts = vec![format!("{} on {}", mount.fstype, mount.source)];
+        // A subvolume's name says little; the rest says how it behaves.
+        parts.extend(
+            mount
+                .options
+                .iter()
+                .filter(|o| !o.starts_with("subvol="))
+                .map(|o| mount_option(o)),
+        );
+        out.extend(row(&mount.point, &parts.join(" · "), w));
+    }
+    if m.mounts.len() > SHOWN {
+        out.extend(row(
+            "",
+            &format!(
+                "and {} more: findmnt lists them all",
+                m.mounts.len() - SHOWN
+            ),
+            w,
+        ));
+    }
+    out
+}
+
+/// Seconds since 1970 → `2025-10-15 00:00 UTC`.
+fn utc(secs: u64) -> String {
+    let days = (secs / 86_400) as i64;
+    let rem = secs % 86_400;
+    // Howard Hinnant's days-to-civil algorithm.
+    let z = days + 719_468;
+    let era = z.div_euclid(146_097);
+    let doe = z - era * 146_097;
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let d = doy - (153 * mp + 2) / 5 + 1;
+    let m = if mp < 10 { mp + 3 } else { mp - 9 };
+    let y = yoe + era * 400 + i64::from(m <= 2);
+    format!(
+        "{y:04}-{m:02}-{d:02} {:02}:{:02} UTC",
+        rem / 3600,
+        rem % 3600 / 60
+    )
+}
+
+fn time(t: &TimeInfo, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if let Some(z) = &t.zone {
+        out.extend(row("Zone", z, w));
+    }
+    if let Some(local) = t.rtc_local {
+        let text = if local {
+            "keeps local time: Windows' habit, a source of DST bugs"
+        } else {
+            "keeps UTC"
+        };
+        out.extend(row("RTC", &format!("the hardware clock {text}"), w));
+    }
+    if let Some(c) = &t.clocksource {
+        let others: Vec<&str> = t
+            .clocksources
+            .iter()
+            .map(String::as_str)
+            .filter(|o| o != c)
+            .collect();
+        let mut text = c.clone();
+        if !others.is_empty() {
+            text.push_str(&format!(" (also available: {})", others.join(", ")));
+        }
+        out.extend(row("Source", &text, w));
+    }
+    let sync = match (&t.daemon, t.synced) {
+        (Some(d), Some(true)) => format!("{d}, synchronised"),
+        (Some(d), Some(false)) => format!("{d}, not synchronised yet"),
+        (Some(d), None) => format!("{d} running"),
+        (None, _) => {
+            "no NTP daemon running here (a container or VM may get its time from the host)"
+                .to_string()
+        }
+    };
+    out.extend(row("Sync", &sync, w));
+    if let Some(b) = t.boot {
+        out.extend(row("Booted", &utc(b), w));
+    }
+    out
+}
+
+fn crypto(c: &CryptoInfo, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if let (Some(b), Some(n)) = (&c.ca_bundle, c.ca_count) {
+        out.extend(row(
+            "Trusted",
+            &format!("{n} certificate authorities, in {b}"),
+            w,
+        ));
+    }
+    if let Some(a) = &c.aes {
+        let how = if c.aes_hw {
+            "with the CPU's AES instructions"
+        } else {
+            "in software"
+        };
+        let mut text = format!("{a}, {how}");
+        if let Some(sha) = &c.sha256 {
+            text.push_str(&format!(" · SHA-256: {sha}"));
+        }
+        out.extend(row("AES", &text, w));
+    }
+    if let Some(r) = &c.hw_rng {
+        out.extend(row(
+            "RNG",
+            &format!("hardware generator {r} feeds the kernel"),
+            w,
+        ));
+    }
+    if let Some(t) = &c.tpm {
+        out.extend(row(
+            "TPM",
+            &format!("version {t}: can hold keys and seal disk keys"),
+            w,
+        ));
+    }
+    if let Some(p) = &c.policy {
+        out.extend(row("Policy", &format!("system-wide crypto policy {p}"), w));
+    }
+    out
+}
+
+fn locale(l: &LocaleInfo, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    let text = if l.vars.is_empty() {
+        "no locale variable set: programs use C, plain ASCII".to_string()
+    } else {
+        l.vars
+            .iter()
+            .map(|(k, v)| format!("{k}={v}"))
+            .collect::<Vec<_>>()
+            .join(" · ")
+    };
+    out.extend(row("Session", &text, w));
+    out.extend(row(
+        "Text",
+        &if l.utf8 {
+            format!("read as UTF-8 ({})", l.ctype)
+        } else {
+            format!("not UTF-8 ({}): accents may break", l.ctype)
+        },
+        w,
+    ));
+    if let Some(s) = &l.system {
+        out.extend(row("System", &format!("LANG={s} for new sessions"), w));
+    }
+    if !l.installed.is_empty() || l.archive {
+        let mut text = l.installed.join(", ");
+        if l.archive {
+            if !text.is_empty() {
+                text.push_str(", ");
+            }
+            text.push_str("and those in locale-archive");
+        }
+        out.extend(row("Installed", &text, w));
+    }
+    out
+}
+
+fn logs(l: &LogInfo, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    let place = match l.storage.as_str() {
+        "persistent" => "on disk (/var/log/journal): kept across reboots",
+        "volatile" => "in RAM (/run/log/journal): lost at reboot",
+        _ => "no journal found",
+    };
+    let mut text = place.to_string();
+    if l.journal_files > 0 {
+        text.push_str(&format!(
+            " · {} in {} {}",
+            size(l.journal_bytes),
+            l.journal_files,
+            if l.journal_files == 1 {
+                "file"
+            } else {
+                "files"
+            }
+        ));
+    }
+    out.extend(row("Journal", &text, w));
+    let mut set = Vec::new();
+    if let Some(s) = &l.storage_setting {
+        set.push(format!("Storage={s}"));
+    }
+    if let Some(m) = &l.max_use {
+        set.push(format!("SystemMaxUse={m}"));
+    }
+    if !set.is_empty() {
+        out.extend(row("Settings", &set.join(" · "), w));
+    }
+    if let Some(s) = &l.syslog {
+        out.extend(row(
+            "Syslog",
+            &format!("{s} also writes text files in /var/log"),
+            w,
+        ));
+    }
+    if let Some(n) = l.logrotate_rules {
+        out.extend(row(
+            "Rotation",
+            &format!("{n} rules in /etc/logrotate.d"),
+            w,
+        ));
+    }
+    if !l.biggest.is_empty() {
+        let list: Vec<String> = l
+            .biggest
+            .iter()
+            .map(|(p, s)| format!("{p} {}", size(*s)))
+            .collect();
+        out.extend(row("Biggest", &list.join(" · "), w));
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2052,6 +2312,14 @@ mod tests {
         let gpu = text("gpu.devices");
         assert!(gpu.contains("card1     NVIDIA, driver nvidia"), "{gpu}");
         assert!(gpu.contains("NVIDIA kernel module 560.35.03"), "{gpu}");
+    }
+
+    #[test]
+    fn utc_dates() {
+        assert_eq!(utc(0), "1970-01-01 00:00 UTC");
+        assert_eq!(utc(1_760_486_400), "2025-10-15 00:00 UTC");
+        assert_eq!(utc(951_782_400 + 3_600 + 60), "2000-02-29 01:01 UTC");
+        assert_eq!(utc(2_147_483_647), "2038-01-19 03:14 UTC");
     }
 
     #[test]

@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-14.1  Load average
+18.1  Load average
 
 TL;DR
   - Load average: the number of tasks running or waiting for a CPU, plus those
@@ -50,5 +50,5 @@ Related
   Commands  uptime, nproc, top
   Paths     /proc/loadavg
   Hub       idk cpu CPU
-  See also  idk 12.1 Process states and zombies
-  See also  idk 12.3 nice and priorities
+  See also  idk 16.1 Process states and zombies
+  See also  idk 16.3 nice and priorities

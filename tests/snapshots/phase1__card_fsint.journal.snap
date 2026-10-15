@@ -1,0 +1,42 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+9.2  Journaling: how a filesystem survives a crash
+
+TL;DR
+  - Creating a file touches several places on disk: the inode, the folder, the
+    free-space map. A crash in between would leave them disagreeing.
+  - A journal writes the whole change to a log area first, then applies it.
+    After a crash, the filesystem replays or drops the logged changes:
+    consistent again in seconds, without a full check.
+  - ext4 and XFS journal metadata; your file's content still needs fsync (4.5).
+
+      findmnt -no OPTIONS /        # mount options of the root filesystem
+      sudo dmesg | grep -iE 'ext4|xfs|btrfs'   # errors and journal replays
+
+On your machine
+  /         btrfs on /dev/nvme0n1p2 · SSD mode
+  /home     btrfs on /dev/nvme0n1p2 · SSD mode
+  /var/lib/my data btrfs on /dev/nvme0n1p2 · SSD mode
+  /boot/efi vfat on /dev/nvme0n1p1
+  /media/usb exfat on /dev/sda
+  /home     btrfs on /dev/nvme0n1p2
+
+Pitfalls
+  - "Read-only file system" out of the blue: the kernel found an error and
+    remounted it read-only (errors=remount-ro). Look at dmesg, then plan a
+    check: the disk may be failing.
+  - Never run fsck on a mounted filesystem: it can destroy it. Check from a
+    rescue system, or let it run at boot.
+  - fsck -n only reports problems; without it, fsck changes the disk.
+
+Deep dive: 2 questions. Read them with idk 9.2 --why
+
+Related
+  Commands  fsck, dmesg, mount
+  Paths     /etc/fstab
+  Hub       idk disk Disk
+  See also  idk 9.1 How a filesystem stores a file
+  See also  idk 4.5 fsync: when is data really on disk?
+  See also  idk 21.3 dmesg and the kernel log

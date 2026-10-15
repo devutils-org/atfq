@@ -31,7 +31,7 @@ Pitfalls
   - "Too many open files" can also be a leak: if the count in /proc/PID/fd keeps
     growing, a file or socket isn't being closed.
   - ulimit -n 65536 lasts for that shell and what it starts; for a service,
-    systemctl edit and LimitNOFILE=65536 (18.3).
+    systemctl edit and LimitNOFILE=65536 (22.3).
   - "fork: Resource temporarily unavailable" means a process or thread limit:
     ulimit -u, or a cgroup's pids.max (systemd's TasksMax=).
   - Containers have their own limits: docker run --ulimit nofile=….
@@ -56,5 +56,5 @@ Related
   Commands  ulimit, prlimit, ls
   Paths     /proc/PID/limits, /etc/security/limits.conf
   See also  idk 8.3 Event loops: one thread, thousands of connections
-  See also  idk 18.3 Unit files and overrides
-  See also  idk 12.4 cgroups
+  See also  idk 22.3 Unit files and overrides
+  See also  idk 16.4 cgroups

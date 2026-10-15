@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: page
 ---
-16. Boot  hub
+20. Boot  hub
 
 From power button to login prompt: firmware, bootloader, kernel, init.
 
@@ -30,7 +30,7 @@ Paths
   /etc/default/grub  GRUB settings, kernel options included
 
 Cards
-  idk 16.1  From firmware to init
-  idk 16.2  The kernel command line
-  idk 16.3  GRUB vs systemd-boot vs UKI
-  idk 16.4  systemd targets
+  idk 20.1  From firmware to init
+  idk 20.2  The kernel command line
+  idk 20.3  GRUB vs systemd-boot vs UKI
+  idk 20.4  systemd targets

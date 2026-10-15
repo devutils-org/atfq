@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-13.3  Swap and swappiness
+17.3  Swap and swappiness
 
 TL;DR
   - Swap is disk space the kernel uses as overflow for RAM: app memory that is
@@ -29,11 +29,11 @@ Pitfalls
   - swapoff -a on a busy machine pulls everything back into RAM, and can wake
     the OOM killer.
 
-Deep dive: 2 questions. Read them with idk 13.3 --why
+Deep dive: 2 questions. Read them with idk 17.3 --why
 
 Related
   Commands  swapon, vmstat
   Paths     /proc/swaps, /proc/sys/vm/swappiness
   Hub       idk memory Memory
-  See also  idk 13.1 free vs available
-  See also  idk 13.2 The OOM killer
+  See also  idk 17.1 free vs available
+  See also  idk 17.2 The OOM killer

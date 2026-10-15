@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-19.2  ELF and "command not found"
+23.2  ELF and "command not found"
 
 TL;DR
   - "command not found": no file of that name in any folder of your PATH.
@@ -52,6 +52,6 @@ Deep dive
 
 Related
   Commands  file, readelf
-  See also  idk 19.3 PATH and command resolution
-  See also  idk 19.1 Dynamic linking and ldd
-  See also  idk 11.1 rwx, octal and umask
+  See also  idk 23.3 PATH and command resolution
+  See also  idk 23.1 Dynamic linking and ldd
+  See also  idk 15.1 rwx, octal and umask

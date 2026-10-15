@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: page
 ---
-13. Memory  hub
+17. Memory  hub
 
 How much RAM you have, who is using it, and why "used" doesn't mean what you
 think.
@@ -25,9 +25,9 @@ Paths
   /proc/PID/status         memory of one process (VmRSS line)
 
 Cards
-  idk 13.1  free vs available
-  idk 13.2  The OOM killer
-  idk 13.3  Swap and swappiness
-  idk 13.4  The page cache
+  idk 17.1  free vs available
+  idk 17.2  The OOM killer
+  idk 17.3  Swap and swappiness
+  idk 17.4  The page cache
   idk 1.3   How virtual memory works
   idk 3.1   RAM and the memory hierarchy

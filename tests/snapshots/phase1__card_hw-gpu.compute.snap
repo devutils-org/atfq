@@ -22,7 +22,7 @@ On your machine
 
 Pitfalls
   - Render nodes usually belong to the render group (sometimes video): add
-    yourself, then log in again (11.3).
+    yourself, then log in again (15.3).
   - Containers see no GPU unless given one: --gpus all with the NVIDIA Container
     Toolkit, or --device /dev/kfd --device /dev/dri for ROCm.
   - A Python package built for CPU only, or for another CUDA version, reports no
@@ -37,4 +37,4 @@ Related
   Paths     /dev/dri/, /dev/kfd, /dev/nvidia0
   See also  idk 5.1 What a GPU does differently
   See also  idk 5.2 GPU drivers: the kernel, Mesa and NVIDIA
-  See also  idk 11.3 sudo and groups
+  See also  idk 15.3 sudo and groups

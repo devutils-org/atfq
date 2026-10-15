@@ -1,0 +1,66 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+11.5  Disk encryption: LUKS and the TPM
+
+TL;DR
+  - LUKS encrypts a whole partition: without the key, a stolen disk or laptop
+    gives nothing. Once unlocked, files are readable as usual.
+  - Your passphrase doesn't encrypt the data directly: it unlocks a random
+    master key stored in the LUKS header, in one of several key slots.
+  - A TPM can hold an unlock key and release it only if the boot chain is
+    unchanged: no passphrase at boot, still protected if the disk is removed.
+
+      lsblk -f                          # crypto_LUKS partitions
+      sudo cryptsetup luksDump /dev/nvme0n1p3     # key slots, cipher
+      sudo systemd-cryptenroll --tpm2-device=auto /dev/nvme0n1p3
+
+On your machine
+  Trusted   3 certificate authorities, in /etc/ssl/certs/ca-certificates.crt
+  AES       aes-aesni, with the CPU's AES instructions · SHA-256: sha256-ni
+  RNG       hardware generator tpm-rng-0 feeds the kernel
+  TPM       version 2: can hold keys and seal disk keys
+
+  nvme0n1         476.9 GiB  SSD · Samsung SSD 980 PRO 500GB
+    nvme0n1p1     512.0 MiB  vfat   /boot/efi   256.0 MiB free (50%)
+    nvme0n1p2     476.4 GiB  btrfs  / (+2)      120.0 GiB free (30%)
+    nvme0n1p10      1.0 MiB
+  sda              30.0 GiB  rotational · removable · USB DISK 3.0
+    (whole disk)             exfat  /media/usb
+  zram0             8.0 GiB  SSD · swap
+  2 loop or empty devices not shown
+
+Pitfalls
+  - Damage to the LUKS header loses everything: keep a copy elsewhere
+    (cryptsetup luksHeaderBackup).
+  - Keep a recovery passphrase or key: a firmware update or Secure Boot change
+    makes the TPM refuse, and asks for it.
+  - Encryption protects a machine that's off. While it runs, files are as
+    readable as on any disk.
+  - Changing a passphrase is instant (another key slot); changing the master key
+    means re-encrypting the disk.
+
+Deep dive
+
+  ▾ How does the TPM know the boot is the same?
+
+    As each stage boots, it measures the next (firmware, bootloader, kernel,
+    Secure Boot settings) into the TPM's registers (PCRs). The disk key is
+    sealed to chosen register values: the TPM releases it only if they match.
+    Boot something else, or move the disk to another machine, and the key stays
+    locked.
+
+  ▾ Does encryption slow the disk down?
+
+    Barely, with AES instructions in the CPU: encryption runs at gigabytes per
+    second per core. On some SSDs, discard must be allowed in /etc/crypttab for
+    TRIM to reach the drive (4.2).
+
+Related
+  Commands  cryptsetup, systemd-cryptenroll, lsblk
+  Paths     /etc/crypttab
+  Hub       idk disk Disk
+  See also  idk 11.1 Hashes, encryption and signatures
+  See also  idk 20.1 From firmware to init
+  See also  idk 4.2 Inside an SSD: flash, TRIM and wear

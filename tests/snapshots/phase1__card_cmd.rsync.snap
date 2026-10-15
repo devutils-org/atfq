@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-23.7  rsync
+28.7  rsync
 
 TL;DR
   - rsync copies files and only transfers what changed: run it again and it
@@ -28,9 +28,9 @@ Pitfalls
   - -a doesn't keep hard links, ACLs or extended attributes: add -H, -A and -X
     when they matter.
 
-Deep dive: 2 questions. Read them with idk 23.7 --why
+Deep dive: 2 questions. Read them with idk 28.7 --why
 
 Related
   Commands  rsync
   Hub       idk disk Disk
-  See also  idk 23.6 tar
+  See also  idk 28.6 tar

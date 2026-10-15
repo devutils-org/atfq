@@ -7,8 +7,15 @@ pub fn is_dangerous(cmd: &str) -> bool {
     words.iter().enumerate().any(|(i, &w)| match w {
         "rm" | "dd" | "shred" | "wipefs" | "truncate" | "-delete" => true,
         "git" => git_destroys(&words[i + 1..]),
+        // Repair tools rewrite the filesystem; `-n` only checks.
+        _ if w.starts_with("fsck") || w == "e2fsck" || w == "xfs_repair" => {
+            !words[i + 1..].contains(&"-n")
+        }
+        "btrfs" => words[i + 1..].contains(&"--repair"),
         // rsync --delete, --delete-after…: removes files from the destination.
         _ if w.starts_with("--delete") => true,
+        // journalctl --vacuum-size, --vacuum-time: deletes old logs.
+        _ if w.starts_with("--vacuum") => true,
         "chmod" | "chown" | "chgrp" => words[i + 1..].contains(&"-R"),
         _ => w.starts_with("mkfs"),
     })
@@ -91,6 +98,11 @@ mod tests {
             "git checkout -- notes.txt",
             "git restore notes.txt",
             "git restore --staged --worktree notes.txt",
+            "sudo journalctl --vacuum-size=500M",
+            "sudo fsck -y /dev/sdb1",
+            "sudo fsck.ext4 /dev/sdb1",
+            "sudo xfs_repair /dev/sdb1",
+            "sudo btrfs check --repair /dev/sdb1",
         ] {
             assert!(is_dangerous(cmd), "{cmd}");
         }
@@ -114,6 +126,8 @@ mod tests {
             "git checkout main",
             "git restore --staged notes.txt",
             "git log --oneline",
+            "sudo fsck -n /dev/sdb1",
+            "sudo btrfs check /dev/sdb1",
         ] {
             assert!(!is_dangerous(cmd), "{cmd}");
         }

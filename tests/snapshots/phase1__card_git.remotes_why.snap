@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-25.4  Remotes: fetch, pull and push
+30.4  Remotes: fetch, pull and push
 
 TL;DR
   - A remote is another copy of the repository, usually origin on GitHub or
@@ -41,7 +41,7 @@ Deep dive
   ▾ HTTPS or SSH remotes?
 
     With SSH (git@github.com:user/repo.git), your SSH key authenticates you
-    (24.1). With HTTPS, git asks a credential helper for a token: the system
+    (29.1). With HTTPS, git asks a credential helper for a token: the system
     keyring, or store, which writes it in plain text in ~/.git-credentials.
     Hosts no longer accept account passwords over HTTPS.
 
@@ -54,5 +54,5 @@ Deep dive
 
 Related
   Commands  git
-  See also  idk 25.3 Merge or rebase?
-  See also  idk 24.1 SSH keys and the agent
+  See also  idk 30.3 Merge or rebase?
+  See also  idk 29.1 SSH keys and the agent

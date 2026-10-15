@@ -1,0 +1,37 @@
+---
+source: tests/phase1.rs
+expression: page
+---
+26. Logs  hub
+
+What happened on this machine, where it's written down, and how to keep it from
+filling the disk.
+
+On your machine
+  Journal   on disk (/var/log/journal): kept across reboots · 300 B in 2 files
+  Settings  SystemMaxUse=500M
+  Syslog    rsyslog also writes text files in /var/log
+  Rotation  2 rules in /etc/logrotate.d
+  Biggest   /var/log/syslog 4.9 KiB · /var/log/nginx/access.log 2.9 KiB ·
+            /var/log/auth.log 1.2 KiB
+
+Commands
+  journalctl -b -p warning  warnings and errors since boot
+  journalctl -u nginx -f    follow one service's log
+  journalctl -b -1 -e       how the previous boot ended
+  journalctl --disk-usage   space the journal takes
+  sudo dmesg -w             kernel messages as they arrive
+  ls -lt /var/log | head    text logs written most recently
+
+Paths
+  /var/log/journal/           the journal, when it's kept on disk
+  /var/log/                   text logs from rsyslog and programs
+  /etc/systemd/journald.conf  journal storage and size limits
+  /etc/logrotate.d/           rotation rules for text logs
+
+Cards
+  idk 26.1  Reading the journal with journalctl
+  idk 26.2  Where logs go: journald, syslog and /var/log
+  idk 26.3  Log rotation and logs that fill the disk
+  idk 26.4  Logging from your own programs and services
+  idk 21.3  dmesg and the kernel log

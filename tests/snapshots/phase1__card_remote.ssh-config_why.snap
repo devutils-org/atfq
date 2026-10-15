@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-24.2  ~/.ssh/config, jump hosts and host keys
+29.2  ~/.ssh/config, jump hosts and host keys
 
 TL;DR
   - ~/.ssh/config gives each server a short name with its address, user, port
@@ -58,5 +58,5 @@ Deep dive
 Related
   Commands  ssh, ssh-keygen
   Paths     ~/.ssh/config, ~/.ssh/known_hosts, /etc/ssh/sshd_config
-  See also  idk 24.1 SSH keys and the agent
-  See also  idk 24.3 SSH tunnels and port forwarding
+  See also  idk 29.1 SSH keys and the agent
+  See also  idk 29.3 SSH tunnels and port forwarding

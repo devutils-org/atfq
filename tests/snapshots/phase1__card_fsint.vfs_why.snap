@@ -1,0 +1,65 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+9.5  The VFS: one interface for every filesystem
+
+TL;DR
+  - Programs call open, read and write the same way whatever holds the file. The
+    kernel's VFS turns those calls into the right filesystem's code.
+  - So the same cat reads ext4 on a disk, NFS on a server, /proc made up by the
+    kernel, or a FUSE filesystem written in Python.
+  - FUSE runs a filesystem as an ordinary program: sshfs, rclone, ntfs-3g,
+    AppImages.
+
+      cat /proc/filesystems    # filesystems this kernel knows
+      findmnt -t nfs,nfs4,cifs,fuse.sshfs,virtiofs
+
+On your machine
+  /         btrfs on /dev/nvme0n1p2 · SSD mode
+  /home     btrfs on /dev/nvme0n1p2 · SSD mode
+  /var/lib/my data btrfs on /dev/nvme0n1p2 · SSD mode
+  /boot/efi vfat on /dev/nvme0n1p1
+  /media/usb exfat on /dev/sda
+  /home     btrfs on /dev/nvme0n1p2
+
+  Kernel    6.12.48-amd64, built with gcc 14.2.0
+  Build     #1 SMP PREEMPT_DYNAMIC Debian 6.12.48-1 (2025-09-20)
+  Work      in the 3 days, 4 h since boot: 912.3 million context switches (3,330
+            per second), 1.2 million processes started, 51.2 million interrupts
+  Now       3 tasks running or ready, 1 waiting on I/O
+  Disk FS   ext4, vfat, btrfs
+
+Pitfalls
+  - A network filesystem whose server vanishes can freeze every program touching
+    it, in state D (16.1): hard mounts wait forever.
+  - "Stale file handle" (NFS): the file was replaced or deleted on the server
+    while you held it. Reopen it, or remount.
+  - FUSE is slower than a kernel filesystem: each operation goes to a program
+    and back.
+  - File locking and inotify watches don't work reliably on every network
+    filesystem.
+
+Deep dive
+
+  ▾ What does the VFS keep in common?
+
+    The objects every filesystem must provide: superblocks (a mounted
+    filesystem), inodes (files), dentries (names in folders) and open file
+    structures, each with a table of operations the filesystem fills in. The VFS
+    handles path lookup, permissions, the page cache and caching of names and
+    inodes once, for all of them.
+
+  ▾ How do VMs and containers share folders with the host?
+
+    virtiofs and 9p carry file operations between a guest and its host over
+    virtio. virtiofs is newer, much faster, and can share the host's page cache.
+    Docker Desktop and OrbStack mount the Mac's folders this way.
+
+Related
+  Commands  findmnt, mount
+  Paths     /proc/filesystems
+  Hub       idk disk Disk
+  See also  idk 13.3 /proc and /sys
+  See also  idk 29.5 Copying files over SSH: scp, sftp and rsync
+  See also  idk 9.1 How a filesystem stores a file

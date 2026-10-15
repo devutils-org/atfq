@@ -1,0 +1,5 @@
+/var/log/syslog {
+  weekly
+  rotate 4
+  compress
+}

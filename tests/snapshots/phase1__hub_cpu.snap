@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: page
 ---
-14. CPU  hub
+18. CPU  hub
 
 What your processor is, how busy it is, and who keeps it busy.
 
@@ -25,10 +25,10 @@ Paths
   /sys/devices/system/cpu/  online CPUs, frequency, governor
 
 Cards
-  idk 14.1  Load average
+  idk 18.1  Load average
   idk 1.2   How the kernel shares the CPUs
   idk 1.4   Interrupts: how devices get attention
   idk 2.2   Cores, threads and sockets
   idk 2.3   CPU caches: why memory layout matters
   idk 2.4   Clock speed, turbo and power saving
-  idk 12.3  nice and priorities
+  idk 16.3  nice and priorities

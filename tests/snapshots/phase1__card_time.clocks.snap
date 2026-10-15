@@ -1,0 +1,40 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+10.1  Wall clock and monotonic clock: measuring time right
+
+TL;DR
+  - The wall clock says what time it is. It can jump: NTP corrects it, an admin
+    sets it, a VM resumes. Never measure durations with it.
+  - The monotonic clock only moves forward, from an arbitrary start (boot): made
+    for durations and timeouts.
+  - A battery-powered hardware clock (RTC) keeps time while the machine is off;
+    the kernel reads it at boot, then counts with a CPU counter.
+
+      date                       # wall clock, in your time zone
+      cat /proc/uptime           # seconds since boot: monotonic
+      timedatectl                # wall clock, RTC, zone, NTP status
+
+On your machine
+  Zone      Europe/Paris
+  RTC       the hardware clock keeps UTC
+  Source    tsc (also available: hpet, acpi_pm)
+  Sync      systemd-timesyncd, synchronised
+  Booted    2026-10-11 06:26 UTC
+
+Pitfalls
+  - end - start with wall-clock times can be negative or huge across an NTP
+    step: use time.monotonic() (Python), performance.now() (JS), Instant (Rust);
+    Go's time.Since already does.
+  - The monotonic clock stops during suspend; CLOCK_BOOTTIME doesn't.
+  - Comparing timestamps from two machines assumes both clocks are right: their
+    difference is only as good as NTP (10.2).
+
+Deep dive: 2 questions. Read them with idk 10.1 --why
+
+Related
+  Commands  date, timedatectl
+  Paths     /sys/devices/system/clocksource/
+  See also  idk 10.2 Keeping the clock right: NTP
+  See also  idk 1.4 Interrupts: how devices get attention

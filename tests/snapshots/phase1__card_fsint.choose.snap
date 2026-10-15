@@ -1,0 +1,42 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+9.4  ext4, XFS, btrfs or ZFS?
+
+TL;DR
+  - ext4: the safe default (Debian, Ubuntu). Mature, fast, repairable.
+  - XFS: big files and parallel workloads (RHEL's default). Can grow but never
+    shrink.
+  - btrfs: snapshots, compression, checksums (Fedora's and openSUSE's default).
+    ZFS: the same ideas, for storage servers with many disks.
+  - For a USB stick shared with Windows and macOS: exFAT.
+
+      lsblk -f                 # filesystem of each partition
+      findmnt -t ext4,xfs,btrfs
+
+On your machine
+  /         btrfs on /dev/nvme0n1p2 · SSD mode
+  /home     btrfs on /dev/nvme0n1p2 · SSD mode
+  /var/lib/my data btrfs on /dev/nvme0n1p2 · SSD mode
+  /boot/efi vfat on /dev/nvme0n1p1
+  /media/usb exfat on /dev/sda
+  /home     btrfs on /dev/nvme0n1p2
+
+Pitfalls
+  - FAT32 can't hold a file over 4 GiB: big copies fail with an odd error. exFAT
+    has no such limit.
+  - Linux permissions don't exist on FAT and exFAT: every file gets the same
+    owner and rights, set at mount time.
+  - Btrfs RAID 5 and 6 still carry warnings: use RAID 1 or 10 profiles, or ZFS,
+    for parity RAID.
+  - Changing filesystem means reformatting: back up first.
+
+Deep dive: 2 questions. Read them with idk 9.4 --why
+
+Related
+  Commands  lsblk, findmnt
+  Paths     /etc/fstab
+  Hub       idk disk Disk
+  See also  idk 9.3 Copy-on-write filesystems: snapshots and checksums
+  See also  idk 9.2 Journaling: how a filesystem survives a crash

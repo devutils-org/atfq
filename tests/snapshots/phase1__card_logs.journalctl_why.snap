@@ -1,0 +1,57 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+26.1  Reading the journal with journalctl
+
+TL;DR
+  - systemd's journal collects everything: the kernel, every service's output,
+    and programs that log through syslog. One command reads it.
+  - Narrow it down: by boot (-b), unit (-u), priority (-p), time (--since), text
+    (-g). -f follows new lines as they come.
+  - Reading other users' and system logs needs sudo, or membership in adm or
+    systemd-journal.
+
+      journalctl -b -p warning              # warnings and worse, this boot
+      journalctl -u nginx --since "1 hour ago"
+      journalctl -f -u myapp                # follow one service
+      journalctl -b -1 -e                   # end of the previous boot
+
+On your machine
+  Journal   on disk (/var/log/journal): kept across reboots · 300 B in 2 files
+  Settings  SystemMaxUse=500M
+  Syslog    rsyslog also writes text files in /var/log
+  Rotation  2 rules in /etc/logrotate.d
+  Biggest   /var/log/syslog 4.9 KiB · /var/log/nginx/access.log 2.9 KiB ·
+            /var/log/auth.log 1.2 KiB
+
+Pitfalls
+  - -b -1 shows nothing: the journal is kept in RAM only, so earlier boots are
+    gone (26.2).
+  - Priorities count down: -p err means error and worse (crit, alert, emerg),
+    not just errors.
+  - --since takes local time; --utc shows and parses times in UTC.
+  - Output goes through a pager: --no-pager for scripts, -o json to parse it.
+
+Deep dive
+
+  ▾ What is stored besides the message?
+
+    Each entry carries fields: _SYSTEMD_UNIT, _PID, _UID, _COMM, PRIORITY, the
+    boot ID and more, set by journald itself so programs can't fake them. Any
+    field filters: journalctl _UID=1000, journalctl _COMM=sshd.
+    journalctl -o verbose shows them all.
+
+  ▾ Why a binary format?
+
+    Indexed by field and time, so filtering a month of logs by unit is instant,
+    and entries can be checked for tampering (--verify). The cost: you need
+    journalctl to read them, not grep on a file.
+
+Related
+  Commands  journalctl
+  Paths     /var/log/journal/
+  Hub       idk logs Logs
+  See also  idk 26.2 Where logs go: journald, syslog and /var/log
+  See also  idk 22.2 Why a service won't start
+  See also  idk 21.3 dmesg and the kernel log

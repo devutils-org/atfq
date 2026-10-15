@@ -8,7 +8,7 @@ TL;DR
   - A new process starts as a copy of an existing one: fork() duplicates the
     process that calls it.
   - exec() then replaces the copy's program with another: the kernel loads the
-    new ELF file and its loader (19.2).
+    new ELF file and its loader (23.2).
   - Your shell does both for every command you type. Every process descends from
     PID 1.
 
@@ -29,14 +29,14 @@ Pitfalls
   - After exec, the PID stays the same: it's the same process running another
     program.
   - Environment variables and open files survive exec: that's how export and
-    redirections reach the program (22.3).
-  - A parent that never waits for its children leaves zombies (12.1).
+    redirections reach the program (27.3).
+  - A parent that never waits for its children leaves zombies (16.1).
 
 Deep dive: 2 questions. Read them with idk 1.5 --why
 
 Related
   Commands  pstree, strace
   Hub       idk processes Processes & scheduling
-  See also  idk 19.2 ELF and "command not found"
-  See also  idk 12.1 Process states and zombies
-  See also  idk 22.3 Redirections and file descriptors
+  See also  idk 23.2 ELF and "command not found"
+  See also  idk 16.1 Process states and zombies
+  See also  idk 27.3 Redirections and file descriptors

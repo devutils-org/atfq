@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-19.1  Dynamic linking and ldd
+23.1  Dynamic linking and ldd
 
 TL;DR
   - Most programs don't contain the libraries they use: at start-up, the dynamic
@@ -34,10 +34,10 @@ Pitfalls
   - LD_LIBRARY_PATH set for everything breaks other programs: set it only for
     the command that needs it.
 
-Deep dive: 2 questions. Read them with idk 19.1 --why
+Deep dive: 2 questions. Read them with idk 23.1 --why
 
 Related
   Commands  ldd, ldconfig, objdump
   Paths     /etc/ld.so.conf.d/
-  See also  idk 19.2 ELF and "command not found"
-  See also  idk 17.4 syscalls and strace
+  See also  idk 23.2 ELF and "command not found"
+  See also  idk 21.4 syscalls and strace

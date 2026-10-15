@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-23.5  xargs
+28.5  xargs
 
 TL;DR
   - xargs turns its input into arguments for a command, many at a time.
@@ -21,8 +21,8 @@ Pitfalls
     runs the command once per line.
   - To see what would run, put echo in front of the command: xargs -0 echo rm.
 
-Deep dive: 2 questions. Read them with idk 23.5 --why
+Deep dive: 2 questions. Read them with idk 28.5 --why
 
 Related
   Commands  xargs
-  See also  idk 23.1 find
+  See also  idk 28.1 find

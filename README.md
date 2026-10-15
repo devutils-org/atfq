@@ -5,7 +5,7 @@ state second, the deep "why" only if you want it.
 
 ```
 $ idk free
-13.1  free vs available
+17.1  free vs available
 
 TL;DR
   - free: memory nobody is using at all, not even as cache.
@@ -37,7 +37,7 @@ This installs the `idk` command (the project and crate are called atfq).
 ```
 idk memory               # a hub: live overview, commands, paths, cards
 idk zombie               # a card, by name or alias
-idk 13.1                  # a card, by chapter number
+idk 17.1                  # a card, by chapter number
 idk free --why           # with the deep dive
 idk toc                  # table of contents
 idk search swap          # full-text search
@@ -99,10 +99,10 @@ binary, as `which idk` prints it):
 
 ## What's inside
 
-- 8 hubs (Disk, Permissions, Processes & scheduling, Memory, CPU, Network,
-  Boot, GPU) and 100 cards in 25 chapters, in three parts (how it works,
-  your system, shell and commands): `idk toc` lists them.
-- 44 live probes. They read `/proc`, `/sys` and `/etc` directly, plus a
+- 9 hubs (Disk, Permissions, Processes & scheduling, Memory, CPU, Network,
+  Boot, GPU, Logs) and 121 cards in 30 chapters, in three parts (how it
+  works, your system, shell and commands): `idk toc` lists them.
+- 49 live probes. They read `/proc`, `/sys` and `/etc` directly, plus a
   few files in your home folder: names and public keys in `~/.ssh`, and
   git's config, of which only your name's and email's presence are
   shown. Never a private key or a credential. The only

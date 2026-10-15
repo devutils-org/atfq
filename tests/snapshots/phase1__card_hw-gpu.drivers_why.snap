@@ -33,7 +33,7 @@ Pitfalls
   - A kernel update can leave NVIDIA's module unbuilt (DKMS failed): the desktop
     falls back to a basic driver, or a black screen.
   - With Secure Boot, out-of-tree modules must be signed (enrolled MOK key) or
-    the kernel refuses them (16.3).
+    the kernel refuses them (20.3).
   - llvmpipe as the OpenGL renderer means software rendering: no GPU driver is
     working.
 
@@ -59,6 +59,6 @@ Deep dive
 Related
   Commands  lspci, glxinfo, vulkaninfo, modinfo
   Paths     /sys/class/drm/, /proc/driver/nvidia/version
-  See also  idk 17.2 Kernel modules
+  See also  idk 21.2 Kernel modules
   See also  idk 5.3 How a picture reaches the screen: KMS, Wayland and X11
-  See also  idk 16.2 The kernel command line
+  See also  idk 20.2 The kernel command line

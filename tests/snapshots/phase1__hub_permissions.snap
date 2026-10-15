@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: page
 ---
-11. Permissions  hub
+15. Permissions  hub
 
 Who you are to the system, and what decides whether you may read, write or run
 something.
@@ -30,8 +30,8 @@ Paths
   /etc/sudoers.d/  who may use sudo, and for what
 
 Cards
-  idk 11.1  rwx, octal and umask
-  idk 11.2  setuid, setgid and sticky bit
-  idk 11.3  sudo and groups
-  idk 11.4  ACLs and capabilities
-  idk 11.5  SELinux and AppArmor
+  idk 15.1  rwx, octal and umask
+  idk 15.2  setuid, setgid and sticky bit
+  idk 15.3  sudo and groups
+  idk 15.4  ACLs and capabilities
+  idk 15.5  SELinux and AppArmor

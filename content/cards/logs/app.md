@@ -1,0 +1,53 @@
+---
+id: logs.app
+kind: concept
+title: Logging from your own programs and services
+aliases: [logger, systemd-cat, logging, log levels, structured logging, stdout logging, application logs, json logs, sd_journal]
+hubs: [logs]
+probes: []
+see_also: [logs.journalctl, systemd.units, shell.redirections]
+commands: [logger, systemd-cat, journalctl]
+paths: []
+---
+
+## TL;DR
+
+- Under systemd, a service only has to print to standard output or
+  error: journald stores each line with the time, unit and PID.
+- Prefix a line with `<3>` (error) to `<7>` (debug) to set its priority;
+  `journalctl -p` can then filter it.
+- From a shell script, `logger` sends a message to the journal;
+  `systemd-cat` sends a whole command's output.
+
+```
+logger -p user.err "backup failed: disk full"
+systemd-cat -t backup ./backup.sh
+journalctl -t backup                  # by tag
+```
+
+## Pitfalls
+
+- Writing your own log file from a service means handling rotation,
+  permissions and disk space yourself: standard output is simpler.
+- Never log secrets: passwords, tokens and full request bodies end up in
+  files many people and tools can read.
+- Logging every request at full detail can cost more than the work:
+  keep debug logs off in production, behind a level setting.
+- Python's output to a pipe is buffered: set `PYTHONUNBUFFERED=1`, or
+  lines reach the journal late.
+
+## Deep dive
+
+### Plain text or structured logs?
+
+Plain lines are easy to read and grep. Structured logs (JSON, or the
+journal's own fields) are easy to filter and count: `user_id=42`,
+`duration_ms=180`. Many services print JSON for a log collector to index;
+the journal can also take extra fields directly through its API.
+
+### Which level for what?
+
+Error: something failed and someone should look. Warning: unexpected but
+handled. Info: what happened, at a level an operator follows. Debug:
+details for the developer, off by default. If every request logs a
+warning, warnings stop meaning anything.

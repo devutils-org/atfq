@@ -1,0 +1,41 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+10.3  Time zones, UTC and daylight saving
+
+TL;DR
+  - The kernel counts time in UTC. Time zones are applied when time is
+    displayed, by the C library, from the rules in /etc/localtime.
+  - Each process can use another zone: TZ=Asia/Tokyo date.
+  - Store and compute in UTC; convert to local time only to show it.
+
+      timedatectl set-timezone Europe/Paris
+      TZ=America/New_York date
+      date -u                          # UTC
+
+On your machine
+  Zone      Europe/Paris
+  RTC       the hardware clock keeps UTC
+  Source    tsc (also available: hpet, acpi_pm)
+  Sync      systemd-timesyncd, synchronised
+  Booted    2026-10-11 06:26 UTC
+
+Pitfalls
+  - When clocks go back, a local time like 02:30 happens twice; when they go
+    forward, it doesn't happen at all. Jobs scheduled then may run twice or be
+    skipped: schedule them outside 01:00–03:00, or in UTC.
+  - A day isn't always 24 hours, in local time: add days with a date library,
+    not + 86400.
+  - Zone rules change by law, sometimes at short notice: keep tzdata updated,
+    and use names like Europe/Paris, not offsets like +01:00.
+  - Dual boot with Windows: Windows keeps the hardware clock in local time,
+    Linux in UTC, so one of them shows the wrong hour.
+
+Deep dive: 2 questions. Read them with idk 10.3 --why
+
+Related
+  Commands  timedatectl, date
+  Paths     /etc/localtime, /usr/share/zoneinfo/
+  See also  idk 10.4 Timestamps: Unix time, 2038 and leap seconds
+  See also  idk 10.1 Wall clock and monotonic clock: measuring time right

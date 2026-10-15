@@ -35,4 +35,4 @@ Related
   Commands  watch
   Paths     /proc/interrupts, /proc/softirqs
   See also  idk 1.2 How the kernel shares the CPUs
-  See also  idk 17.3 dmesg and the kernel log
+  See also  idk 21.3 dmesg and the kernel log

@@ -57,5 +57,5 @@ Related
   Commands  id, podman, docker
   Paths     /etc/subuid, /etc/subgid, /run/docker.sock
   See also  idk 7.2 Namespaces: a private view of the system
-  See also  idk 11.4 ACLs and capabilities
-  See also  idk 11.3 sudo and groups
+  See also  idk 15.4 ACLs and capabilities
+  See also  idk 15.3 sudo and groups

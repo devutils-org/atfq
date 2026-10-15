@@ -511,7 +511,7 @@ fn parse_mountinfo(text: &str) -> Vec<MountEntry> {
 }
 
 /// mountinfo writes space, tab, newline and backslash as `\040`-style octal.
-fn unescape(s: &str) -> String {
+pub(crate) fn unescape(s: &str) -> String {
     let bytes = s.as_bytes();
     let mut out = Vec::with_capacity(bytes.len());
     let mut i = 0;

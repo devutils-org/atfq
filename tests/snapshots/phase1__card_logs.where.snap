@@ -1,0 +1,43 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+26.2  Where logs go: journald, syslog and /var/log
+
+TL;DR
+  - journald receives the logs. It keeps them on disk in /var/log/journal/ if
+    that folder exists, otherwise in RAM under /run/log/journal/, lost at
+    reboot.
+  - A syslog daemon (rsyslog) may also copy them to text files: /var/log/syslog
+    (Debian, Ubuntu) or /var/log/messages (older RHEL), and auth.log for logins.
+  - Some programs write their own files: /var/log/nginx/, /var/log/apt/,
+    /var/log/pacman.log.
+
+      sudo mkdir -p /var/log/journal && sudo systemctl restart systemd-journald
+      ls -lt /var/log | head
+      sudo tail -f /var/log/nginx/error.log
+
+On your machine
+  Journal   on disk (/var/log/journal): kept across reboots · 300 B in 2 files
+  Settings  SystemMaxUse=500M
+  Syslog    rsyslog also writes text files in /var/log
+  Rotation  2 rules in /etc/logrotate.d
+  Biggest   /var/log/syslog 4.9 KiB · /var/log/nginx/access.log 2.9 KiB ·
+            /var/log/auth.log 1.2 KiB
+
+Pitfalls
+  - Logs from before a crash need a persistent journal: create /var/log/journal
+    (or set Storage=persistent) before you need them.
+  - In containers there's often no journald: logs go to the container's output
+    (docker logs).
+  - /var/log/wtmp and btmp are binary login records: read them with last and
+    lastb.
+
+Deep dive: 2 questions. Read them with idk 26.2 --why
+
+Related
+  Commands  journalctl, tail, less
+  Paths     /var/log/, /etc/systemd/journald.conf, /etc/rsyslog.conf
+  Hub       idk logs Logs
+  See also  idk 26.1 Reading the journal with journalctl
+  See also  idk 26.3 Log rotation and logs that fill the disk

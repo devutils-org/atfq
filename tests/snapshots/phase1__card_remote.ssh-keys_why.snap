@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-24.1  SSH keys and the agent
+29.1  SSH keys and the agent
 
 TL;DR
   - A key pair replaces your password: the private key stays on your machine,
@@ -31,7 +31,7 @@ Pitfalls
   - "Permission denied (publickey)" with the right key: on the server, ~/.ssh or
     authorized_keys writable by others makes sshd ignore it.
   - Never copy the private key to a server to "jump" further: use ProxyJump
-    (24.2).
+    (29.2).
   - Agent forwarding (ssh -A) lets anyone with root on that server use your keys
     while you're connected.
 
@@ -55,5 +55,5 @@ Deep dive
 Related
   Commands  ssh-keygen, ssh-copy-id, ssh-add, ssh
   Paths     ~/.ssh/, ~/.ssh/authorized_keys
-  See also  idk 24.2 ~/.ssh/config, jump hosts and host keys
-  See also  idk 11.1 rwx, octal and umask
+  See also  idk 29.2 ~/.ssh/config, jump hosts and host keys
+  See also  idk 15.1 rwx, octal and umask

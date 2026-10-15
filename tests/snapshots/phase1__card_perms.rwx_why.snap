@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-11.1  rwx, octal and umask
+15.1  rwx, octal and umask
 
 TL;DR
   - Every file has an owner, a group, and three sets of rights: for the owner,
@@ -39,7 +39,7 @@ Deep dive
 
     Each set of rights is three bits, and one octal digit is exactly three bits,
     so 750 reads as owner 7 (rwx), group 5 (r-x), others 0. A fourth digit in
-    front holds the setuid, setgid and sticky bits (see 11.2):
+    front holds the setuid, setgid and sticky bits (see 15.2):
     chmod 2775 shared/.
 
   ▾ Where does the umask come from?
@@ -54,5 +54,5 @@ Deep dive
 
 Related
   Commands  chmod, chown, umask
-  See also  idk 11.2 setuid, setgid and sticky bit
-  See also  idk 11.3 sudo and groups
+  See also  idk 15.2 setuid, setgid and sticky bit
+  See also  idk 15.3 sudo and groups

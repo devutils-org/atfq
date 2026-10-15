@@ -35,4 +35,4 @@ Related
   Commands  strace
   See also  idk 8.1 Processes, threads and async: doing several things at once
   See also  idk 8.4 Too many open files: limits on processes
-  See also  idk 17.4 syscalls and strace
+  See also  idk 21.4 syscalls and strace

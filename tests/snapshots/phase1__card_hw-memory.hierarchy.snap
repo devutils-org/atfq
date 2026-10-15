@@ -34,7 +34,7 @@ Pitfalls
     the firmware; otherwise the RAM runs at a safer default.
   - DDR5's "on-die ECC" only protects inside the chip: it isn't ECC memory and
     reports nothing (3.3).
-  - "Free" RAM is wasted RAM: Linux fills it with cache (13.1).
+  - "Free" RAM is wasted RAM: Linux fills it with cache (17.1).
 
 Deep dive: 2 questions. Read them with idk 3.1 --why
 
@@ -44,4 +44,4 @@ Related
   Hub       idk memory Memory
   See also  idk 2.3 CPU caches: why memory layout matters
   See also  idk 1.3 How virtual memory works
-  See also  idk 13.4 The page cache
+  See also  idk 17.4 The page cache

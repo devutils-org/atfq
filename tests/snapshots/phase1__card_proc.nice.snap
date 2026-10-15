@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-12.3  nice and priorities
+16.3  nice and priorities
 
 TL;DR
   - Niceness goes from -20 (greedy) to 19 (polite). The default is 0.
@@ -22,9 +22,9 @@ Pitfalls
   - In top, NI is the niceness and PR the kernel's priority: 20 + niceness for
     normal processes.
 
-Deep dive: 2 questions. Read them with idk 12.3 --why
+Deep dive: 2 questions. Read them with idk 16.3 --why
 
 Related
   Commands  nice, renice, ionice, chrt
   Hub       idk cpu CPU
-  See also  idk 14.1 Load average
+  See also  idk 18.1 Load average

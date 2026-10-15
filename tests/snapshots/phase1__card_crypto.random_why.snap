@@ -1,0 +1,52 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+11.4  Random numbers: /dev/urandom and entropy
+
+TL;DR
+  - Keys, tokens and session IDs need numbers nobody can predict. The kernel
+    provides them: getrandom(), /dev/urandom.
+  - It seeds a cryptographic generator with unpredictable events (interrupt
+    timings, hardware generators), then can produce endless output safely.
+  - In code, use your language's secure source: Python secrets,
+    crypto.randomBytes in Node, rand::rngs::OsRng in Rust.
+
+      head -c 32 /dev/urandom | base64      # 32 random bytes
+      openssl rand -hex 16                  # a 128-bit token
+
+On your machine
+  Trusted   3 certificate authorities, in /etc/ssl/certs/ca-certificates.crt
+  AES       aes-aesni, with the CPU's AES instructions · SHA-256: sha256-ni
+  RNG       hardware generator tpm-rng-0 feeds the kernel
+  TPM       version 2: can hold keys and seal disk keys
+
+Pitfalls
+  - Math.random(), Python's random and C's rand() are predictable: never for
+    passwords, tokens or keys.
+  - Advice to use /dev/random "for more security" is outdated: since Linux 5.18
+    both give the same output once the generator is seeded.
+  - Cloning a VM from a snapshot used to duplicate its random state; current
+    kernels reseed when the hypervisor reports a clone.
+
+Deep dive
+
+  ▾ Doesn't the kernel run out of entropy?
+
+    No. Old kernels counted "entropy" and made /dev/random block when the count
+    was low, as if randomness were used up. A seeded cryptographic generator
+    doesn't run out: predicting its output means breaking the cipher. Since
+    5.18, entropy_avail simply reads 256 once seeded.
+
+  ▾ What about early boot?
+
+    Right after boot, before enough events were collected, the generator isn't
+    seeded yet; getrandom() waits for it. On modern hardware that's a fraction
+    of a second, thanks to CPU instructions like RDRAND, a TPM, a virtio RNG in
+    VMs, and jitter in CPU timing itself.
+
+Related
+  Commands  head, openssl
+  Paths     /dev/urandom, /proc/sys/kernel/random/
+  See also  idk 11.1 Hashes, encryption and signatures
+  See also  idk 1.4 Interrupts: how devices get attention

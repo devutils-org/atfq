@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: page
 ---
-15. Network  hub
+19. Network  hub
 
 Your network interfaces, their addresses, where traffic goes, and how names
 become addresses.
@@ -33,10 +33,10 @@ Paths
   /sys/class/net/   one folder per interface: state, MAC, speed
 
 Cards
-  idk 15.1  Who listens on which port
-  idk 15.2  DNS resolution
-  idk 15.3  Interfaces and routes
-  idk 15.4  nftables vs iptables vs ufw
+  idk 19.1  Who listens on which port
+  idk 19.2  DNS resolution
+  idk 19.3  Interfaces and routes
+  idk 19.4  nftables vs iptables vs ufw
   idk 6.1   Network layers: OSI and TCP/IP
   idk 6.2   What happens when you open a website
   idk 6.3   IP addresses, subnets and NAT

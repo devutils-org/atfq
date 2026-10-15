@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-24.5  Copying files over SSH: scp, sftp and rsync
+29.5  Copying files over SSH: scp, sftp and rsync
 
 TL;DR
   - Everything that copies over SSH uses the same keys and the same
@@ -17,7 +17,7 @@ TL;DR
 
 Pitfalls
   - rsync src/ dst and rsync src dst differ: the trailing slash copies the
-    folder's contents, not the folder (23.7).
+    folder's contents, not the folder (28.7).
   - Interrupted scp starts over; rsync -P picks up where it stopped.
   - Remote paths with spaces need quoting twice with old scp: once for your
     shell, once for the remote one. Recent OpenSSH no longer needs it.
@@ -40,5 +40,5 @@ Deep dive
 
 Related
   Commands  scp, sftp, rsync, sshfs
-  See also  idk 23.7 rsync
-  See also  idk 24.2 ~/.ssh/config, jump hosts and host keys
+  See also  idk 28.7 rsync
+  See also  idk 29.2 ~/.ssh/config, jump hosts and host keys

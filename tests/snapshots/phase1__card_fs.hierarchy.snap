@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-9.1  The hierarchy in 2 minutes
+13.1  The hierarchy in 2 minutes
 
 TL;DR
   - /etc: system-wide settings, as plain text files.
@@ -26,11 +26,11 @@ Pitfalls
   - /var fills up quietly (logs, caches, container images): look there first
     when a disk is full.
 
-Deep dive: 2 questions. Read them with idk 9.1 --why
+Deep dive: 2 questions. Read them with idk 13.1 --why
 
 Related
   Commands  ls
   Paths     /etc, /usr, /var, /home
   Hub       idk disk Disk
-  See also  idk 9.2 /tmp vs /var/tmp
-  See also  idk 9.3 /proc and /sys
+  See also  idk 13.2 /tmp vs /var/tmp
+  See also  idk 13.3 /proc and /sys

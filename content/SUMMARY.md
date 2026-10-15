@@ -47,6 +47,27 @@
   - [Event loops: one thread, thousands of connections](cards/concurrency/event-loops.md)
   - [Too many open files: limits on processes](cards/concurrency/limits.md)
   - [How processes talk: sockets, shared memory and D-Bus](cards/concurrency/ipc.md)
+- [How filesystems work](fsint)
+  - [How a filesystem stores a file](cards/fsint/layout.md)
+  - [Journaling: how a filesystem survives a crash](cards/fsint/journal.md)
+  - [Copy-on-write filesystems: snapshots and checksums](cards/fsint/cow.md)
+  - [ext4, XFS, btrfs or ZFS?](cards/fsint/choose.md)
+  - [The VFS: one interface for every filesystem](cards/fsint/vfs.md)
+- [How time works](time)
+  - [Wall clock and monotonic clock: measuring time right](cards/time/clocks.md)
+  - [Keeping the clock right: NTP](cards/time/ntp.md)
+  - [Time zones, UTC and daylight saving](cards/time/zones.md)
+  - [Timestamps: Unix time, 2038 and leap seconds](cards/time/epoch.md)
+- [How cryptography works](crypto)
+  - [Hashes, encryption and signatures](cards/crypto/primitives.md)
+  - [Public-key cryptography](cards/crypto/public-key.md)
+  - [Certificates: how HTTPS proves who it is](cards/crypto/certificates.md)
+  - [Random numbers: /dev/urandom and entropy](cards/crypto/random.md)
+  - [Disk encryption: LUKS and the TPM](cards/crypto/disk.md)
+- [How text is stored](text)
+  - [Bytes and characters: ASCII, Unicode and UTF-8](cards/text/encodings.md)
+  - [Locales: why sorting, dates and numbers change](cards/text/locales.md)
+  - [Line endings, BOMs and invisible characters](cards/text/invisible.md)
 
 # Your system
 
@@ -103,6 +124,11 @@
   - [Which package owns a file](cards/pkg/owner.md)
   - [Native packages vs Snap and Flatpak](cards/pkg/formats.md)
 - [GPU](hubs/gpu.md)
+- [Logs](hubs/logs.md)
+  - [Reading the journal with journalctl](cards/logs/journalctl.md)
+  - [Where logs go: journald, syslog and /var/log](cards/logs/where.md)
+  - [Log rotation and logs that fill the disk](cards/logs/rotation.md)
+  - [Logging from your own programs and services](cards/logs/app.md)
 
 # Shell and commands
 

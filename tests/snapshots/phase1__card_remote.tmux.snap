@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-24.4  tmux: sessions that survive a lost connection
+29.4  tmux: sessions that survive a lost connection
 
 TL;DR
   - Closing an SSH connection hangs up its shell, and the hang-up signal stops
@@ -20,16 +20,16 @@ Pitfalls
   - Every tmux shortcut starts with the prefix, Ctrl-b by default: Ctrl-b then c
     for a new window, % or " to split, [ to scroll.
   - For a single command, nohup cmd > out.log 2>&1 & is enough: it ignores the
-    hang-up signal (12.2).
+    hang-up signal (16.2).
   - Some systems kill all your processes at logout (KillUserProcesses=yes in
     logind): tmux dies too, unless loginctl enable-linger.
   - On a connection that drops all the time, mosh reconnects by itself and can
     carry tmux.
 
-Deep dive: 2 questions. Read them with idk 24.4 --why
+Deep dive: 2 questions. Read them with idk 29.4 --why
 
 Related
   Commands  tmux, nohup
   Paths     ~/.tmux.conf
-  See also  idk 12.2 Signals
-  See also  idk 24.1 SSH keys and the agent
+  See also  idk 16.2 Signals
+  See also  idk 29.1 SSH keys and the agent

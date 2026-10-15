@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-20.2  Native packages vs Snap and Flatpak
+24.2  Native packages vs Snap and Flatpak
 
 TL;DR
   - Native packages (deb, rpm, pacman) come from your distro, share its
@@ -29,9 +29,9 @@ Pitfalls
   - They take more disk space: each app bundles, or shares, a runtime.
   - On Ubuntu, some deb packages (firefox, chromium) only install the snap.
 
-Deep dive: 2 questions. Read them with idk 20.2 --why
+Deep dive: 2 questions. Read them with idk 24.2 --why
 
 Related
   Commands  snap, flatpak
   Paths     /var/lib/snapd, /var/lib/flatpak
-  See also  idk 20.1 Which package owns a file
+  See also  idk 24.1 Which package owns a file

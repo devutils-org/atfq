@@ -1,0 +1,56 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+12.1  Bytes and characters: ASCII, Unicode and UTF-8
+
+TL;DR
+  - A file holds bytes. An encoding says which bytes mean which characters.
+    ASCII covers 128 (English letters, digits, punctuation).
+  - Unicode numbers every character of every script (about 150,000). UTF-8
+    writes them in 1 to 4 bytes, and plain ASCII stays unchanged: it's the
+    default almost everywhere on Linux and the web.
+  - Ã© instead of é is UTF-8 read as Latin-1 (mojibake): the bytes are fine, the
+    reader guessed the wrong encoding.
+
+      file -i notes.txt                       # charset=utf-8, iso-8859-1…
+      iconv -f latin1 -t utf-8 old.txt > new.txt
+      printf 'é' | hexdump -C                 # c3 a9: two bytes in UTF-8
+
+On your machine
+  Session   LANG=en_US.UTF-8
+  Text      read as UTF-8 (en_US.UTF-8)
+  System    LANG=fr_FR.UTF-8 for new sessions
+  Installed C.utf8, and those in locale-archive
+
+Pitfalls
+  - "Length" has several meanings: é is 2 bytes and 1 character; an emoji with
+    skin tone is 2 code points shown as 1. Count what you need.
+  - é can be one code point or e plus an accent: identical on screen, different
+    bytes. Normalise (NFC) before comparing or using as keys.
+  - Linux filenames are bytes, not text: a name can be invalid UTF-8, and tools
+    must cope.
+  - Excel and some Windows tools expect a BOM or another encoding for CSV: a
+    UTF-8 file may open garbled there.
+
+Deep dive
+
+  ▾ How does UTF-8 stay compatible with ASCII?
+
+    Characters 0 to 127 are one byte, exactly as in ASCII. Every other character
+    uses 2 to 4 bytes, all with the high bit set, and the first byte says how
+    many follow. So ASCII text is valid UTF-8, a / or \n byte never appears
+    inside another character, and a reader can find where characters start from
+    any position.
+
+  ▾ Why do Windows, Java and JavaScript use UTF-16?
+
+    They adopted Unicode when it fit in 16 bits, one unit per character. Unicode
+    then grew past 65,536 characters, so UTF-16 also needs pairs of units for
+    some. It kept the cost of a variable length without UTF-8's compatibility,
+    which is why UTF-8 won for files and networks.
+
+Related
+  Commands  file, iconv, hexdump
+  See also  idk 12.2 Locales: why sorting, dates and numbers change
+  See also  idk 12.3 Line endings, BOMs and invisible characters

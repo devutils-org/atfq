@@ -25,7 +25,7 @@ On your machine
 
 Pitfalls
   - "Exec format error" usually means a binary for another architecture:
-    file ./program says which (19.2).
+    file ./program says which (23.2).
   - "Illegal instruction" (SIGILL): the program uses an extension this CPU
     lacks, often one built with -march=native on a newer machine.
   - Containers share the host's CPU: an arm64 image on an x86-64 machine only
@@ -40,4 +40,4 @@ Related
   Paths     /proc/cpuinfo
   Hub       idk cpu CPU
   See also  idk 2.2 Cores, threads and sockets
-  See also  idk 19.2 ELF and "command not found"
+  See also  idk 23.2 ELF and "command not found"

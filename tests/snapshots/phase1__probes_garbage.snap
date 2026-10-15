@@ -221,3 +221,28 @@ ipc.summary  Unix sockets and shared memory: how processes talk here
 
   not available on this system
   note: /proc/net/unix: not found
+
+fs.mounts  filesystems holding data, and options that change their behaviour
+
+  not available on this system
+  note: /proc/self/mountinfo: not found
+
+time.clock  time zone, hardware clock, clock source, NTP sync, boot time
+
+  not available on this system
+  note: no time zone, clock source or boot time found
+
+crypto.setup  trusted certificate authorities, kernel AES and SHA, RNG, TPM
+
+  not available on this system
+  note: no CA bundle and no /proc/crypto
+
+text.locale  locale settings and whether text is read as UTF-8
+
+  not available on this system
+  note: /proc/self/environ: not found
+
+log.journal  where logs are kept, journal size, syslog and log rotation
+
+  not available on this system
+  note: /var/log: not found

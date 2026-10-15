@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, WHY)"
 ---
-11.3  sudo and groups
+15.3  sudo and groups
 
 TL;DR
   - sudo runs one command as root, if /etc/sudoers (or a file in
@@ -52,4 +52,4 @@ Deep dive
 Related
   Commands  sudo, id, usermod, visudo
   Paths     /etc/sudoers, /etc/sudoers.d/, /etc/group
-  See also  idk 11.1 rwx, octal and umask
+  See also  idk 15.1 rwx, octal and umask

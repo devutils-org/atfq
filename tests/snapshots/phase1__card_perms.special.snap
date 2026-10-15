@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-11.2  setuid, setgid and sticky bit
+15.2  setuid, setgid and sticky bit
 
 TL;DR
   - setuid (s in the owner's x spot): the program runs with its owner's rights,
@@ -25,10 +25,10 @@ Pitfalls
   - A filesystem mounted with nosuid (common for USB drives and /tmp) ignores
     these bits.
 
-Deep dive: 2 questions. Read them with idk 11.2 --why
+Deep dive: 2 questions. Read them with idk 15.2 --why
 
 Related
   Commands  chmod, getcap
   Paths     /usr/bin/passwd, /tmp
-  See also  idk 11.1 rwx, octal and umask
-  See also  idk 9.2 /tmp vs /var/tmp
+  See also  idk 15.1 rwx, octal and umask
+  See also  idk 13.2 /tmp vs /var/tmp

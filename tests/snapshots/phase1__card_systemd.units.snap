@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-18.1  Units and timers
+22.1  Units and timers
 
 TL;DR
   - systemd manages units: services (.service), timers (.timer), mounts,
@@ -28,11 +28,11 @@ Pitfalls
   - systemctl --user manages your own units, separately from the system's, and
     without sudo.
 
-Deep dive: 2 questions. Read them with idk 18.1 --why
+Deep dive: 2 questions. Read them with idk 22.1 --why
 
 Related
   Commands  systemctl
   Paths     /etc/systemd/system, /usr/lib/systemd/system
-  See also  idk 18.2 Why a service won't start
-  See also  idk 18.3 Unit files and overrides
-  See also  idk 16.1 From firmware to init
+  See also  idk 22.2 Why a service won't start
+  See also  idk 22.3 Unit files and overrides
+  See also  idk 20.1 From firmware to init

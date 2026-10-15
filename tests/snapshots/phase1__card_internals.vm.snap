@@ -38,6 +38,6 @@ Related
   Commands  ps, top
   Paths     /proc/PID/maps, /proc/PID/smaps, /proc/vmstat
   Hub       idk memory Memory
-  See also  idk 13.4 The page cache
-  See also  idk 13.3 Swap and swappiness
+  See also  idk 17.4 The page cache
+  See also  idk 17.3 Swap and swappiness
   See also  idk 1.5 How a program starts: fork and exec

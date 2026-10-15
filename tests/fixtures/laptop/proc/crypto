@@ -1,0 +1,35 @@
+name         : aes
+driver       : aes-generic
+module       : kernel
+priority     : 100
+refcnt       : 1
+selftest     : passed
+
+name         : aes
+driver       : aes-aesni
+module       : kernel
+priority     : 300
+refcnt       : 1
+selftest     : passed
+
+name         : sha256
+driver       : sha256-generic
+module       : kernel
+priority     : 100
+refcnt       : 1
+selftest     : passed
+
+name         : sha256
+driver       : sha256-ni
+module       : kernel
+priority     : 250
+refcnt       : 1
+selftest     : passed
+
+name         : gcm(aes)
+driver       : generic-gcm-aesni
+module       : kernel
+priority     : 400
+refcnt       : 1
+selftest     : passed
+

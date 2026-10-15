@@ -52,4 +52,4 @@ Related
   Paths     /sys/devices/system/edac/mc/
   Hub       idk memory Memory
   See also  idk 3.1 RAM and the memory hierarchy
-  See also  idk 17.3 dmesg and the kernel log
+  See also  idk 21.3 dmesg and the kernel log

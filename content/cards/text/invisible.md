@@ -1,0 +1,53 @@
+---
+id: text.invisible
+kind: concept
+title: "Line endings, BOMs and invisible characters"
+aliases: [line endings, line ending, crlf, carriage return, ^m, dos2unix, bom, byte order mark, zero-width space, non-breaking space, nbsp, cat -a, no newline at end of file, trailing whitespace]
+hubs: []
+probes: []
+see_also: [text.encodings, git.config, cmd.sed]
+commands: [cat, hexdump, dos2unix, sed]
+paths: []
+---
+
+## TL;DR
+
+- Lines end with `\n` (LF) on Linux and macOS, `\r\n` (CRLF) on Windows.
+  The extra `\r` shows as `^M` and breaks scripts.
+- A BOM is three invisible bytes (`EF BB BF`) some Windows tools put at
+  the start of UTF-8 files.
+- Copy-pasted text can carry invisible characters: non-breaking spaces,
+  zero-width spaces. Commands look right and fail.
+
+```
+cat -A script.sh | head        # ^M before $ means CRLF; M-BM- is a NBSP
+hexdump -C file | head -2      # the raw bytes
+dos2unix script.sh             # or: sed -i 's/\r$//' script.sh
+```
+
+## Pitfalls
+
+- `/bin/bash^M: bad interpreter`: the script was saved with Windows line
+  endings. Convert it, and set `* text=auto eol=lf` in `.gitattributes`.
+- A BOM before `#!` stops the shebang from working, and some JSON
+  parsers reject it.
+- A file without a final newline: `wc -l` counts one line less, and
+  `while read` loops skip the last line.
+- `grep -nP '[^\x00-\x7F]' file` finds non-ASCII characters hiding in
+  code or config.
+
+## Deep dive
+
+### Why two characters for a new line?
+
+Teletypes needed two moves: carriage return (`\r`) to bring the print
+head back to the left, line feed (`\n`) to roll the paper. Windows kept
+both from that era; Unix kept just the line feed; old Macs used `\r`
+alone.
+
+### Why would a UTF-8 file have a byte order mark?
+
+UTF-16 needs one to tell big-endian from little-endian. UTF-8 has no
+byte order, but Windows tools long added the mark to say "this is
+UTF-8, not the local code page". Most Unix tools treat it as ordinary
+characters, hence the surprises.

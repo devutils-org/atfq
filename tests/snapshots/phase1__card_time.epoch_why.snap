@@ -1,0 +1,53 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+10.4  Timestamps: Unix time, 2038 and leap seconds
+
+TL;DR
+  - Unix time counts seconds since 1970-01-01 00:00 UTC: one number, the same
+    everywhere, with no time zone. Most systems store time this way.
+  - Signed 32-bit counters overflow on 2038-01-19 at 03:14:07 UTC. 64-bit Linux
+    uses 64 bits; old file formats, databases and 32-bit devices may not.
+  - For text, use ISO 8601 with an offset: 2026-10-15T09:30:00+02:00.
+
+      date +%s                         # now, as Unix time
+      date -d @1700000000              # Unix time to a date (GNU date)
+      date -u +%Y-%m-%dT%H:%M:%SZ      # ISO 8601 in UTC
+
+On your machine
+  Zone      Europe/Paris
+  RTC       the hardware clock keeps UTC
+  Source    tsc (also available: hpet, acpi_pm)
+  Sync      systemd-timesyncd, synchronised
+  Booted    2026-10-11 06:26 UTC
+
+Pitfalls
+  - Milliseconds or seconds? 1700000000000 is JavaScript's milliseconds; reading
+    it as seconds gives a date in the year 55,000.
+  - A date without a time zone ("2026-03-29 02:30") is ambiguous: say which
+    zone, or store UTC.
+  - ext4 filesystems made with small (128-byte) inodes can't store dates past
+    2038; tune2fs -l shows the inode size.
+
+Deep dive
+
+  ▾ What happens on a leap second?
+
+    Unix time pretends every day has 86,400 seconds, so a leap second has no
+    number of its own: the clock repeats a second, or large providers spread it
+    over hours ("smearing"). Leap seconds have caused real outages; the world's
+    timekeepers decided in 2022 to stop adding them by 2035.
+
+  ▾ Is 2038 still a problem on Linux?
+
+    Not for 64-bit programs on a current kernel. The remaining risks are 32-bit
+    systems (since glibc 2.34, programs built with 64-bit time work there),
+    embedded devices that are rarely updated, and data formats with 32-bit time
+    fields: some will fail before 2038 when they compute dates in the future,
+    such as certificates or loans.
+
+Related
+  Commands  date
+  See also  idk 10.3 Time zones, UTC and daylight saving
+  See also  idk 10.1 Wall clock and monotonic clock: measuring time right

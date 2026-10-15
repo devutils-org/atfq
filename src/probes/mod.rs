@@ -8,10 +8,13 @@
 mod boot;
 mod conc;
 mod cpu;
+mod crypto;
 mod disk;
+mod fsmount;
 mod git;
 mod gpu;
 mod kernel;
+mod logs;
 mod mem;
 mod net;
 mod pkg;
@@ -21,6 +24,8 @@ mod shell;
 mod ssh;
 mod sys;
 mod systemd;
+mod text;
+mod time;
 mod user;
 mod virt;
 
@@ -35,12 +40,15 @@ pub use conc::{Ipc, Limit, Limits, Threads};
 pub use cpu::{
     Cache, CoreKind, CpuCaches, CpuFeatures, CpuFreq, CpuSummary, CpuTopology, CpuVulns,
 };
+pub use crypto::CryptoInfo;
 pub use disk::{BlockDevice, DiskTree, Mount, Partition, TmpDir, TmpDirs};
 pub use disk::{DiskHardware, DiskHw, DiskIo, DiskStats, Fstab, FstabEntry, UdevRules};
+pub use fsmount::{FsMount, FsMounts};
 pub use git::GitConfig;
 pub use gpu::{Connector, GpuCard, Gpus};
 pub use kernel::{Interrupts, KernelOverview};
 pub use kernel::{Modules, Sysctl, SysctlSetting, SysctlValue};
+pub use logs::LogInfo;
 pub use mem::MemSummary;
 pub use mem::{MemController, MemErrors, Numa, NumaNode, VirtualMemory};
 pub use net::{DnsConfig, Interface, Listener, Listening, NetInterfaces};
@@ -52,6 +60,8 @@ pub use shell::{BinPath, PathEntry, ShellEnv, Startup};
 pub use ssh::{SshKey, SshServer, SshSetup};
 pub use sys::{FsSpace, IfAddr};
 pub use systemd::{DropIn, FailedUnit, Overrides, SystemdStatus};
+pub use text::LocaleInfo;
+pub use time::TimeInfo;
 pub use user::Identity;
 pub use virt::VirtInfo;
 
@@ -116,6 +126,11 @@ pub enum ProbeData {
     Threads(Threads),
     Limits(Limits),
     Ipc(Ipc),
+    FsMounts(FsMounts),
+    Time(TimeInfo),
+    Crypto(CryptoInfo),
+    Locale(LocaleInfo),
+    Logs(LogInfo),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -350,6 +365,11 @@ impl ProbeCtx {
             let _ = abs;
             None
         }
+    }
+
+    /// Size of a file in bytes; `None` if it can't be read.
+    pub(crate) fn size(&self, abs: &str) -> Option<u64> {
+        std::fs::metadata(self.path(abs)).ok().map(|m| m.len())
     }
 
     pub(crate) fn exists(&self, abs: &str) -> bool {
@@ -626,6 +646,31 @@ pub const REGISTRY: &[ProbeInfo] = &[
         name: conc::IPC,
         description: "Unix sockets and shared memory: how processes talk here",
         run: conc::ipc,
+    },
+    ProbeInfo {
+        name: fsmount::NAME,
+        description: "filesystems holding data, and options that change their behaviour",
+        run: fsmount::probe,
+    },
+    ProbeInfo {
+        name: time::NAME,
+        description: "time zone, hardware clock, clock source, NTP sync, boot time",
+        run: time::probe,
+    },
+    ProbeInfo {
+        name: crypto::NAME,
+        description: "trusted certificate authorities, kernel AES and SHA, RNG, TPM",
+        run: crypto::probe,
+    },
+    ProbeInfo {
+        name: text::NAME,
+        description: "locale settings and whether text is read as UTF-8",
+        run: text::probe,
+    },
+    ProbeInfo {
+        name: logs::NAME,
+        description: "where logs are kept, journal size, syslog and log rotation",
+        run: logs::probe,
     },
 ];
 

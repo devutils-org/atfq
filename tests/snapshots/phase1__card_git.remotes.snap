@@ -2,7 +2,7 @@
 source: tests/phase1.rs
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
-25.4  Remotes: fetch, pull and push
+30.4  Remotes: fetch, pull and push
 
 TL;DR
   - A remote is another copy of the repository, usually origin on GitHub or
@@ -36,9 +36,9 @@ Pitfalls
   - push.autoSetupRemote = true saves the -u origin BRANCH on a new branch's
     first push.
 
-Deep dive: 2 questions. Read them with idk 25.4 --why
+Deep dive: 2 questions. Read them with idk 30.4 --why
 
 Related
   Commands  git
-  See also  idk 25.3 Merge or rebase?
-  See also  idk 24.1 SSH keys and the agent
+  See also  idk 30.3 Merge or rebase?
+  See also  idk 29.1 SSH keys and the agent
