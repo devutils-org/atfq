@@ -115,7 +115,7 @@ exit code 1 for scripts.
 
 ---
 
-## Act 4 -- a book, not a pile of pages (1 min)
+## Act 4 -- a book, not a pile of pages (1.5 min)
 
 ```console
 idk toc
@@ -126,11 +126,29 @@ idk 17.1 --why
 How it works, the theory; Your system, the practice; Shell and commands. A
 number is an address you can type."
 
-**Point at:** the hubs first (`idk disk`, `idk memory`…), then `Part I · How
-it works`, `Part II · Your system`, `Part III · Shell and commands`; in
-`--why`, the three questions marked `▾`, each answering why it exists, how
-it works, or what to change. Cards cite each other by id, so numbers in the
-text always match the table of contents.
+**Point at:** the nine hubs first (`idk disk`, `idk memory`… `idk logs`),
+then `Part I · How it works`, `Part II · Your system`, `Part III · Shell and
+commands`; in `--why`, the three questions marked `▾`, each answering why it
+exists, how it works, or what to change. Cards cite each other by id, so
+numbers in the text always match the table of contents.
+
+**Then the theory, on this machine:**
+
+```console
+idk docker
+idk "cpu cache"
+```
+
+**Say:** "Even the theory looks at your machine. You thought this was a
+VM?"
+
+**Point at:** in `7.1 What a container really is`, `Here  this is a
+container: lxc (from /run/systemd/container), inside a virtual machine:
+orbstack,virt`: OrbStack runs each "machine" as a container inside one VM,
+and the card finds both layers. Then in `2.3 CPU caches`, this chip's caches
+(`L2  2 × 12.0 MiB, each shared by 4 CPUs`, `Line  128 bytes`), next to the
+pitfall on reading arrays in order. On a typical x86 laptop the line says
+64 bytes and the first answer `no container or virtual machine detected`.
 
 ---
 
@@ -145,7 +163,7 @@ opens the interactive mode.
 
 Then, in this order:
 
-1. Click `10.1 Process states and zombies` in the contents, then click it
+1. Click `16.1 Process states and zombies` in the contents, then click it
    again: the first click selects, the second opens. The zombie is in the
    live block.
 2. Scroll down with the wheel to a question `▸`, click it twice: the answer
@@ -202,6 +220,8 @@ One fact, four surfaces: the CLI, the TUI, the prompt and an agent.
 | search | `idk search delete matches` | `idk 28.1 find`, with the line that matched |
 | boot | `idk boot` | on this VM `device tree (no UEFI)`; on a laptop `UEFI · Secure Boot on` and the bootloader |
 | dangerous commands | `idk find` | under `find . -name '*.tmp' -delete`, the line `⚠ changes or deletes data: check what it targets first`; a pitfall says to run it without `-delete` first and check the list |
+| git, too | `idk "git undo"` | `git restore FILE` marked `⚠`, `git restore --staged FILE` not: one drops your edits, the other only unstages |
+| logs | `idk logs` | the journal `on disk (/var/log/journal): kept across reboots`, its size, and the biggest files in `/var/log` |
 
 ---
 
@@ -212,8 +232,15 @@ One fact, four surfaces: the CLI, the TUI, the prompt and an agent.
   examples. `idk` gives the answer first, then this machine's state, then
   the why, and it works offline.
 - **"Can it break something?"** No. It reads files in `/proc`, `/sys` and
-  `/etc`, and runs one program, `systemctl`, with fixed arguments. It never
-  runs what you type.
+  `/etc`, plus a few in your home folder (file names and public keys in
+  `~/.ssh`, git's config), and runs one program, `systemctl`, with fixed
+  arguments. It never opens a private key or a credential, and never runs
+  what you type.
+- **"What does it cover?"** 121 cards in 30 chapters. The theory: kernel,
+  CPU, memory, storage, GPU, networks, containers, concurrency,
+  filesystems, time, cryptography, text. The practice: nine hubs from Disk
+  to Logs. The shell: environment, find and friends, SSH, git. 49 probes
+  answer from the machine.
 - **"Does it need root?"** No. Where root would show more (another user's
   process on a port, AppArmor profiles), it says so: `needs root`, with the
   command that would.
