@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>atfq</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A Linux companion for the terminal: short answers first, your machine's real state second, the deep why only if you want it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&family=Martian+Mono:wdth,wght@87.5,500;112.5,700;112.5,800&display=swap">
+<style>
+/* Layout: the page reads like a terminal session. Each section opens with the
+   command that would show it; the hero is the TUI itself, rounded panes and
+   mode badge included. Colours are the 16-colour ANSI set the TUI uses:
+   cyan for focus and code, magenta for search, green for the AI prompt,
+   yellow for warnings. */
+/* Colours: the atfq web app's themes (atfq-poc), switched by the picker at
+   the bottom. They live on data-palette, because data-theme belongs to the
+   viewer. Each theme gives the app's eight colours; everything else on the
+   page is mixed from them. --accent is the theme's main colour, except in
+   base, where main is the text colour and the app's cyan takes its place. */
+:root {
+  --p-bg: #7766BD; --p-main: #F4EFFA; --p-caret: #F4EFFA; --p-text: #F4EFFA;
+  --p-sub: #4B3A91; --p-sub-alt: #4B3A91; --p-error: #00F5FF; --p-extra: #20C2CC;
+  --accent: var(--p-error);
+  color-scheme: dark;
+
+  --bg: var(--p-bg);
+  --fg: var(--p-text);
+  --surface: color-mix(in srgb, var(--p-sub-alt) 45%, var(--p-bg));
+  --line: color-mix(in srgb, var(--p-sub) 70%, var(--p-bg));
+  --muted: color-mix(in srgb, var(--p-text) 72%, var(--p-bg));
+  --magenta: var(--p-extra);
+  --green: var(--p-main);
+  --yellow: var(--p-extra);
+  --key-bg: var(--p-sub-alt);
+
+  /* The terminal takes the theme's darker surface. */
+  --t-bg: var(--p-sub-alt);
+  --t-bar: color-mix(in srgb, var(--p-sub-alt) 82%, #000);
+  --t-line: color-mix(in srgb, var(--p-main) 16%, var(--p-sub-alt));
+  --t-fg: var(--p-text);
+  --t-dim: color-mix(in srgb, var(--p-text) 52%, var(--p-sub-alt));
+  --t-bold: var(--p-main);
+  --t-cyan: var(--accent);
+  --t-magenta: var(--p-extra);
+  --t-green: var(--p-main);
+  --t-yellow: var(--p-extra);
+  --t-black: var(--p-sub-alt);
+
+  --display: "Martian Mono", "JetBrains Mono", ui-monospace, monospace;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --radius: 10px;
+}
+[data-palette="husqy"]    { --p-bg: #000000; --p-main: #972FFF; --p-caret: #B66CFF; --p-text: #EBD7FF; --p-sub: #523b6b; --p-sub-alt: #1a0b2e; --p-error: #00F5FF; --p-extra: #31C7D5; --accent: var(--p-main); }
+[data-palette="paper"]    { --p-bg: #eeeeee; --p-main: #444444; --p-caret: #444444; --p-text: #111111; --p-sub: #777777; --p-sub-alt: #dddddd; --p-error: #C2413B; --p-extra: #D97706; --accent: var(--p-error); color-scheme: light; }
+[data-palette="graphite"] { --p-bg: #121212; --p-main: #F2F2F2; --p-caret: #FFD166; --p-text: #E8E6DF; --p-sub: #8A8F98; --p-sub-alt: #242424; --p-error: #FF5D73; --p-extra: #FFB703; --accent: var(--p-caret); }
+[data-palette="aurora"]   { --p-bg: #10201C; --p-main: #7CE7C7; --p-caret: #7CE7C7; --p-text: #EAFCF6; --p-sub: #5AA391; --p-sub-alt: #18372F; --p-error: #FF7A90; --p-extra: #FFC857; --accent: var(--p-main); }
+[data-palette="lagoon"]   { --p-bg: #062A33; --p-main: #69D2E7; --p-caret: #FFD166; --p-text: #EDFAFF; --p-sub: #4D8F9B; --p-sub-alt: #0D3B46; --p-error: #FF6B6B; --p-extra: #F4D35E; --accent: var(--p-main); }
+[data-palette="ember"]    { --p-bg: #251416; --p-main: #FFB86C; --p-caret: #FFB86C; --p-text: #FFF1DF; --p-sub: #B36B57; --p-sub-alt: #3A2021; --p-error: #8BE9FD; --p-extra: #5EEAD4; --accent: var(--p-main); }
+[data-palette="orchid"]   { --p-bg: #21162E; --p-main: #F0A6FF; --p-caret: #66E3D6; --p-text: #FFF0FB; --p-sub: #8F6CA7; --p-sub-alt: #362045; --p-error: #66E3D6; --p-extra: #FFD166; --accent: var(--p-main); }
+[data-palette="circuit"]  { --p-bg: #071B18; --p-main: #43F0B6; --p-caret: #43F0B6; --p-text: #E6FFF7; --p-sub: #4B9381; --p-sub-alt: #10322C; --p-error: #FF5C8A; --p-extra: #FFD166; --accent: var(--p-main); }
+[data-palette="daybreak"] { --p-bg: #F7FBFF; --p-main: #2F6FEF; --p-caret: #2F6FEF; --p-text: #14213D; --p-sub: #6D7891; --p-sub-alt: #E4EEF8; --p-error: #D64045; --p-extra: #F6AE2D; --accent: var(--p-main); color-scheme: light; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 1.0625rem/1.6 var(--body);
+}
+a { color: var(--accent); text-underline-offset: 3px; }
+::selection { background: var(--accent); color: var(--bg); }
+body { transition: background-color 0.25s ease, color 0.2s ease; }
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+code, pre, kbd { font-family: var(--mono); }
+code { font-size: 0.92em; color: var(--accent); }
+
+.wrap {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ----- header ----- */
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1.25rem;
+}
+.logo {
+  font: 800 1.35rem/1 var(--display);
+  font-stretch: 112.5%;
+  color: var(--fg);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+.logo span { color: var(--accent); }
+.top nav { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+.top nav a {
+  font: 500 0.85rem/1 var(--mono);
+  color: var(--muted);
+  text-decoration: none;
+}
+.top nav a:hover { color: var(--accent); }
+
+/* ----- hero ----- */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 3rem;
+  align-items: center;
+  padding-block: 2.5rem 4rem;
+}
+.hero > * { min-width: 0; }
+.eyebrow {
+  font: 600 0.75rem/1 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 1.25rem;
+}
+h1 {
+  font: 700 clamp(2rem, 4.2vw, 3.1rem)/1.12 var(--display);
+  font-stretch: 112.5%;
+  letter-spacing: -0.035em;
+  margin: 0 0 1.5rem;
+  text-wrap: balance;
+}
+h1 .q { color: var(--accent); }
+.lede {
+  font-size: 1.15rem;
+  color: var(--muted);
+  max-width: 34rem;
+  margin: 0 0 2rem;
+}
+.lede strong { color: var(--fg); font-weight: 500; }
+
+.install {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  max-width: 34rem;
+  overflow: hidden;
+}
+.install pre {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9rem;
+}
+.install pre .p { color: var(--muted); user-select: none; }
+.copy {
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font: 600 0.75rem/1 var(--mono);
+  padding: 0 1rem;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+}
+.copy:hover { color: var(--accent); }
+.under {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0.85rem 0 0;
+}
+
+/* ----- the terminal ----- */
+.term {
+  background: var(--t-bg);
+  color: var(--t-fg);
+  border-radius: 14px;
+  border: 1px solid var(--t-line);
+  box-shadow: 0 30px 60px -30px rgba(4, 20, 26, 0.55);
+  overflow: hidden;
+}
+.term-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.6rem;
+  background: var(--t-bar);
+  border-bottom: 1px solid var(--t-line);
+}
+.tab {
+  border: 0;
+  background: transparent;
+  color: var(--t-dim);
+  font: 600 0.78rem/1 var(--mono);
+  padding: 0.45rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.tab:hover { color: var(--t-fg); }
+.tab[aria-selected="true"] { background: var(--t-line); color: var(--t-fg); }
+.term-bar .where {
+  margin-left: auto;
+  font: 400 0.72rem/1 var(--mono);
+  color: var(--t-dim);
+  padding-right: 0.4rem;
+  white-space: nowrap;
+}
+.screen {
+  margin: 0;
+  padding: 1rem 1.1rem 1.1rem;
+  font: 400 clamp(0.62rem, 1.05vw, 0.8rem)/1.45 var(--mono);
+  overflow-x: auto;
+  white-space: pre;
+  min-height: 31.5em;
+}
+.c { color: var(--t-cyan); }
+.m { color: var(--t-magenta); }
+.g { color: var(--t-green); }
+.y { color: var(--t-yellow); }
+.d { color: var(--t-dim); }
+.b { font-weight: 600; color: var(--t-bold); }
+.sel { background: var(--t-cyan); color: var(--t-black); font-weight: 600; }
+.badge { background: var(--t-cyan); color: var(--t-black); font-weight: 600; }
+.badge.mg { background: var(--t-magenta); }
+.cursor { background: var(--t-fg); color: var(--t-bg); animation: blink 1.1s steps(1) infinite; }
+@keyframes blink { 50% { background: transparent; color: inherit; } }
+@media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+
+/* ----- sections ----- */
+section { padding-block: 4.5rem; border-top: 1px solid var(--line); }
+.cmd {
+  font: 500 0.85rem/1 var(--mono);
+  color: var(--muted);
+  margin: 0 0 1rem;
+}
+.cmd::before { content: "$ "; color: var(--accent); }
+h2 {
+  font: 700 clamp(1.5rem, 2.8vw, 2.1rem)/1.2 var(--display);
+  font-stretch: 112.5%;
+  letter-spacing: -0.03em;
+  margin: 0 0 1rem;
+  text-wrap: balance;
+  max-width: 40rem;
+}
+.intro { color: var(--muted); max-width: 40rem; margin: 0 0 2.5rem; }
+
+/* A card, layer by layer: a real sequence, so it is numbered. */
+.layers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  counter-reset: layer;
+}
+.layer {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.4rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.layer h3 {
+  font: 700 1rem/1.3 var(--display);
+  font-stretch: 112.5%;
+  margin: 0;
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+}
+.layer h3::before {
+  counter-increment: layer;
+  content: counter(layer);
+  font: 600 0.75rem/1 var(--mono);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 0.2rem 0.45rem;
+}
+.layer p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.layer pre {
+  margin: auto 0 0;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  background: var(--t-bg);
+  color: var(--t-fg);
+  border-radius: 8px;
+  padding: 0.8rem 0.9rem;
+  overflow-x: auto;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 2.5rem;
+  margin: 3rem 0 0;
+  padding: 0;
+  list-style: none;
+  font: 400 0.9rem/1.4 var(--mono);
+  color: var(--muted);
+}
+.stats b {
+  font: 700 1.5rem/1 var(--display);
+  color: var(--fg);
+  margin-right: 0.4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Read-only: two columns of plain facts. */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 3rem;
+}
+.split > * { min-width: 0; }
+.facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.1rem; }
+.facts li { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 1rem; }
+.facts dt, .facts .k {
+  font: 600 0.78rem/1.6 var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.facts .v { color: var(--fg); }
+.facts .v small { display: block; color: var(--muted); font-size: 0.9rem; }
+
+.queries { display: grid; gap: 0.6rem; margin: 0; padding: 0; list-style: none; }
+.queries li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.9rem;
+  align-items: baseline;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.queries code { color: var(--fg); font-size: 0.88rem; }
+.queries code::before { content: "atfq "; color: var(--accent); }
+.queries span { color: var(--muted); font-size: 0.92rem; }
+
+/* Keys, as the TUI's footer shows them. */
+.keys {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.25rem 2.5rem;
+  margin: 0;
+}
+.keys div {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  gap: 1rem;
+  padding-block: 0.55rem;
+  border-bottom: 1px dashed var(--line);
+  align-items: baseline;
+}
+.keys dt { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.keys dd { margin: 0; color: var(--muted); font-size: 0.95rem; }
+kbd {
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--key-bg);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 0.05rem 0.4rem;
+  color: var(--fg);
+}
+
+.get { display: grid; gap: 1.25rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.get > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.get h3 { font: 700 0.95rem/1.3 var(--display); font-stretch: 112.5%; margin: 0; }
+.get p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.get pre {
+  margin: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  overflow-x: auto;
+}
+
+footer {
+  border-top: 1px solid var(--line);
+  padding-block: 2rem 3rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+footer .wrap { display: flex; flex-wrap: wrap; gap: 0.75rem 2rem; justify-content: space-between; align-items: center; }
+footer .themes { flex-basis: 100%; padding-top: 0.75rem; }
+
+/* Theme picker, as in the app. */
+.themes { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
+.themes > span {
+  font: 600 0.72rem/1 var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-right: 0.4rem;
+}
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem 0.3rem 0.35rem;
+  font: 500 0.75rem/1 var(--mono);
+  cursor: pointer;
+}
+.swatch i {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 999px;
+  background: var(--sw-bg);
+  box-shadow: inset 0 0 0 2px var(--sw-main), inset 0 0 0 4px var(--sw-bg), inset 0 0 0 9px var(--sw-main);
+}
+.swatch:hover { color: var(--fg); }
+.swatch[aria-pressed="true"] { color: var(--fg); border-color: var(--line); background: var(--surface); }
+@media (prefers-reduced-motion: reduce) { body { transition: none; } }
+
+@media (max-width: 900px) {
+  .hero, .split { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
+  .layers, .get { grid-template-columns: minmax(0, 1fr); }
+  .screen { font-size: 0.68rem; }
+}
+@media (max-width: 480px) {
+  .top nav a:not(.gh) { display: none; }
+  .facts li { grid-template-columns: minmax(0, 1fr); gap: 0.2rem; }
+  .keys div { grid-template-columns: 7rem minmax(0, 1fr); }
+  .term-bar .where { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="wrap top">
+  <a class="logo" href="#">atfq<span>_</span></a>
+  <nav aria-label="Sections">
+    <a href="#cards">cards</a>
+    <a href="#keys">keys</a>
+    <a href="#install">install</a>
+    <a class="gh" href="https://github.com/moha-bekh/atfq">github</a>
+  </nav>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div>
+      <p class="eyebrow">A Linux companion for the terminal</p>
+      <h1>Ask the question<span class="q">.</span> Your machine answers.</h1>
+      <p class="lede">
+        <strong>Short answers first</strong>, your machine's real state second,
+        the deep "why" only if you want it. 121 cards on how Linux works, each
+        checked against what <code>/proc</code> and <code>/sys</code> say right now.
+      </p>
+      <div class="install">
+        <pre id="install-cmd"><span class="p">$ </span>cargo install --git https://github.com/moha-bekh/atfq</pre>
+        <button class="copy" type="button" data-copy="install-cmd">COPY</button>
+      </div>
+      <p class="under">One binary for x86-64 and ARM64 Linux. Read-only, offline, no root.</p>
+    </div>
+
+    <div class="term" aria-label="atfq in a terminal">
+      <div class="term-bar" role="tablist" aria-label="Surfaces">
+        <button class="tab" role="tab" id="tab-cli" aria-selected="true" aria-controls="screen" data-screen="cli">CLI</button>
+        <button class="tab" role="tab" id="tab-tui" aria-selected="false" aria-controls="screen" data-screen="tui">TUI</button>
+        <button class="tab" role="tab" id="tab-mcp" aria-selected="false" aria-controls="screen" data-screen="mcp">MCP</button>
+        <span class="where">alice@laptop ~</span>
+      </div>
+<pre class="screen" id="screen" role="tabpanel" aria-live="polite"><span class="c">$</span> atfq free
+<span class="b">17.1  free vs available</span>
+
+<span class="b">TL;DR</span>
+  - <span class="b">free</span>: memory nobody is using at all, not even as cache.
+  - <span class="b">available</span>: what your apps can still get without swapping.
+  - Look at available, not free: the available column of
+    the Mem: line in <span class="c">free -h</span>.
+
+      <span class="c">free -h</span>
+
+<span class="b">On your machine</span>
+  RAM       <span class="c">10.5 GiB</span> available of 15.5 GiB (68%)
+            · 1.1 GiB completely free
+  Cache     <span class="c">7.5 GiB</span> in buff/cache, 604.0 MiB of it shared
+  Swap      <span class="c">256.0 MiB</span> used of 8.0 GiB · swappiness 60
+
+<span class="b">Pitfalls</span>
+  - "free" near zero is normal: Linux fills spare RAM
+    with page cache.
+  - <span class="y">A little swap in use is not a problem by itself.</span>
+    What hurts is constant swapping: watch the si and so
+    columns of <span class="c">vmstat 1</span>.
+
+<span class="d">Deep dive: 3 questions. Read them with atfq 17.1 --why</span>
+
+<span class="c">$</span> <span class="cursor"> </span></pre>
+    </div>
+  </div>
+
+  <section id="cards">
+    <div class="wrap">
+      <p class="cmd">atfq 17.1 --why</p>
+      <h2>Every card answers in the same order</h2>
+      <p class="intro">
+        Cards are organised like a book, with a flat numbered table of contents.
+        You type a name, an alias, a chapter number, or the error message you
+        just got. The first screen solves the problem.
+      </p>
+      <div class="layers">
+        <article class="layer">
+          <h3>TL;DR</h3>
+          <p>Three lines, in plain English. If a sentence would fit in a man page, it was rewritten.</p>
+<pre><span class="b">17.4  The page cache</span>
+  - Keeps file data in RAM after
+    it has been read or written.
+  - Shrinks by itself when apps
+    need more: nothing to free.</pre>
+        </article>
+        <article class="layer">
+          <h3>On your machine</h3>
+          <p>Live probes read <code>/proc</code>, <code>/sys</code> and <code>/etc</code> directly. What's true here, not in general.</p>
+<pre><span class="b">On your machine</span>
+  Arch   <span class="c">x86_64</span>, made by Intel
+  Level  <span class="c">x86-64-v4</span>: programs
+         built for this level or
+         below run here</pre>
+        </article>
+        <article class="layer">
+          <h3>Deep dive</h3>
+          <p>The "why", folded away until you ask. Questions you can open one by one in the TUI.</p>
+<pre>  <span class="c">▾</span> <span class="b">Why do zombies exist at all?</span>
+  <span class="c">▸</span> How is "available" calculated?
+  <span class="c">▸</span> What is swappiness and when
+    should I change it?</pre>
+        </article>
+      </div>
+      <ul class="stats" aria-label="What's inside">
+        <li><b>9</b>hubs</li>
+        <li><b>121</b>cards</li>
+        <li><b>30</b>chapters</li>
+        <li><b>49</b>live probes</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="safe">
+    <div class="wrap split">
+      <div>
+        <p class="cmd">atfq probe</p>
+        <h2>It looks. It never touches.</h2>
+        <p class="intro">
+          <code>atfq</code> shows commands and reads state. It never runs your
+          commands and never changes the system, so you can point it at a
+          production box.
+        </p>
+        <ul class="facts">
+          <li><span class="k">Reads</span><span class="v"><code>/proc</code>, <code>/sys</code>, <code>/etc</code><small>Plus key names in <code>~/.ssh</code>, never a private key.</small></span></li>
+          <li><span class="k">Runs</span><span class="v"><code>systemctl</code>, and nothing else<small>Fixed arguments, a 500 ms timeout.</small></span></li>
+          <li><span class="k">Network</span><span class="v">Never<small>Content is embedded in the binary.</small></span></li>
+          <li><span class="k">Root</span><span class="v">Not needed<small>A probe that can't answer says "needs root".</small></span></li>
+        </ul>
+      </div>
+      <div>
+        <p class="cmd">atfq "exec format error"</p>
+        <h2>Paste the error, get the card</h2>
+        <p class="intro">Typos are forgiven, and error messages work as queries.</p>
+        <ul class="queries">
+          <li><code>"exec format error"</code><span>23.2 ELF and "command not found"</span></li>
+          <li><code>memroy</code><span>No exact match, showing Memory</span></li>
+          <li><code>degraded</code><span>systemd units that failed</span></li>
+          <li><code>5.1</code><span>a card, by chapter number</span></li>
+          <li><code>ask disk --redact</code><span>a prompt to paste into an AI, without your hostname</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="keys">
+    <div class="wrap">
+      <p class="cmd">atfq tui</p>
+      <h2>Your fingers already know the keys</h2>
+      <p class="intro">Contents on the left, the page on the right. vim keys, counts included, and the mouse when you want it.</p>
+      <dl class="keys">
+        <div><dt><kbd>j</kbd><kbd>k</kbd></dt><dd>move, scroll (<kbd>5j</kbd> for five)</dd></div>
+        <div><dt><kbd>h</kbd><kbd>l</kbd></dt><dd>switch pane</dd></div>
+        <div><dt><kbd>gg</kbd><kbd>G</kbd></dt><dd>top, bottom</dd></div>
+        <div><dt><kbd>^d</kbd><kbd>^u</kbd></dt><dd>half a page</dd></div>
+        <div><dt><kbd>Tab</kbd></dt><dd>next link or question</dd></div>
+        <div><dt><kbd>⏎</kbd></dt><dd>open, expand</dd></div>
+        <div><dt><kbd>^o</kbd><kbd>⌫</kbd></dt><dd>back</dd></div>
+        <div><dt><kbd>/</kbd></dt><dd>search every card</dd></div>
+        <div><dt><kbd>?</kbd></dt><dd>the AI prompt for this page</dd></div>
+        <div><dt><kbd>r</kbd></dt><dd>run the probes again</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="wrap">
+      <p class="cmd">atfq --version</p>
+      <h2>Install</h2>
+      <p class="intro">Linux only, glibc 2.35 or later for the prebuilt binaries. Each release lists SHA-256 sums.</p>
+      <div class="get">
+        <div>
+          <h3>Prebuilt</h3>
+          <p>x86-64 shown; use <code>aarch64</code> on ARM.</p>
+<pre>curl -LO https://github.com/moha-bekh/atfq/releases/latest/download/atfq-x86_64-linux.tar.gz
+tar xzf atfq-x86_64-linux.tar.gz
+install -m 755 atfq-x86_64-linux/atfq ~/.local/bin/</pre>
+        </div>
+        <div>
+          <h3>From source</h3>
+          <p>With a Rust toolchain.</p>
+<pre>git clone https://github.com/moha-bekh/atfq
+cd atfq
+cargo install --path .</pre>
+        </div>
+        <div>
+          <h3>For your AI agent</h3>
+          <p>Five read-only MCP tools over stdio.</p>
+<pre>claude mcp add atfq -- atfq mcp</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span><b>atfq</b> stands for "Ask The F*cking Question".</span>
+    <span>MIT OR Apache-2.0 · <a href="https://github.com/moha-bekh/atfq">github.com/moha-bekh/atfq</a></span>
+    <div class="themes" role="group" aria-label="Theme"><span>theme</span></div>
+  </div>
+</footer>
+
+<template id="screen-tui"><span class="c">╭</span> <span class="c b">Contents</span> <span class="c">──────────────╮╭</span> <span class="d">Memory</span> <span class="d">───────────────────────────╮</span>
+<span class="c">│</span>  Disk                  <span class="c">│</span><span class="d">│</span><span class="b">17. Memory</span>  <span class="d">hub</span>                    <span class="d">│</span>
+<span class="c">│</span>  Permissions           <span class="c">│</span><span class="d">│</span>                                   <span class="d">│</span>
+<span class="c">│</span>  Processes &amp; schedulin…<span class="c">│</span><span class="d">│</span>How much RAM you have, who is      <span class="d">│</span>
+<span class="c">│</span><span class="sel">  Memory                </span><span class="c">│</span><span class="d">│</span>using it, and why "used" doesn't   <span class="d">│</span>
+<span class="c">│</span>  CPU                   <span class="c">│</span><span class="d">│</span>mean what you think.               <span class="d">│</span>
+<span class="c">│</span>  Network               <span class="c">│</span><span class="d">│</span>                                   <span class="d">│</span>
+<span class="c">│</span>  Boot                  <span class="c">│</span><span class="d">│</span><span class="b">On your machine</span>                    <span class="d">│</span>
+<span class="c">│</span>  GPU                   <span class="c">│</span><span class="d">│</span>  RAM    <span class="c">10.5 GiB</span> available of     <span class="d">│</span>
+<span class="c">│</span>  Logs                  <span class="c">│</span><span class="d">│</span>         15.5 GiB (68%)            <span class="d">│</span>
+<span class="c">│</span><span class="b">I. How it works</span>         <span class="c">│</span><span class="d">│</span>  Cache  <span class="c">7.5 GiB</span> in buff/cache     <span class="d">│</span>
+<span class="c">│</span>1. How the kernel works <span class="c">│</span><span class="d">│</span>  Swap   <span class="c">256.0 MiB</span> used of 8.0 GiB <span class="d">│</span>
+<span class="c">│</span>  1.1 What does the ker…<span class="c">│</span><span class="d">│</span>                                   <span class="d">│</span>
+<span class="c">│</span>  1.2 How the kernel sh…<span class="c">│</span><span class="d">│</span><span class="b">Commands</span>                           <span class="d">│</span>
+<span class="c">│</span>  1.3 How virtual memor…<span class="c">│</span><span class="d">│</span>  <span class="c"><u>free -h</u></span>      RAM and swap, in    <span class="d">│</span>
+<span class="c">│</span>  1.4 Interrupts: how d…<span class="c">│</span><span class="d">│</span>               human units         <span class="d">│</span>
+<span class="c">│</span>  1.5 How a program sta…<span class="c">│</span><span class="d">│</span>  <span class="c"><u>vmstat 1</u></span>     memory and swap     <span class="d">│</span>
+<span class="c">│</span><span class="b">2. How a CPU works</span>      <span class="c">│</span><span class="d">│</span>               activity            <span class="d">│</span>
+<span class="c">│</span>  2.1 What a CPU does: …<span class="c">│</span><span class="d">│</span>  <span class="c"><u>top -o %MEM</u></span>  by memory use       <span class="d">│</span>
+<span class="c">│</span>  2.2 Cores, threads an…<span class="c">│</span><span class="d">│</span>  <span class="c"><u>swapon --show</u></span>  swap areas        <span class="d">│</span>
+<span class="c">│</span>  2.3 CPU caches: why m…<span class="c">│</span><span class="d">│</span>                                   <span class="d">│</span>
+<span class="c">╰────────────────────────╯</span><span class="d">╰───────────────────────────────────╯</span>
+<span class="badge"> NORMAL </span> <span class="b">q</span><span class="d"> quit  </span><span class="b">jk</span><span class="d"> move  </span><span class="b">tab</span><span class="d"> link  </span><span class="b">⏎</span><span class="d"> open  </span><span class="b">/</span><span class="d"> search</span></template>
+
+<template id="screen-mcp"><span class="c">$</span> claude mcp add atfq -- atfq mcp
+<span class="d">Added stdio MCP server atfq</span>
+
+<span class="d">The agent calls a read-only tool:</span>
+<span class="m">lookup</span> { <span class="g">"query"</span>: <span class="g">"free"</span> }
+
+{
+  <span class="g">"query"</span>: <span class="g">"free"</span>,
+  <span class="g">"match"</span>: <span class="g">"exact"</span>,
+  <span class="g">"entry"</span>: {
+    <span class="g">"kind"</span>: <span class="g">"card"</span>,
+    <span class="g">"id"</span>: <span class="g">"memory.free-vs-available"</span>,
+    <span class="g">"title"</span>: <span class="g">"free vs available"</span>,
+    <span class="g">"number"</span>: <span class="g">"17.1"</span>,
+    <span class="g">"aliases"</span>: [<span class="g">"free"</span>, <span class="g">"available"</span>, <span class="g">"ram usage"</span>, …],
+    <span class="g">"probes"</span>: [<span class="g">"mem.summary"</span>],
+    <span class="g">"commands"</span>: [<span class="g">"free"</span>, <span class="g">"vmstat"</span>],
+    <span class="g">"paths"</span>: [<span class="g">"/proc/meminfo"</span>],
+    …
+  }
+}
+
+<span class="d">Tools:</span> <span class="m">lookup</span>  <span class="m">search</span>  <span class="m">toc</span>  <span class="m">run_probe</span>  <span class="m">list_probes</span>
+<span class="d">Every one carries</span> <span class="c">readOnlyHint: true</span><span class="d">.</span></template>
+
+<script>
+(function () {
+  var screen = document.getElementById("screen");
+  var screens = { cli: screen.innerHTML };
+  ["tui", "mcp"].forEach(function (name) {
+    screens[name] = document.getElementById("screen-" + name).innerHTML;
+  });
+  var tabs = document.querySelectorAll(".tab");
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      tabs.forEach(function (t) { t.setAttribute("aria-selected", String(t === tab)); });
+      screen.innerHTML = screens[tab.dataset.screen];
+      screen.setAttribute("aria-labelledby", tab.id);
+    });
+  });
+
+  // The atfq app's themes: name, background, main colour.
+  var themes = [
+    ["base", "#7766BD", "#F4EFFA"], ["husqy", "#000000", "#972FFF"],
+    ["paper", "#eeeeee", "#444444"], ["graphite", "#121212", "#F2F2F2"],
+    ["aurora", "#10201C", "#7CE7C7"], ["lagoon", "#062A33", "#69D2E7"],
+    ["ember", "#251416", "#FFB86C"], ["orchid", "#21162E", "#F0A6FF"],
+    ["circuit", "#071B18", "#43F0B6"], ["daybreak", "#F7FBFF", "#2F6FEF"]
+  ];
+  var root = document.documentElement;
+  var group = document.querySelector(".themes");
+  var saved = null;
+  try { saved = localStorage.getItem("atfq-palette"); } catch (e) {}
+  function apply(name) {
+    if (name === "base") root.removeAttribute("data-palette");
+    else root.setAttribute("data-palette", name);
+    group.querySelectorAll(".swatch").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.palette === name));
+    });
+  }
+  themes.forEach(function (t) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "swatch";
+    b.dataset.palette = t[0];
+    b.style.setProperty("--sw-bg", t[1]);
+    b.style.setProperty("--sw-main", t[2]);
+    b.innerHTML = "<i></i>" + t[0];
+    b.addEventListener("click", function () {
+      apply(t[0]);
+      try { localStorage.setItem("atfq-palette", t[0]); } catch (e) {}
+    });
+    group.appendChild(b);
+  });
+  apply(themes.some(function (t) { return t[0] === saved; }) ? saved : "base");
+
+  document.querySelectorAll(".copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var src = document.getElementById(btn.dataset.copy);
+      var text = src.textContent.replace(/^\$ /, "");
+      var done = function () {
+        btn.textContent = "COPIED";
+        setTimeout(function () { btn.textContent = "COPY"; }, 1500);
+      };
+      var select = function () {
+        var r = document.createRange();
+        r.selectNodeContents(src);
+        var s = window.getSelection();
+        s.removeAllRanges();
+        s.addRange(r);
+      };
+      try {
+        navigator.clipboard.writeText(text).then(done, select);
+      } catch (e) {
+        select();
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

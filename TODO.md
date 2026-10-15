@@ -1,0 +1,5 @@
+- [x] improve ui -> take example on tuios (borders, theme)
+- [x] vim navigation
+- [~] frontend (book: `cargo run --example book`; GitHub Pages workflow ready, to enable in the repo settings)
+- [~] landing page (draft in site/index.html, DA to validate)
+- [ ] x86 tests
