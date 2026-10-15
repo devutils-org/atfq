@@ -1,5 +1,7 @@
 processor	: 0
 BogoMIPS	: 38.40
+Features	: fp asimd evtstrm crc32 cpuid
+CPU architecture: 8
 CPU implementer	: 0x41
 CPU part	: 0xd08
 

@@ -1,0 +1,3 @@
+numa_hit 480000000
+numa_miss 1200000
+numa_foreign 0

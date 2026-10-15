@@ -1,0 +1,55 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+3.2  NUMA: when some memory is closer
+
+TL;DR
+  - On machines with several CPU sockets, each socket has its own RAM. Reading
+    the other socket's RAM crosses a link between chips: slower, often by half
+    or more.
+  - Each socket with its RAM is a NUMA node. Laptops and most desktops have one:
+    none of this applies to them.
+  - Linux gives a process memory on the node of the CPU that first touches it,
+    and tries to keep the process near its memory.
+
+      numactl --hardware            # nodes, their CPUs, memory, distances
+      numastat -p PID               # where a process's memory lives
+
+On your machine
+  Nodes     one node: all RAM is equally close to every CPU
+
+Pitfalls
+  - A big service started on one node, or one thread filling all memory before
+    others start, ends with every page on one node: the other socket's CPUs all
+    read from afar.
+  - One node can run out of memory while the other has plenty: the kernel may
+    reclaim or swap on that node instead of using the far one.
+  - AMD EPYC and some Intel servers can split one socket into several nodes
+    (NPS, sub-NUMA clustering), a firmware setting.
+  - For databases and VMs, pin both CPUs and memory:
+    numactl --cpunodebind=0 --membind=0 ./program.
+
+Deep dive
+
+  ▾ What do the distances mean?
+
+    The firmware gives a table of relative costs, read by numactl --hardware: 10
+    for a node's own memory, more for the others. 20 means roughly twice as
+    costly. It's a hint, not a measurement; tools like the Intel Memory Latency
+    Checker measure the real figures.
+
+  ▾ What does automatic NUMA balancing do?
+
+    With kernel.numa_balancing on, the kernel periodically unmaps a few pages of
+    each process to see, from the faults, which CPUs use them. It then moves
+    pages toward the node that uses them, or the task toward its memory. It
+    helps long-running services that weren't placed by hand, at a small cost;
+    carefully pinned workloads often turn it off.
+
+Related
+  Commands  numactl, numastat, lscpu
+  Paths     /sys/devices/system/node/
+  Hub       idk memory Memory
+  See also  idk 2.2 Cores, threads and sockets
+  See also  idk 3.1 RAM and the memory hierarchy

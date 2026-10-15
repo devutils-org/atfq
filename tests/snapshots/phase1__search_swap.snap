@@ -9,6 +9,8 @@ Results for "swap"
               free -h: RAM and swap, in human units
   idk 11.2    The OOM killer
               When RAM and swap are both used up, the kernel's OOM ("out of m…
+  idk 3.2     NUMA: when some memory is closer
+              may reclaim or swap on that node instead of using the far one.
   idk 7.6     /dev and udev
               /dev/sda and /dev/sdb can swap places: scripts should use
   idk 11.1    free vs available
@@ -17,9 +19,7 @@ Results for "swap"
               with dots instead of slashes: vm.swappiness is
   idk 1.3     How virtual memory works
               ones to swap, and give every program the same simple layout.
+  idk 3.1     RAM and the memory hierarchy
+              Where do swap and the page cache fit?
   idk 7.2     /tmp vs /var/tmp
               swap under pressure, but a machine without swap has nowhere to…
-  idk 7.3     /proc and /sys
-              /proc/sys holds what sysctl changes: sysctl vm.swappiness reads
-  idk 20.7    rsync
-              The order is source then destination, as with cp: swapping them…

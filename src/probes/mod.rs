@@ -26,13 +26,15 @@ use std::path::{Path, PathBuf};
 use serde::Serialize;
 
 pub use boot::{BootInfo, Firmware};
-pub use cpu::CpuSummary;
+pub use cpu::{
+    Cache, CoreKind, CpuCaches, CpuFeatures, CpuFreq, CpuSummary, CpuTopology, CpuVulns,
+};
 pub use disk::{BlockDevice, DiskTree, Mount, Partition, TmpDir, TmpDirs};
 pub use disk::{Fstab, FstabEntry, UdevRules};
 pub use kernel::{Interrupts, KernelOverview};
 pub use kernel::{Modules, Sysctl, SysctlSetting, SysctlValue};
 pub use mem::MemSummary;
-pub use mem::VirtualMemory;
+pub use mem::{MemController, MemErrors, Numa, NumaNode, VirtualMemory};
 pub use net::{DnsConfig, Interface, Listener, Listening, NetInterfaces};
 pub use net::{Firewall, Neighbour, NetLayers, TcpStats};
 pub use pkg::Packages;
@@ -88,6 +90,13 @@ pub enum ProbeData {
     Irq(Interrupts),
     Vm(VirtualMemory),
     Layers(NetLayers),
+    Features(CpuFeatures),
+    Topology(CpuTopology),
+    Caches(CpuCaches),
+    Freq(CpuFreq),
+    Vulns(CpuVulns),
+    Numa(Numa),
+    MemErrors(MemErrors),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -489,7 +498,50 @@ pub const REGISTRY: &[ProbeInfo] = &[
         description: "this machine's network, layer by layer, link to DNS",
         run: net::layers,
     },
+    ProbeInfo {
+        name: cpu::FEATURES,
+        description: "architecture, x86-64 level and notable instruction set extensions",
+        run: cpu::features,
+    },
+    ProbeInfo {
+        name: cpu::TOPOLOGY,
+        description: "sockets, cores, threads per core and kinds of cores",
+        run: cpu::topology,
+    },
+    ProbeInfo {
+        name: cpu::CACHES,
+        description: "CPU caches: levels, sizes, who shares them, line size",
+        run: cpu::caches,
+    },
+    ProbeInfo {
+        name: cpu::FREQ,
+        description: "CPU frequencies, governor, turbo, idle states, temperature",
+        run: cpu::freq,
+    },
+    ProbeInfo {
+        name: cpu::VULNS,
+        description: "CPU flaws (Spectre and others) and how the kernel handles them",
+        run: cpu::vulns,
+    },
+    ProbeInfo {
+        name: mem::NUMA,
+        description: "NUMA nodes: their CPUs, memory and distances",
+        run: mem::numa,
+    },
+    ProbeInfo {
+        name: mem::ERRORS,
+        description: "memory errors reported by ECC controllers (EDAC)",
+        run: mem::errors,
+    },
 ];
+
+/// What a notable CPU flag is, in words: `avx2` → `AVX2 (256-bit vectors)`.
+pub fn cpu_notable(flag: &str) -> Option<&'static str> {
+    cpu::NOTABLE
+        .iter()
+        .find(|(f, _)| *f == flag)
+        .map(|(_, d)| *d)
+}
 
 pub fn find(name: &str) -> Option<&'static ProbeInfo> {
     REGISTRY.iter().find(|p| p.name == name)

@@ -1,0 +1,45 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+2.5  Speculative execution and CPU flaws
+
+TL;DR
+  - To stay busy, a CPU guesses: which way a branch goes, what memory will hold,
+    and runs ahead. Wrong guesses are thrown away.
+  - Thrown away, but not without a trace: the caches keep what was read.
+    Spectre, Meltdown and their successors (2018 onwards) use that to read
+    memory a program should never see.
+  - The kernel works around each flaw it knows (mitigations), helped by
+    microcode updates. It lists them per flaw.
+
+      grep -r . /sys/devices/system/cpu/vulnerabilities/
+      journalctl -k | grep -i microcode    # microcode loaded at boot
+
+On your machine
+  Mitigated gather_data_sampling: Microcode
+            spec_store_bypass: Speculative Store Bypass disabled via prctl
+            spectre_v1: usercopy/swapgs barriers and __user pointer sanitization
+            spectre_v2: Enhanced / Automatic IBRS; IBPB: conditional; RSB
+            filling; PBRSB-eIBRS: SW sequence; BHI: SW loop, KVM: SW loop
+  Immune    10 others: this CPU doesn't have them
+
+Pitfalls
+  - Keep the microcode package installed and updated (intel-microcode, amd-ucode
+    or amd64-microcode): many fixes need it.
+  - mitigations=off on the kernel command line buys some speed and drops every
+    protection: only for isolated machines running trusted code.
+  - "Vulnerable" for one entry isn't always an alarm: some protections are only
+    applied to programs that ask for them (spec_store_bypass is often left to
+    prctl or seccomp).
+  - Mitigations cost most on older CPUs and system-call-heavy work; newer CPUs
+    fix several flaws in hardware.
+
+Deep dive: 2 questions. Read them with idk 2.5 --why
+
+Related
+  Commands  grep, journalctl
+  Paths     /sys/devices/system/cpu/vulnerabilities/
+  Hub       idk cpu CPU
+  See also  idk 2.1 What a CPU does: instructions and architectures
+  See also  idk 14.2 The kernel command line

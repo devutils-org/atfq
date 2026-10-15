@@ -14,7 +14,7 @@ paths:
   - { path: "/proc/meminfo", desc: "the kernel's memory counters, read by free and top" }
   - { path: "/proc/sys/vm/swappiness", desc: "how willing the kernel is to swap" }
   - { path: "/proc/PID/status", desc: "memory of one process (VmRSS line)" }
-cards: [internals.vm, memory.page-cache]
+cards: [internals.vm, hw-memory.hierarchy, memory.page-cache]
 ---
 
 How much RAM you have, who is using it, and why "used" doesn't mean what you

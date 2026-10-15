@@ -1,0 +1,40 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+3.3  ECC and failing RAM
+
+TL;DR
+  - RAM can return a wrong bit, mostly from a failing or badly seated module.
+    Without ECC nothing notices: random crashes, corrupted files.
+  - ECC memory stores extra check bits: it corrects a single wrong bit and
+    detects two, and the kernel counts both (EDAC).
+  - Corrected errors are a warning; a count that keeps growing on one module
+    means replacing it. An uncorrectable error stops the program, or the
+    machine.
+
+      sudo ras-mc-ctl --error-count       # per module (package rasdaemon)
+      journalctl -k | grep -i -E 'edac|mce|hardware error'
+
+On your machine
+  ECC       no memory controller reports errors (EDAC): RAM without ECC, no
+            driver, or a virtual machine
+  Retired   none: the kernel retired no RAM after an error
+
+Pitfalls
+  - Random segfaults in different programs, or a compiler crashing on code that
+    built yesterday, point at RAM: test it before reinstalling.
+  - Test with memtest86+ from a USB stick or a boot menu entry, for several
+    passes. Testing from the running system can't reach every address.
+  - ECC needs a CPU, board and modules that all support it: ECC modules in a
+    desktop board often run without it.
+  - No EDAC entries doesn't prove good RAM: it may only mean there's no ECC.
+
+Deep dive: 2 questions. Read them with idk 3.3 --why
+
+Related
+  Commands  ras-mc-ctl, journalctl
+  Paths     /sys/devices/system/edac/mc/
+  Hub       idk memory Memory
+  See also  idk 3.1 RAM and the memory hierarchy
+  See also  idk 15.3 dmesg and the kernel log

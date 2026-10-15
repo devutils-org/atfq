@@ -1,0 +1,47 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+3.1  RAM and the memory hierarchy
+
+TL;DR
+  - Every level trades size for speed. Rough orders of magnitude: registers
+    under 1 ns, L1 1 ns, L2 4 ns, L3 15 ns, RAM 100 ns, NVMe SSD tens of µs,
+    network to another continent 100 ms.
+  - RAM (DRAM) keeps each bit in a tiny capacitor that leaks: it must be
+    refreshed constantly, and it loses everything when powered off.
+  - Bandwidth comes from channels: two modules in the right slots work in
+    parallel and double it; one module alone halves it.
+
+      sudo dmidecode -t memory | grep -E 'Size|Type:|Speed|Locator'
+      lsmem                     # memory blocks the kernel sees
+
+On your machine
+  L1 data   4 × 48.0 KiB, each shared by 2 CPUs
+  L1 code   4 × 32.0 KiB, each shared by 2 CPUs
+  L2        4 × 1.2 MiB, each shared by 2 CPUs
+  L3        12.0 MiB, shared by all 8 CPUs
+  Line      64 bytes: the block memory moves in
+
+  RAM       10.5 GiB available of 15.5 GiB (68%) · 1.1 GiB completely free
+  Cache     7.5 GiB in buff/cache, 604.0 MiB of it shared (tmpfs)
+  Swap      256.0 MiB used of 8.0 GiB · swappiness 60
+
+Pitfalls
+  - Latency hardly improved in 20 years; bandwidth did. Code that chases
+    pointers waits on latency, code that streams arrays enjoys bandwidth.
+  - The rated speed (DDR5-6000) often needs a profile (XMP or EXPO) turned on in
+    the firmware; otherwise the RAM runs at a safer default.
+  - DDR5's "on-die ECC" only protects inside the chip: it isn't ECC memory and
+    reports nothing (3.3).
+  - "Free" RAM is wasted RAM: Linux fills it with cache (11.1).
+
+Deep dive: 2 questions. Read them with idk 3.1 --why
+
+Related
+  Commands  dmidecode, lsmem
+  Paths     /proc/meminfo
+  Hub       idk memory Memory
+  See also  idk 2.3 CPU caches: why memory layout matters
+  See also  idk 1.3 How virtual memory works
+  See also  idk 11.4 The page cache

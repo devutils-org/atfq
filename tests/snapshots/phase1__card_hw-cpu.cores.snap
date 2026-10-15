@@ -1,0 +1,41 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+2.2  Cores, threads and sockets
+
+TL;DR
+  - A core is a complete processor. A chip (package, or socket) holds several; a
+    server board can hold several chips.
+  - With SMT (Intel calls it Hyper-Threading), one core runs two hardware
+    threads. Each shows up as a CPU, but the two share the core's units: expect
+    far less than twice the speed.
+  - Logical CPUs = sockets × cores × threads per core. That's what nproc, top
+    and the load average count.
+
+      lscpu | grep -E '^(CPU\(s\)|Thread|Core|Socket)'
+      nproc                # CPUs this process may use
+
+On your machine
+  CPUs      8 logical CPUs on 4 cores, up to 2 threads per core (SMT)
+
+Pitfalls
+  - A load average of 8 on "8 CPUs" that are 4 cores with SMT is a busier
+    machine than it looks (12.1).
+  - In a container limited with --cpus=2, nproc still shows every CPU of the
+    host: the limit is a time quota, not fewer CPUs.
+  - Recent Intel chips mix performance (P) and efficiency (E) cores, like ARM's
+    big.LITTLE: the same task runs at different speeds depending on where the
+    scheduler puts it.
+  - Benchmarks vary between runs partly because of this: pin them with
+    taskset -c 2 ./bench.
+
+Deep dive: 2 questions. Read them with idk 2.2 --why
+
+Related
+  Commands  nproc, lscpu
+  Paths     /sys/devices/system/cpu/
+  Hub       idk cpu CPU
+  See also  idk 1.2 How the kernel shares the CPUs
+  See also  idk 2.3 CPU caches: why memory layout matters
+  See also  idk 3.2 NUMA: when some memory is closer

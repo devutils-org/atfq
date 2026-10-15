@@ -1,4 +1,6 @@
-//! `mem.summary`: RAM and swap, from /proc/meminfo and vm.swappiness.
+//! Memory probes: `mem.summary` (RAM and swap, from /proc/meminfo and
+//! vm.swappiness), `mem.vm` (virtual memory counters), and the hardware ones
+//! for Part I: `mem.numa`, `mem.errors`.
 
 use std::collections::HashMap;
 
@@ -8,6 +10,8 @@ use super::{ProbeCtx, ProbeData, ProbeResult, Status};
 
 pub(crate) const NAME: &str = "mem.summary";
 pub(crate) const VM: &str = "mem.vm";
+pub(crate) const NUMA: &str = "mem.numa";
+pub(crate) const ERRORS: &str = "mem.errors";
 
 /// All sizes in bytes.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -124,6 +128,160 @@ pub(crate) fn vm(ctx: &ProbeCtx) -> ProbeResult {
     ProbeResult::new(VM, Status::Ok, Some(ProbeData::Vm(data)))
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct Numa {
+    /// Empty when the kernel has no NUMA support: all RAM is one node.
+    pub nodes: Vec<NumaNode>,
+    /// Automatic NUMA balancing (`kernel.numa_balancing`) is on.
+    pub balancing: Option<bool>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct NumaNode {
+    pub id: u32,
+    /// CPUs of this node: `0-15`.
+    pub cpus: String,
+    /// Bytes.
+    pub total: Option<u64>,
+    pub free: Option<u64>,
+    /// Pages a process got from the node it wanted, and from another one.
+    pub hit: Option<u64>,
+    pub miss: Option<u64>,
+    /// Relative distance to each node, this one first being 10.
+    pub distances: Vec<u32>,
+}
+
+pub(crate) fn numa(ctx: &ProbeCtx) -> ProbeResult {
+    const DIR: &str = "/sys/devices/system/node";
+    let mut ids: Vec<u32> = ctx
+        .list(DIR)
+        .unwrap_or_default()
+        .iter()
+        .filter_map(|n| n.strip_prefix("node")?.parse().ok())
+        .collect();
+    ids.sort_unstable();
+    let nodes = ids
+        .into_iter()
+        .map(|id| {
+            let dir = format!("{DIR}/node{id}");
+            let info = ctx.read(&format!("{dir}/meminfo")).unwrap_or_default();
+            // `Node 0 MemTotal:  16264712 kB`: drop `Node 0`, then parse.
+            let info: String = info
+                .lines()
+                .map(|l| {
+                    l.trim_start_matches("Node ")
+                        .trim_start_matches(|c: char| c.is_ascii_digit())
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
+            let info = parse_meminfo(&info);
+            let stat = ctx.read(&format!("{dir}/numastat")).unwrap_or_default();
+            let stat = |k: &str| {
+                stat.lines().find_map(|l| {
+                    let (key, v) = l.split_once(' ')?;
+                    (key == k).then(|| v.trim().parse::<u64>().ok()).flatten()
+                })
+            };
+            NumaNode {
+                id,
+                cpus: ctx
+                    .read_trimmed(&format!("{dir}/cpulist"))
+                    .unwrap_or_default(),
+                total: info.get("MemTotal").copied(),
+                free: info.get("MemFree").copied(),
+                hit: stat("numa_hit"),
+                miss: stat("numa_miss"),
+                distances: ctx
+                    .read_trimmed(&format!("{dir}/distance"))
+                    .unwrap_or_default()
+                    .split_whitespace()
+                    .filter_map(|d| d.parse().ok())
+                    .collect(),
+            }
+        })
+        .collect();
+    let data = Numa {
+        nodes,
+        balancing: ctx
+            .read_trimmed("/proc/sys/kernel/numa_balancing")
+            .map(|b| b != "0"),
+    };
+    ProbeResult::new(NUMA, Status::Ok, Some(ProbeData::Numa(data)))
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct MemErrors {
+    /// Memory controllers that report errors (EDAC); none without ECC.
+    pub controllers: Vec<MemController>,
+    /// RAM the kernel stopped using after an uncorrectable error, in bytes.
+    pub hardware_corrupted: Option<u64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct MemController {
+    /// `mc0`.
+    pub name: String,
+    /// Driver's name for it: `Skylake Socket#0 IMC#0`.
+    pub model: Option<String>,
+    /// Bytes of RAM behind it.
+    pub size: Option<u64>,
+    /// Memory type and ECC mode of its first DIMM: `Registered-DDR4`, `SECDED`.
+    pub mem_type: Option<String>,
+    pub ecc_mode: Option<String>,
+    /// Errors since boot: fixed by ECC, and not fixable.
+    pub corrected: u64,
+    pub uncorrected: u64,
+}
+
+pub(crate) fn errors(ctx: &ProbeCtx) -> ProbeResult {
+    const DIR: &str = "/sys/devices/system/edac/mc";
+    let mut names: Vec<String> = ctx
+        .list(DIR)
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|n| {
+            n.strip_prefix("mc")
+                .is_some_and(|i| i.parse::<u32>().is_ok())
+        })
+        .collect();
+    names.sort_by_key(|n| n[2..].parse::<u32>().unwrap_or(0));
+    let controllers = names
+        .into_iter()
+        .map(|name| {
+            let dir = format!("{DIR}/{name}");
+            let get = |f: &str| ctx.read_trimmed(&format!("{dir}/{f}"));
+            let num = |f: &str| get(f).and_then(|v| v.parse::<u64>().ok());
+            let dimm = ctx
+                .list(&dir)
+                .unwrap_or_default()
+                .into_iter()
+                .find(|d| d.starts_with("dimm") || d.starts_with("rank"));
+            let of_dimm = |f: &str| {
+                let d = dimm.as_ref()?;
+                ctx.read_trimmed(&format!("{dir}/{d}/{f}"))
+                    .filter(|v| v != "Unknown")
+            };
+            MemController {
+                model: get("mc_name"),
+                size: num("size_mb").map(|mb| mb * 1024 * 1024),
+                mem_type: of_dimm("dimm_mem_type"),
+                ecc_mode: of_dimm("dimm_edac_mode"),
+                corrected: num("ce_count").unwrap_or(0),
+                uncorrected: num("ue_count").unwrap_or(0),
+                name,
+            }
+        })
+        .collect();
+    let data = MemErrors {
+        controllers,
+        hardware_corrupted: ctx
+            .read("/proc/meminfo")
+            .ok()
+            .and_then(|m| parse_meminfo(&m).get("HardwareCorrupted").copied()),
+    };
+    ProbeResult::new(ERRORS, Status::Ok, Some(ProbeData::MemErrors(data)))
+}
+
 /// `Key:   1234 kB` lines → bytes. Lines without a unit are taken as is.
 fn parse_meminfo(text: &str) -> HashMap<&str, u64> {
     text.lines()
@@ -196,6 +354,45 @@ mod tests {
         assert_eq!(v.major_faults, Some(2_400_000));
         assert_eq!(v.thp.as_deref(), Some("madvise"));
         assert_eq!(vm(&fixture("empty")).status, Status::Unavailable);
+    }
+
+    #[test]
+    fn numa_nodes() {
+        let Some(ProbeData::Numa(n)) = numa(&fixture("server")).data else {
+            panic!()
+        };
+        assert_eq!(n.nodes.len(), 2);
+        assert_eq!(n.nodes[1].cpus, "4-7");
+        assert_eq!(n.nodes[0].total, Some(65_810_566 * 1024));
+        assert_eq!(
+            (n.nodes[0].hit, n.nodes[0].miss),
+            (Some(500_000_000), Some(25_000_000))
+        );
+        assert_eq!(n.nodes[1].distances, [20, 10]);
+        assert_eq!(n.balancing, Some(true));
+        let Some(ProbeData::Numa(n)) = numa(&fixture("empty")).data else {
+            panic!()
+        };
+        assert!(n.nodes.is_empty());
+    }
+
+    #[test]
+    fn ecc_errors() {
+        let Some(ProbeData::MemErrors(e)) = errors(&fixture("server")).data else {
+            panic!()
+        };
+        assert_eq!(e.controllers.len(), 2);
+        let mc0 = &e.controllers[0];
+        assert_eq!((mc0.corrected, mc0.uncorrected), (3, 0));
+        assert_eq!(mc0.mem_type.as_deref(), Some("Registered-DDR4"));
+        assert_eq!(mc0.ecc_mode.as_deref(), Some("SECDED"));
+        assert_eq!(mc0.size, Some(64 << 30));
+        assert_eq!(e.hardware_corrupted, Some(4096));
+        let Some(ProbeData::MemErrors(e)) = errors(&fixture("laptop")).data else {
+            panic!()
+        };
+        assert!(e.controllers.is_empty());
+        assert_eq!(e.hardware_corrupted, Some(0));
     }
 
     #[test]

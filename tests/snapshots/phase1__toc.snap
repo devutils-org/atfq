@@ -21,7 +21,15 @@ Part I · How it works
       1.4  Interrupts: how devices get attention
       1.5  How a program starts: fork and exec
    2. How a CPU works
+      2.1  What a CPU does: instructions and architectures
+      2.2  Cores, threads and sockets
+      2.3  CPU caches: why memory layout matters
+      2.4  Clock speed, turbo and power saving
+      2.5  Speculative execution and CPU flaws
    3. How memory works
+      3.1  RAM and the memory hierarchy
+      3.2  NUMA: when some memory is closer
+      3.3  ECC and failing RAM
    4. How storage works
    5. How a GPU works
    6. How networks work

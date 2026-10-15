@@ -10,6 +10,7 @@ use crate::probes::{
     MemSummary, Modules, Mount, NetInterfaces, Overrides, ProbeData, ProbeResult, ProcInfo,
     ProcStates, Status, Sysctl, SystemdStatus, TmpDirs,
 };
+use crate::probes::{CpuCaches, CpuFeatures, CpuFreq, CpuTopology, CpuVulns, MemErrors, Numa};
 use crate::probes::{Interrupts, KernelOverview, NetLayers, VirtualMemory};
 
 /// Width of the label column (`RAM`, `Swap`, `Zombies`…).
@@ -67,6 +68,13 @@ pub(crate) fn result(r: &ProbeResult, w: usize) -> Vec<Line> {
         (_, Some(ProbeData::Irq(i))) => irq(i, w),
         (_, Some(ProbeData::Vm(v))) => vm(v, w),
         (_, Some(ProbeData::Layers(l))) => layers(l, w),
+        (_, Some(ProbeData::Features(f))) => features(f, w),
+        (_, Some(ProbeData::Topology(t))) => topology(t, w),
+        (_, Some(ProbeData::Caches(c))) => caches(c, w),
+        (_, Some(ProbeData::Freq(f))) => freq(f, w),
+        (_, Some(ProbeData::Vulns(v))) => vulns(v, w),
+        (_, Some(ProbeData::Numa(n))) => numa(n, w),
+        (_, Some(ProbeData::MemErrors(e))) => mem_errors(e, w),
         (_, None) => Vec::new(),
     };
     for note in &r.notes {
@@ -1168,6 +1176,305 @@ fn layers(l: &NetLayers, w: usize) -> Vec<Line> {
     out
 }
 
+fn features(f: &CpuFeatures, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    let arch = match (&f.arch, &f.vendor) {
+        (Some(a), Some(v)) => format!("{a}, made by {v}"),
+        (Some(a), None) => a.clone(),
+        (None, Some(v)) => format!("made by {v}"),
+        (None, None) => "unknown".to_string(),
+    };
+    out.extend(row("Arch", &arch, w));
+    if let Some(l) = &f.level {
+        out.extend(row(
+            "Level",
+            &format!("{l}: programs built for this level or below run here"),
+            w,
+        ));
+    }
+    if !f.notable.is_empty() {
+        let names: Vec<&str> = f
+            .notable
+            .iter()
+            .filter_map(|n| crate::probes::cpu_notable(n))
+            .collect();
+        out.extend(row("Has", &names.join(", "), w));
+    }
+    if f.flags > 0 {
+        out.extend(row(
+            "Flags",
+            &format!("{} in all, in /proc/cpuinfo", f.flags),
+            w,
+        ));
+    }
+    out
+}
+
+fn topology(t: &CpuTopology, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    let plural = |n: u32, one: &str, many: &str| format!("{n} {}", if n == 1 { one } else { many });
+    let mut cpus = format!(
+        "{} on {}",
+        plural(t.logical, "logical CPU", "logical CPUs"),
+        plural(t.cores, "core", "cores")
+    );
+    if t.threads_per_core > 1 {
+        cpus.push_str(&format!(
+            ", up to {} threads per core (SMT)",
+            t.threads_per_core
+        ));
+    }
+    if t.packages > 1 {
+        cpus.push_str(&format!(", in {} sockets", t.packages));
+    }
+    out.extend(row("CPUs", &cpus, w));
+    if !t.kinds.is_empty() {
+        let kinds: Vec<String> = t
+            .kinds
+            .iter()
+            .map(|k| format!("{} {}", k.name, k.cpus))
+            .collect();
+        out.extend(row("Kinds", &kinds.join(" · "), w));
+    }
+    if let Some(i) = &t.isolated {
+        out.extend(row(
+            "Isolated",
+            &format!("{i}: the scheduler puts nothing there by itself"),
+            w,
+        ));
+    }
+    if let Some(o) = &t.offline {
+        out.extend(row("Offline", o, w));
+    }
+    out
+}
+
+fn caches(c: &CpuCaches, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    for cache in &c.caches {
+        let label = match cache.kind.as_str() {
+            "Data" => format!("L{} data", cache.level),
+            "Instruction" => format!("L{} code", cache.level),
+            _ => format!("L{}", cache.level),
+        };
+        let size = size(cache.size);
+        let n = cache.instances;
+        let text = if cache.shared_by <= 1 {
+            format!("{n} × {size}, one for each CPU")
+        } else if n == 1 {
+            format!("{size}, shared by all {} CPUs", cache.shared_by)
+        } else {
+            format!("{n} × {size}, each shared by {} CPUs", cache.shared_by)
+        };
+        out.extend(row(&label, &text, w));
+    }
+    if let Some(line) = c.caches.iter().find_map(|c| c.line) {
+        out.extend(row(
+            "Line",
+            &format!("{line} bytes: the block memory moves in"),
+            w,
+        ));
+    }
+    out
+}
+
+/// `400 MHz`, `4.7 GHz`.
+fn khz(k: u64) -> String {
+    if k < 1_000_000 {
+        format!("{} MHz", k / 1000)
+    } else {
+        format!("{:.1} GHz", k as f64 / 1e6)
+    }
+}
+
+fn freq(f: &CpuFreq, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if let Some(d) = &f.driver {
+        let text = match &f.governor {
+            Some(g) => format!("{d}, governor {g}"),
+            None => d.clone(),
+        };
+        out.extend(row("Driver", &text, w));
+    }
+    if let (Some(lo), Some(hi)) = (f.min_khz, f.max_khz) {
+        let text = if lo == hi {
+            format!("fixed at {}", khz(hi))
+        } else {
+            format!("{} to {}", khz(lo), khz(hi))
+        };
+        out.extend(row("Range", &text, w));
+    }
+    if let (Some(lo), Some(hi)) = (f.current_khz.iter().min(), f.current_khz.iter().max()) {
+        let n = f.current_khz.len();
+        let text = if lo == hi {
+            format!("{} on all {n} CPUs", khz(*hi))
+        } else {
+            format!("{} to {} across {n} CPUs", khz(*lo), khz(*hi))
+        };
+        out.extend(row("Now", &text, w));
+    }
+    if let Some(b) = f.boost {
+        out.extend(row("Turbo", if b { "allowed" } else { "off" }, w));
+    }
+    if !f.idle_states.is_empty() {
+        let states: Vec<String> = f
+            .idle_states
+            .iter()
+            .map(|(name, n)| format!("{name} {}", count(*n)))
+            .collect();
+        let text = match &f.idle_driver {
+            Some(d) => format!("{d}: {}", states.join(", ")),
+            None => states.join(", "),
+        };
+        out.extend(row("Idle", &format!("{text} (CPU 0, times entered)"), w));
+    }
+    if let Some((zone, t)) = &f.hottest {
+        out.extend(row("Hottest", &format!("{t:.0} °C ({zone})"), w));
+    }
+    out
+}
+
+fn vulns(v: &CpuVulns, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if v.mitigations_off {
+        out.extend(row(
+            "Warning",
+            "mitigations=off: the kernel skips every workaround",
+            w,
+        ));
+    }
+    for (i, (name, state)) in v.vulnerable.iter().enumerate() {
+        let label = if i == 0 { "Exposed" } else { "" };
+        let text = if state == "Vulnerable" {
+            name.clone()
+        } else {
+            format!("{name}: {state}")
+        };
+        out.extend(row(label, &text, w));
+    }
+    for (i, (name, how)) in v.mitigated.iter().enumerate() {
+        let label = if i == 0 { "Mitigated" } else { "" };
+        out.extend(row(label, &format!("{name}: {how}"), w));
+    }
+    if !v.not_affected.is_empty() {
+        out.extend(row(
+            "Immune",
+            &format!(
+                "{} others: this CPU doesn't have them",
+                v.not_affected.len()
+            ),
+            w,
+        ));
+    }
+    out
+}
+
+fn numa(n: &Numa, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if n.nodes.len() <= 1 {
+        let what = if n.nodes.is_empty() {
+            "no NUMA"
+        } else {
+            "one node"
+        };
+        out.extend(row(
+            "Nodes",
+            &format!("{what}: all RAM is equally close to every CPU"),
+            w,
+        ));
+        return out;
+    }
+    for node in &n.nodes {
+        let mut text = format!("CPUs {}", node.cpus);
+        if let Some(t) = node.total {
+            text.push_str(&format!(", {}", size(t)));
+            if let Some(f) = node.free {
+                text.push_str(&format!(" ({} free)", size(f)));
+            }
+        }
+        if let (Some(h), Some(m)) = (node.hit, node.miss) {
+            if h + m > 0 {
+                text.push_str(&format!(
+                    ", {}% of its allocations local",
+                    percent(h, h + m)
+                ));
+            }
+        }
+        out.extend(row(&format!("Node {}", node.id), &text, w));
+    }
+    let far: Vec<String> = n
+        .nodes
+        .iter()
+        .flat_map(|a| {
+            a.distances
+                .iter()
+                .enumerate()
+                .filter(move |(b, _)| *b as u32 > a.id)
+                .map(move |(b, d)| format!("{}→{b} {d}", a.id))
+        })
+        .collect();
+    if !far.is_empty() {
+        out.extend(row(
+            "Distance",
+            &format!(
+                "{} (10 is local: 21 costs about twice as much)",
+                far.join(", ")
+            ),
+            w,
+        ));
+    }
+    if let Some(b) = n.balancing {
+        let text = if b {
+            "on: the kernel moves memory near the CPUs that use it"
+        } else {
+            "off"
+        };
+        out.extend(row("Balancing", text, w));
+    }
+    out
+}
+
+fn mem_errors(e: &MemErrors, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if e.controllers.is_empty() {
+        out.extend(row(
+            "ECC",
+            "no memory controller reports errors (EDAC): RAM without ECC, \
+             no driver, or a virtual machine",
+            w,
+        ));
+    }
+    for c in &e.controllers {
+        let mut what: Vec<String> = Vec::new();
+        what.extend(c.mem_type.clone());
+        what.extend(c.ecc_mode.as_ref().map(|m| format!("{m} ECC")));
+        what.extend(c.size.map(size));
+        let what = if what.is_empty() {
+            String::new()
+        } else {
+            format!("{}: ", what.join(", "))
+        };
+        out.extend(row(
+            &c.name,
+            &format!(
+                "{what}{} corrected, {} uncorrectable, since boot",
+                count(c.corrected),
+                count(c.uncorrected)
+            ),
+            w,
+        ));
+    }
+    if let Some(b) = e.hardware_corrupted {
+        let text = if b == 0 {
+            "none: the kernel retired no RAM after an error".to_string()
+        } else {
+            format!("{} of RAM taken out of use after errors", size(b))
+        };
+        out.extend(row("Retired", &text, w));
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1187,6 +1494,32 @@ mod tests {
         assert_eq!(duration(42 * 60), "42 min");
         assert_eq!(duration(2 * 3600 + 300), "2 h 5 min");
         assert_eq!(duration(273_912), "3 days, 4 h");
+    }
+
+    #[test]
+    fn numa_and_ecc_on_a_server() {
+        let ctx = crate::probes::fixture("server");
+        let text = |name: &str| {
+            let r = crate::probes::find(name).unwrap().run(&ctx);
+            result(&r, 80)
+                .iter()
+                .map(|l| l.text())
+                .collect::<Vec<_>>()
+                .join("\n")
+        };
+        let numa = text("mem.numa");
+        assert!(
+            numa.contains("Node 1    CPUs 4-7, 62.8 GiB (19.3 GiB free), 100% of"),
+            "{numa}"
+        );
+        assert!(numa.contains("0→1 20"), "{numa}");
+        assert!(numa.contains("Balancing on"), "{numa}");
+        let ecc = text("mem.errors");
+        assert!(
+            ecc.contains("mc0       Registered-DDR4, SECDED ECC, 64.0 GiB: 3 corrected"),
+            "{ecc}"
+        );
+        assert!(ecc.contains("4.0 KiB of RAM taken out of use"), "{ecc}");
     }
 
     #[test]

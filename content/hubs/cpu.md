@@ -14,7 +14,7 @@ paths:
   - { path: "/proc/cpuinfo", desc: "one block per logical CPU" }
   - { path: "/proc/loadavg", desc: "load average and task counts" }
   - { path: "/sys/devices/system/cpu/", desc: "online CPUs, frequency, governor" }
-cards: [internals.scheduler, internals.interrupts, proc.nice]
+cards: [internals.scheduler, internals.interrupts, hw-cpu.cores, hw-cpu.caches, hw-cpu.frequency, proc.nice]
 ---
 
 What your processor is, how busy it is, and who keeps it busy.

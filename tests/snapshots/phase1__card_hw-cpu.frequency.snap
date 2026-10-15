@@ -1,0 +1,45 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+2.4  Clock speed, turbo and power saving
+
+TL;DR
+  - A CPU's speed changes all the time: it climbs when there's work, drops when
+    idle, and goes above its base frequency (turbo) while power and heat allow.
+  - The kernel's cpufreq driver and governor pick the speed; idle CPUs drop into
+    sleep states (C-states), deeper ones saving more but waking slower.
+  - Too hot, and the CPU slows itself down (thermal throttling): a laptop can
+    lose half its speed under a long load.
+
+      grep MHz /proc/cpuinfo                # current speed of each CPU (x86)
+      cpupower frequency-info               # driver, governor, limits
+      sensors                               # temperatures (package lm_sensors)
+
+On your machine
+  Driver    intel_pstate, governor powersave
+  Range     400 MHz to 4.7 GHz
+  Now       400 MHz to 4.1 GHz across 8 CPUs
+  Turbo     allowed
+  Idle      intel_idle: POLL 51,234, C1E 2.4 million, C6 1.8 million, C8
+            950,000, C10 14.2 million (CPU 0, times entered)
+  Hottest   58 °C (x86_pkg_temp)
+
+Pitfalls
+  - With intel_pstate and amd-pstate, the powersave governor still reaches full
+    speed under load: it isn't "always slow".
+  - Benchmarks drift as the chip heats and turbo fades: warm up first, and
+    compare runs on the same power profile, plugged in.
+  - A virtual machine often sees one fixed, made-up frequency: the host decides
+    the real one.
+  - A slow machine with a low load may be throttling: check temperatures and the
+    fan before blaming software.
+
+Deep dive: 2 questions. Read them with idk 2.4 --why
+
+Related
+  Commands  cpupower, sensors, grep
+  Paths     /sys/devices/system/cpu/cpu0/cpufreq/, /sys/class/thermal/
+  Hub       idk cpu CPU
+  See also  idk 2.2 Cores, threads and sockets
+  See also  idk 12.1 Load average

@@ -1,0 +1,42 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+2.3  CPU caches: why memory layout matters
+
+TL;DR
+  - RAM is about 100 times slower than the CPU's own registers. Small, fast
+    memories in the chip keep recent data close: L1 (tens of KiB per core, a few
+    cycles), L2 (MiB, about a dozen cycles), L3 (shared, tens of cycles).
+  - Memory moves in cache lines, 64 bytes on most CPUs: reading one byte brings
+    its neighbours along.
+  - So data read in order, packed together, is fast; data scattered in memory
+    (linked lists, pointers to pointers) is slow.
+
+      lscpu --caches
+      perf stat -e cache-misses,cache-references ./program
+
+On your machine
+  L1 data   4 × 48.0 KiB, each shared by 2 CPUs
+  L1 code   4 × 32.0 KiB, each shared by 2 CPUs
+  L2        4 × 1.2 MiB, each shared by 2 CPUs
+  L3        12.0 MiB, shared by all 8 CPUs
+  Line      64 bytes: the block memory moves in
+
+Pitfalls
+  - Going through a large 2D array column by column instead of row by row can be
+    several times slower: each access lands on a new line.
+  - False sharing: two threads writing different variables that sit on the same
+    line make that line bounce between their cores. Pad or separate hot
+    per-thread data.
+  - A benchmark whose data fits in cache says little about the same code on data
+    ten times bigger.
+
+Deep dive: 2 questions. Read them with idk 2.3 --why
+
+Related
+  Commands  lscpu, perf
+  Paths     /sys/devices/system/cpu/cpu0/cache/
+  Hub       idk cpu CPU
+  See also  idk 3.1 RAM and the memory hierarchy
+  See also  idk 2.2 Cores, threads and sockets

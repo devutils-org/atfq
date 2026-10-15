@@ -148,3 +148,39 @@ net.layers  this machine's network, layer by layer, link to DNS
 
   not available on this system
   note: /sys/class/net: not found
+
+cpu.features  architecture, x86-64 level and notable instruction set extensions
+
+  Arch      aarch64, made by Arm
+  Has       NEON (128-bit vectors)
+  Flags     5 in all, in /proc/cpuinfo
+
+cpu.topology  sockets, cores, threads per core and kinds of cores
+
+  not available on this system
+  note: /sys/devices/system/cpu: not found
+
+cpu.caches  CPU caches: levels, sizes, who shares them, line size
+
+  not available on this system
+  note: /sys/devices/system/cpu/cpu*/cache: not there
+
+cpu.freq  CPU frequencies, governor, turbo, idle states, temperature
+
+  not available on this system
+  note: no cpufreq, cpuidle or thermal data: a virtual machine, or the drivers
+  aren't loaded
+
+cpu.vulns  CPU flaws (Spectre and others) and how the kernel handles them
+
+  not available on this system
+  note: /sys/devices/system/cpu/vulnerabilities: not found
+
+mem.numa  NUMA nodes: their CPUs, memory and distances
+
+  Nodes     no NUMA: all RAM is equally close to every CPU
+
+mem.errors  memory errors reported by ECC controllers (EDAC)
+
+  ECC       no memory controller reports errors (EDAC): RAM without ECC, no
+            driver, or a virtual machine
