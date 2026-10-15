@@ -105,7 +105,16 @@ Part I · How it works
       3.2  NUMA: when some memory is closer
       3.3  ECC and failing RAM
    4. How storage works
+      4.1  Hard drives, SSDs and NVMe
+      4.2  Inside an SSD: flash, TRIM and wear
+      4.3  From write() to the disk: the block layer
+      4.4  IOPS, throughput and latency: how fast is a disk?
+      4.5  fsync: when is data really on disk?
    5. How a GPU works
+      5.1  What a GPU does differently
+      5.2  GPU drivers: the kernel, Mesa and NVIDIA
+      5.3  How a picture reaches the screen: KMS, Wayland and X11
+      5.4  Computing on the GPU, and when your program can't see it
    6. How networks work
       6.1  Network layers: OSI and TCP/IP
       6.2  What happens when you open a website

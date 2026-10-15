@@ -1,0 +1,38 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+5.3  How a picture reaches the screen: KMS, Wayland and X11
+
+TL;DR
+  - The kernel sets up the screen itself (KMS: kernel mode setting): resolution,
+    refresh rate, which output shows which image.
+  - Each window draws into its own buffer. A compositor combines them into one
+    image and asks the kernel to show it at the next refresh.
+  - On Wayland the compositor is the display server (GNOME, KDE, Sway). On X11,
+    the X server sits in between. Old X11 apps run on Wayland through XWayland.
+
+      echo $XDG_SESSION_TYPE                 # wayland or x11
+      cat /sys/class/drm/*/status            # which outputs have a screen
+
+On your machine
+  card0     Intel, driver i915, shows the boot screen
+  Screens   eDP-1 1920x1200 · free: DP-1, HDMI-A-1
+  Compute   /dev/dri/renderD128
+
+Pitfalls
+  - nomodeset on the kernel command line disables KMS: a basic framebuffer with
+    no acceleration. Useful to get a broken system to a desktop, never to keep
+    (14.2).
+  - Screen sharing and global hotkeys work differently on Wayland: apps go
+    through portals (PipeWire), not by reading the whole screen.
+  - Tearing is an image changed in the middle of a refresh. Compositors avoid it
+    by flipping only between refreshes, at a small latency cost.
+
+Deep dive: 2 questions. Read them with idk 5.3 --why
+
+Related
+  Commands  echo, cat
+  Paths     /sys/class/drm/
+  See also  idk 5.2 GPU drivers: the kernel, Mesa and NVIDIA
+  See also  idk 14.2 The kernel command line

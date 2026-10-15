@@ -184,3 +184,17 @@ mem.errors  memory errors reported by ECC controllers (EDAC)
 
   ECC       no memory controller reports errors (EDAC): RAM without ECC, no
             driver, or a virtual machine
+
+disk.hardware  disk hardware: how attached, I/O scheduler, write cache, TRIM
+
+  sda       SATA/SAS disk, 20.0 GiB
+
+disk.io  disk activity since boot, latency, data waiting to be written
+
+  not available on this system
+  note: /proc/diskstats: not found
+
+gpu.devices  graphics cards, their drivers and screens, compute devices
+
+  not available on this system
+  note: /sys/class/drm: not found

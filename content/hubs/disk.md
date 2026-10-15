@@ -3,7 +3,7 @@ id: disk
 kind: hub
 title: Disk
 aliases: [disks, storage, ssd, hdd, nvme, partitions]
-probes: [disk.tree]
+probes: [disk.tree, disk.hardware]
 commands:
   - { cmd: "lsblk", desc: "tree of disks and partitions" }
   - { cmd: "df -h", desc: "free space per mounted filesystem" }
@@ -16,7 +16,7 @@ paths:
   - { path: "/dev/disk/by-uuid/", desc: "stable names for disks and partitions" }
   - { path: "/sys/block/DEV/queue/", desc: "I/O scheduler, rotational flag" }
   - { path: "/etc/fstab", desc: "what gets mounted at boot" }
-cards: [fs.tmp, fs.inodes-links, cmd.find]
+cards: [hw-storage.devices, hw-storage.flash, hw-storage.performance, fs.tmp, fs.inodes-links, cmd.find]
 ---
 
 Everything about storage devices: what's plugged in, how full it is, how it's

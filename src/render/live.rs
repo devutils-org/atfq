@@ -11,6 +11,7 @@ use crate::probes::{
     ProcStates, Status, Sysctl, SystemdStatus, TmpDirs,
 };
 use crate::probes::{CpuCaches, CpuFeatures, CpuFreq, CpuTopology, CpuVulns, MemErrors, Numa};
+use crate::probes::{DiskHardware, DiskIo, Gpus};
 use crate::probes::{Interrupts, KernelOverview, NetLayers, VirtualMemory};
 
 /// Width of the label column (`RAM`, `Swap`, `Zombies`…).
@@ -75,6 +76,9 @@ pub(crate) fn result(r: &ProbeResult, w: usize) -> Vec<Line> {
         (_, Some(ProbeData::Vulns(v))) => vulns(v, w),
         (_, Some(ProbeData::Numa(n))) => numa(n, w),
         (_, Some(ProbeData::MemErrors(e))) => mem_errors(e, w),
+        (_, Some(ProbeData::DiskHardware(d))) => disk_hardware(d, w),
+        (_, Some(ProbeData::DiskIo(d))) => disk_io(d, w),
+        (_, Some(ProbeData::Gpus(g))) => gpus(g, w),
         (_, None) => Vec::new(),
     };
     for note in &r.notes {
@@ -1475,6 +1479,169 @@ fn mem_errors(e: &MemErrors, w: usize) -> Vec<Line> {
     out
 }
 
+fn disk_hardware(d: &DiskHardware, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if d.disks.is_empty() {
+        out.extend(row("Disks", "none: no physical or virtual disk", w));
+    }
+    for disk in &d.disks {
+        let kind = match (disk.rotational, disk.transport.as_str()) {
+            (_, "virtio") => "virtual disk",
+            // USB bridges often claim to spin, flash or not.
+            (_, "USB") => "drive",
+            (Some(true), _) => "spinning disk",
+            (Some(false), _) => "flash",
+            (None, _) => "disk",
+        };
+        let mut parts = Vec::new();
+        let mut what = format!("{} {kind}, {}", disk.transport, size(disk.size));
+        if let Some(m) = &disk.model {
+            what = format!("{m}: {what}");
+        }
+        parts.push(what);
+        if let Some(sched) = &disk.scheduler {
+            parts.push(format!("scheduler {sched}"));
+        }
+        if disk.queues > 1 {
+            parts.push(format!("{} hardware queues", disk.queues));
+        }
+        match disk.write_cache.as_deref() {
+            Some("write back") => parts.push("volatile write cache".to_string()),
+            Some("write through") => parts.push("no volatile write cache".to_string()),
+            _ => {}
+        }
+        if disk.discard {
+            parts.push("TRIM".to_string());
+        }
+        if let (Some(l), Some(p)) = (disk.logical_block, disk.physical_block) {
+            if l != p {
+                parts.push(format!("{l}-byte sectors, {p} inside"));
+            }
+        }
+        out.extend(row(&disk.name, &parts.join(" · "), w));
+    }
+    out
+}
+
+/// Average milliseconds per request: `0.08 ms`.
+fn per_request(ms: u64, n: u64) -> String {
+    if n == 0 {
+        return String::new();
+    }
+    format!(", {:.2} ms each", ms as f64 / n as f64)
+}
+
+fn disk_io(d: &DiskIo, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    for s in &d.disks {
+        let side = |verb: &str, bytes: u64, n: u64, ms: u64| {
+            if n == 0 {
+                format!("{verb} nothing")
+            } else {
+                format!(
+                    "{verb} {} in {} requests{}",
+                    size(bytes),
+                    count(n),
+                    per_request(ms, n)
+                )
+            }
+        };
+        let mut text = format!(
+            "{}; {}",
+            side("read", s.read_bytes, s.reads, s.read_ms),
+            side("wrote", s.write_bytes, s.writes, s.write_ms)
+        );
+        if let Some(up) = d.uptime_secs.filter(|&u| u > 0) {
+            let busy = match percent(s.busy_ms / 1000, up) {
+                0 if s.busy_ms > 0 => "under 1".to_string(),
+                p => p.to_string(),
+            };
+            text.push_str(&format!("; busy {busy}% of the time"));
+        }
+        if let Some(f) = s.flushes.filter(|&f| f > 0) {
+            text.push_str(&format!("; {} cache flushes", count(f)));
+        }
+        out.extend(row(&s.name, &text, w));
+    }
+    if let Some(up) = d.uptime_secs {
+        out.extend(row("Since", &format!("boot, {} ago", duration(up)), w));
+    }
+    if let (Some(dirty), Some(wb)) = (d.dirty, d.writeback) {
+        let mut text = format!(
+            "{} not yet written, {} being written",
+            size(dirty),
+            size(wb)
+        );
+        if let Some(e) = d.dirty_expire_secs {
+            text.push_str(&format!("; data waits up to {e} s in RAM"));
+        }
+        out.extend(row("Pending", &text, w));
+    }
+    out
+}
+
+fn gpus(g: &Gpus, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if g.cards.is_empty() {
+        out.extend(row(
+            "GPUs",
+            "none the kernel drives (DRM): a server, or a virtual machine \
+             without a display",
+            w,
+        ));
+    }
+    for c in &g.cards {
+        let mut parts: Vec<String> = Vec::new();
+        parts.extend(c.vendor.clone());
+        parts.extend(c.driver.as_ref().map(|d| format!("driver {d}")));
+        parts.extend(c.vram.map(|v| format!("{} of video memory", size(v))));
+        if c.boot_vga {
+            parts.push("shows the boot screen".to_string());
+        }
+        out.extend(row(&c.name, &parts.join(", "), w));
+        if !c.connectors.is_empty() {
+            let on: Vec<String> = c
+                .connectors
+                .iter()
+                .filter(|k| k.connected)
+                .map(|k| match &k.mode {
+                    Some(m) => format!("{} {m}", k.name),
+                    None => k.name.clone(),
+                })
+                .collect();
+            let off: Vec<&str> = c
+                .connectors
+                .iter()
+                .filter(|k| !k.connected)
+                .map(|k| k.name.as_str())
+                .collect();
+            let mut text = if on.is_empty() {
+                "no screen connected".to_string()
+            } else {
+                on.join(", ")
+            };
+            if !off.is_empty() {
+                text.push_str(&format!(" · free: {}", off.join(", ")));
+            }
+            out.extend(row("Screens", &text, w));
+        }
+    }
+    let mut compute: Vec<String> = Vec::new();
+    if !g.render_nodes.is_empty() {
+        compute.push(format!("/dev/dri/{}", g.render_nodes.join(", /dev/dri/")));
+    }
+    if g.kfd {
+        compute.push("/dev/kfd (ROCm)".to_string());
+    }
+    if let Some(v) = &g.nvidia {
+        compute.push(format!("NVIDIA kernel module {v}"));
+    }
+    if !compute.is_empty() {
+        out.extend(row("Compute", &compute.join(" · "), w));
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1520,6 +1687,27 @@ mod tests {
             "{ecc}"
         );
         assert!(ecc.contains("4.0 KiB of RAM taken out of use"), "{ecc}");
+    }
+
+    #[test]
+    fn disks_and_gpus_on_a_server() {
+        let ctx = crate::probes::fixture("server");
+        let text = |name: &str| {
+            let r = crate::probes::find(name).unwrap().run(&ctx);
+            result(&r, 80)
+                .iter()
+                .map(|l| l.text())
+                .collect::<Vec<_>>()
+                .join("\n")
+        };
+        let hw = text("disk.hardware");
+        assert!(hw.contains("SATA/SAS spinning disk, 3.6 TiB"), "{hw}");
+        assert!(hw.contains("512-byte sectors, 4096 inside"), "{hw}");
+        let io = text("disk.io");
+        assert!(io.contains("sdb       read nothing; wrote nothing"), "{io}");
+        let gpu = text("gpu.devices");
+        assert!(gpu.contains("card1     NVIDIA, driver nvidia"), "{gpu}");
+        assert!(gpu.contains("NVIDIA kernel module 560.35.03"), "{gpu}");
     }
 
     #[test]

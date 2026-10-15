@@ -1,0 +1,53 @@
+---
+id: hw-storage.devices
+kind: concept
+title: Hard drives, SSDs and NVMe
+aliases: [hard drive, hard disk, spinning disk, solid state drive, flash storage, sata, m.2, pcie ssd, ahci, rotational, disk types]
+hubs: [disk]
+probes: [disk.hardware]
+see_also: [hw-storage.flash, hw-storage.performance]
+commands: [lsblk]
+paths: [/sys/block/]
+---
+
+## TL;DR
+
+- A hard drive (HDD) reads magnetic platters with a moving head: fine at
+  long sequential reads, slow at jumping around (a few milliseconds per
+  seek, about a hundred random reads per second).
+- An SSD stores data in flash chips, with nothing moving: random reads
+  take tens of microseconds, so it's thousands of times better at them.
+- SATA SSDs are capped by their interface at about 550 MB/s. NVMe SSDs
+  talk to the CPU over PCIe: several GB/s, and many requests in parallel.
+
+```
+lsblk -d -o NAME,ROTA,TRAN,MODEL,SIZE     # ROTA 1: spinning
+```
+
+## Pitfalls
+
+- Virtual machines often report their disks as rotational (`ROTA 1`),
+  even when the host stores them on an SSD.
+- An NVMe SSD in an M.2 slot wired for SATA only, or a PCIe slot with
+  fewer lanes, runs well below its rated speed: check the board's manual.
+- USB sticks and SD cards are flash too, but with simple controllers:
+  slow at small writes, and they wear out much sooner.
+- Speeds on the box are for sequential transfers at their best. Small
+  random writes are a fraction of that ({{hw-storage.performance}}).
+
+## Deep dive
+
+### Why is NVMe faster than SATA with the same flash?
+
+SATA and its AHCI protocol were designed for hard drives: one queue of 32
+commands, and an interface limited to 6 Gb/s. NVMe was designed for
+flash: up to 65,535 queues of 65,535 commands, usually one queue per
+CPU, so cores send requests without waiting on each other. A PCIe 4.0 x4
+link carries about 8 GB/s, and the protocol costs less CPU per request.
+
+### Are hard drives still useful?
+
+For size per euro, yes: large archives, backups, media and NAS boxes
+mostly stream big files, which suits them. For an operating system,
+databases or build directories, anything with many small random
+accesses, an SSD makes a far bigger difference than a faster CPU.

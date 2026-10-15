@@ -100,9 +100,9 @@ binary, as `which idk` prints it):
 ## What's inside
 
 - 7 hubs (Disk, Permissions, Processes & scheduling, Memory, CPU, Network,
-  Boot) and 71 cards in 20 chapters, in three parts (how it works, your
+  Boot) and 80 cards in 20 chapters, in three parts (how it works, your
   system, shell and commands): `idk toc` lists them.
-- 35 live probes. They read `/proc`, `/sys` and `/etc` directly; the only
+- 38 live probes. They read `/proc`, `/sys` and `/etc` directly; the only
   external program is `systemctl`, with fixed arguments and a 500 ms
   timeout. A probe that can't answer says why ("needs root", "not
   available on this system") instead of failing.

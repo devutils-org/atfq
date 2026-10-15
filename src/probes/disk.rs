@@ -10,6 +10,8 @@ pub(crate) const NAME: &str = "disk.tree";
 pub(crate) const TMP: &str = "fs.tmp";
 pub(crate) const FSTAB: &str = "fs.fstab";
 pub(crate) const UDEV: &str = "dev.udev";
+pub(crate) const HARDWARE: &str = "disk.hardware";
+pub(crate) const IO: &str = "disk.io";
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct DiskTree {
@@ -274,6 +276,195 @@ fn contains(mount_point: &str, path: &str) -> bool {
             .is_some_and(|rest| rest.starts_with('/'))
 }
 
+/// Disks backed by real (or virtual) hardware: no loop, RAM or zram devices,
+/// no device-mapper or RAID layers, nothing empty.
+fn physical_disks(ctx: &ProbeCtx) -> Result<Vec<String>, super::ReadError> {
+    Ok(ctx
+        .list("/sys/block")?
+        .into_iter()
+        .filter(|n| {
+            !["loop", "ram", "zram", "dm-", "md"]
+                .iter()
+                .any(|p| n.starts_with(p))
+                && sectors(ctx, &format!("/sys/block/{n}")) > 0
+        })
+        .collect())
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct DiskHardware {
+    pub disks: Vec<DiskHw>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct DiskHw {
+    pub name: String,
+    pub model: Option<String>,
+    pub size: u64,
+    /// How it's attached: `NVMe`, `SATA/SAS`, `USB`, `virtio`, `SD/eMMC`.
+    pub transport: String,
+    /// `false` for flash. Virtual disks often claim `true`.
+    pub rotational: Option<bool>,
+    /// Active I/O scheduler and the others available.
+    pub scheduler: Option<String>,
+    pub schedulers: Vec<String>,
+    /// Hardware queues (blk-mq): NVMe has one per CPU or so.
+    pub queues: u32,
+    /// `write back`: the drive has a volatile cache the kernel must flush.
+    pub write_cache: Option<String>,
+    /// The device accepts discard (TRIM).
+    pub discard: bool,
+    pub logical_block: Option<u64>,
+    pub physical_block: Option<u64>,
+}
+
+pub(crate) fn hardware(ctx: &ProbeCtx) -> ProbeResult {
+    let names = match physical_disks(ctx) {
+        Ok(n) => n,
+        Err(e) => return ProbeResult::failed(HARDWARE, e),
+    };
+    let disks = names
+        .into_iter()
+        .map(|name| {
+            let base = format!("/sys/block/{name}");
+            let q = |f: &str| ctx.read_trimmed(&format!("{base}/queue/{f}"));
+            let num = |f: &str| q(f).and_then(|v| v.parse::<u64>().ok());
+            // `none [mq-deadline] kyber`: the active one is in brackets.
+            let line = q("scheduler").unwrap_or_default();
+            let scheduler = line
+                .split_whitespace()
+                .find(|s| s.starts_with('['))
+                .map(|s| s.trim_matches(['[', ']']).to_string());
+            let schedulers = line
+                .split_whitespace()
+                .map(|s| s.trim_matches(['[', ']']).to_string())
+                .collect();
+            // /sys/block/X links to the device's place on the buses.
+            let link = ctx.read_link(&base).unwrap_or_default();
+            let transport = if name.starts_with("nvme") {
+                "NVMe"
+            } else if name.starts_with("mmcblk") {
+                "SD/eMMC"
+            } else if name.starts_with("vd") || link.contains("/virtio") {
+                "virtio"
+            } else if link.contains("/usb") {
+                "USB"
+            } else if name.starts_with("sd") {
+                "SATA/SAS"
+            } else {
+                "other"
+            };
+            DiskHw {
+                model: ctx
+                    .read_trimmed(&format!("{base}/device/model"))
+                    .filter(|m| !m.is_empty()),
+                size: sectors(ctx, &base),
+                transport: transport.to_string(),
+                rotational: q("rotational").map(|r| r == "1"),
+                scheduler,
+                schedulers,
+                queues: ctx
+                    .list(&format!("{base}/mq"))
+                    .map_or(0, |l| l.len() as u32),
+                write_cache: q("write_cache"),
+                discard: num("discard_max_bytes").is_some_and(|d| d > 0),
+                logical_block: num("logical_block_size"),
+                physical_block: num("physical_block_size"),
+                name,
+            }
+        })
+        .collect();
+    ProbeResult::new(
+        HARDWARE,
+        Status::Ok,
+        Some(ProbeData::DiskHardware(DiskHardware { disks })),
+    )
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct DiskIo {
+    pub disks: Vec<DiskStats>,
+    /// Seconds since boot, the period the counters cover.
+    pub uptime_secs: Option<u64>,
+    /// Bytes written by programs but not yet on disk, and being written now.
+    pub dirty: Option<u64>,
+    pub writeback: Option<u64>,
+    /// `vm.dirty_expire_centisecs`: how old dirty data gets before it's
+    /// written, in seconds.
+    pub dirty_expire_secs: Option<u64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct DiskStats {
+    pub name: String,
+    pub reads: u64,
+    pub read_bytes: u64,
+    /// Milliseconds spent on all reads, added up.
+    pub read_ms: u64,
+    pub writes: u64,
+    pub write_bytes: u64,
+    pub write_ms: u64,
+    /// Milliseconds with at least one request in flight.
+    pub busy_ms: u64,
+    /// Cache flushes asked of the drive (fsync and friends), since 5.5.
+    pub flushes: Option<u64>,
+}
+
+pub(crate) fn io(ctx: &ProbeCtx) -> ProbeResult {
+    let text = match ctx.read("/proc/diskstats") {
+        Ok(t) => t,
+        Err(e) => return ProbeResult::failed(IO, e),
+    };
+    let keep = physical_disks(ctx).ok();
+    let disks = text
+        .lines()
+        .filter_map(|line| {
+            let f: Vec<&str> = line.split_whitespace().collect();
+            let name = f.get(2)?.to_string();
+            if !keep.as_ref().is_some_and(|k| k.contains(&name)) {
+                return None;
+            }
+            let n = |i: usize| f.get(i).and_then(|v| v.parse::<u64>().ok());
+            // Sectors here are always 512 bytes.
+            Some(DiskStats {
+                reads: n(3)?,
+                read_bytes: n(5)?.saturating_mul(512),
+                read_ms: n(6)?,
+                writes: n(7)?,
+                write_bytes: n(9)?.saturating_mul(512),
+                write_ms: n(10)?,
+                busy_ms: n(12)?,
+                flushes: n(18),
+                name,
+            })
+        })
+        .collect();
+    let meminfo = ctx.read("/proc/meminfo").unwrap_or_default();
+    let kb = |k: &str| {
+        meminfo.lines().find_map(|l| {
+            let rest = l.strip_prefix(k)?.strip_prefix(':')?;
+            rest.split_whitespace()
+                .next()?
+                .parse::<u64>()
+                .ok()
+                .map(|v| v * 1024)
+        })
+    };
+    let data = DiskIo {
+        disks,
+        uptime_secs: ctx
+            .read_trimmed("/proc/uptime")
+            .and_then(|u| u.split('.').next()?.parse().ok()),
+        dirty: kb("Dirty"),
+        writeback: kb("Writeback"),
+        dirty_expire_secs: ctx
+            .read_trimmed("/proc/sys/vm/dirty_expire_centisecs")
+            .and_then(|c| c.parse::<u64>().ok())
+            .map(|c| c / 100),
+    };
+    ProbeResult::new(IO, Status::Ok, Some(ProbeData::DiskIo(data)))
+}
+
 /// Size in bytes. sysfs counts in 512-byte sectors, whatever the hardware.
 fn sectors(ctx: &ProbeCtx, dir: &str) -> u64 {
     ctx.read_trimmed(&format!("{dir}/size"))
@@ -488,6 +679,55 @@ mod tests {
         assert_eq!(u.local, ["70-keyboard.rules"]);
         assert_eq!(u.packaged, 2);
         assert_eq!(udev(&fixture("empty")).status, Status::Unavailable);
+    }
+
+    #[test]
+    fn disk_hardware() {
+        let Some(ProbeData::DiskHardware(h)) = hardware(&fixture("laptop")).data else {
+            panic!()
+        };
+        let names: Vec<&str> = h.disks.iter().map(|d| d.name.as_str()).collect();
+        // No loop, zram or empty devices.
+        assert_eq!(names, ["nvme0n1", "sda"]);
+        let nvme = &h.disks[0];
+        assert_eq!(nvme.transport, "NVMe");
+        assert_eq!(nvme.scheduler.as_deref(), Some("none"));
+        assert_eq!(nvme.schedulers, ["none", "mq-deadline", "kyber", "bfq"]);
+        assert_eq!(nvme.queues, 8);
+        assert_eq!(nvme.write_cache.as_deref(), Some("write back"));
+        assert!(nvme.discard);
+        // /sys/block/sda links into the USB tree.
+        let usb = &h.disks[1];
+        assert_eq!(usb.transport, "USB");
+        assert_eq!(usb.scheduler.as_deref(), Some("mq-deadline"));
+        assert!(!usb.discard);
+        let Some(ProbeData::DiskHardware(h)) = hardware(&fixture("server")).data else {
+            panic!()
+        };
+        assert_eq!(h.disks[0].transport, "SATA/SAS");
+        assert_eq!(h.disks[0].physical_block, Some(4096));
+        assert_eq!(hardware(&fixture("empty")).status, Status::Unavailable);
+    }
+
+    #[test]
+    fn disk_activity() {
+        let Some(ProbeData::DiskIo(io)) = io(&fixture("laptop")).data else {
+            panic!()
+        };
+        let names: Vec<&str> = io.disks.iter().map(|d| d.name.as_str()).collect();
+        // Partitions, loop and zram are left out.
+        assert_eq!(names, ["nvme0n1", "sda"]);
+        let nvme = &io.disks[0];
+        assert_eq!(nvme.reads, 2_843_117);
+        assert_eq!(nvme.read_bytes, 198_765_432 * 512);
+        assert_eq!(nvme.write_ms, 2_345_678);
+        assert_eq!(nvme.busy_ms, 1_987_654);
+        assert_eq!(nvme.flushes, Some(345_678));
+        assert_eq!(io.disks[1].flushes, Some(0));
+        assert_eq!(io.dirty, Some(1536 * 1024));
+        assert_eq!(io.dirty_expire_secs, Some(30));
+        assert_eq!(io.uptime_secs, Some(273_912));
+        assert_eq!(super::io(&fixture("empty")).status, Status::Unavailable);
     }
 
     #[test]

@@ -1,0 +1,38 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+5.1  What a GPU does differently
+
+TL;DR
+  - A CPU has a few powerful cores, built to run one thread fast, branches and
+    all. A GPU has thousands of simple ones, built to run the same instructions
+    on huge amounts of data at once.
+  - That fits pixels, video and the matrix maths of machine learning; it doesn't
+    fit branchy, step-by-step code.
+  - A discrete GPU has its own memory (VRAM), very fast but separate: data must
+    be copied there over PCIe. An integrated GPU shares the system's RAM.
+
+      lspci -k | grep -A3 -E 'VGA|3D|Display'   # GPUs and their drivers
+
+On your machine
+  card0     Intel, driver i915, shows the boot screen
+  Screens   eDP-1 1920x1200 · free: DP-1, HDMI-A-1
+  Compute   /dev/dri/renderD128
+
+Pitfalls
+  - Copying data between RAM and VRAM is often the bottleneck: a GPU only pays
+    off when it does a lot of work per byte copied.
+  - Running out of VRAM fails or slows down hard; it isn't extended by swap the
+    way RAM is.
+  - Laptops with two GPUs run most programs on the integrated one; the discrete
+    one has to be requested (prime-run, or the desktop's "run with dedicated
+    GPU" option).
+
+Deep dive: 2 questions. Read them with idk 5.1 --why
+
+Related
+  Commands  lspci
+  Paths     /sys/class/drm/
+  See also  idk 5.4 Computing on the GPU, and when your program can't see it
+  See also  idk 2.2 Cores, threads and sockets

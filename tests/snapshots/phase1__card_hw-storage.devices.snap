@@ -1,0 +1,41 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+4.1  Hard drives, SSDs and NVMe
+
+TL;DR
+  - A hard drive (HDD) reads magnetic platters with a moving head: fine at long
+    sequential reads, slow at jumping around (a few milliseconds per seek, about
+    a hundred random reads per second).
+  - An SSD stores data in flash chips, with nothing moving: random reads take
+    tens of microseconds, so it's thousands of times better at them.
+  - SATA SSDs are capped by their interface at about 550 MB/s. NVMe SSDs talk to
+    the CPU over PCIe: several GB/s, and many requests in parallel.
+
+      lsblk -d -o NAME,ROTA,TRAN,MODEL,SIZE     # ROTA 1: spinning
+
+On your machine
+  nvme0n1   Samsung SSD 980 PRO 500GB: NVMe flash, 476.9 GiB · scheduler none ·
+            8 hardware queues · volatile write cache · TRIM
+  sda       USB DISK 3.0: USB drive, 30.0 GiB · scheduler mq-deadline · no
+            volatile write cache
+
+Pitfalls
+  - Virtual machines often report their disks as rotational (ROTA 1), even when
+    the host stores them on an SSD.
+  - An NVMe SSD in an M.2 slot wired for SATA only, or a PCIe slot with fewer
+    lanes, runs well below its rated speed: check the board's manual.
+  - USB sticks and SD cards are flash too, but with simple controllers: slow at
+    small writes, and they wear out much sooner.
+  - Speeds on the box are for sequential transfers at their best. Small random
+    writes are a fraction of that (4.4).
+
+Deep dive: 2 questions. Read them with idk 4.1 --why
+
+Related
+  Commands  lsblk
+  Paths     /sys/block/
+  Hub       idk disk Disk
+  See also  idk 4.2 Inside an SSD: flash, TRIM and wear
+  See also  idk 4.4 IOPS, throughput and latency: how fast is a disk?

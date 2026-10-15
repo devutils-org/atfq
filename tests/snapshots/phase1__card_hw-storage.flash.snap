@@ -1,0 +1,42 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, PLAIN)"
+---
+4.2  Inside an SSD: flash, TRIM and wear
+
+TL;DR
+  - Flash can't overwrite in place: it writes pages of a few KiB, but only
+    erases whole blocks of many pages. The SSD's controller writes new data
+    elsewhere and cleans up old blocks in the background.
+  - TRIM tells the SSD which blocks the filesystem freed, so it doesn't copy
+    dead data around. Run it regularly: fstrim.timer does it weekly.
+  - Each cell survives a limited number of erase cycles. Drives are rated in
+    terabytes written (TBW); health tools say how much is used.
+
+      systemctl status fstrim.timer
+      sudo smartctl -a /dev/nvme0           # look for "Percentage Used"
+
+On your machine
+  nvme0n1   Samsung SSD 980 PRO 500GB: NVMe flash, 476.9 GiB · scheduler none ·
+            8 hardware queues · volatile write cache · TRIM
+  sda       USB DISK 3.0: USB drive, 30.0 GiB · scheduler mq-deadline · no
+            volatile write cache
+
+Pitfalls
+  - A nearly full SSD slows down and wears faster: the controller has few free
+    blocks to work with. Keep some space free.
+  - Cheap QLC drives write fast only until their SLC cache fills; a long copy
+    can then drop to hard drive speeds.
+  - TRIM through LUKS encryption needs discard in /etc/crypttab. It reveals
+    which blocks are unused, a small privacy trade-off.
+  - Deleted files on an SSD are often unrecoverable soon after TRIM: keep
+    backups rather than counting on undelete tools.
+
+Deep dive: 2 questions. Read them with idk 4.2 --why
+
+Related
+  Commands  fstrim, smartctl, nvme, systemctl
+  Paths     /sys/block/DEV/queue/discard_max_bytes
+  Hub       idk disk Disk
+  See also  idk 4.1 Hard drives, SSDs and NVMe
+  See also  idk 7.5 fstab and mount options

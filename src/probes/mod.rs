@@ -8,6 +8,7 @@
 mod boot;
 mod cpu;
 mod disk;
+mod gpu;
 mod kernel;
 mod mem;
 mod net;
@@ -30,7 +31,8 @@ pub use cpu::{
     Cache, CoreKind, CpuCaches, CpuFeatures, CpuFreq, CpuSummary, CpuTopology, CpuVulns,
 };
 pub use disk::{BlockDevice, DiskTree, Mount, Partition, TmpDir, TmpDirs};
-pub use disk::{Fstab, FstabEntry, UdevRules};
+pub use disk::{DiskHardware, DiskHw, DiskIo, DiskStats, Fstab, FstabEntry, UdevRules};
+pub use gpu::{Connector, GpuCard, Gpus};
 pub use kernel::{Interrupts, KernelOverview};
 pub use kernel::{Modules, Sysctl, SysctlSetting, SysctlValue};
 pub use mem::MemSummary;
@@ -97,6 +99,9 @@ pub enum ProbeData {
     Vulns(CpuVulns),
     Numa(Numa),
     MemErrors(MemErrors),
+    DiskHardware(DiskHardware),
+    DiskIo(DiskIo),
+    Gpus(Gpus),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -532,6 +537,21 @@ pub const REGISTRY: &[ProbeInfo] = &[
         name: mem::ERRORS,
         description: "memory errors reported by ECC controllers (EDAC)",
         run: mem::errors,
+    },
+    ProbeInfo {
+        name: disk::HARDWARE,
+        description: "disk hardware: how attached, I/O scheduler, write cache, TRIM",
+        run: disk::hardware,
+    },
+    ProbeInfo {
+        name: disk::IO,
+        description: "disk activity since boot, latency, data waiting to be written",
+        run: disk::io,
+    },
+    ProbeInfo {
+        name: gpu::NAME,
+        description: "graphics cards, their drivers and screens, compute devices",
+        run: gpu::probe,
     },
 ];
 

@@ -1,0 +1,65 @@
+---
+source: tests/phase1.rs
+expression: "render::card(&lib, c, &live, WHY)"
+---
+4.5  fsync: when is data really on disk?
+
+TL;DR
+  - write() returning means the data reached the kernel's memory, not the disk.
+    Linux writes it out later, usually within 30 seconds.
+  - fsync(fd) waits until the file's data and metadata are on the device, and
+    asks the drive to flush its own cache. It's the only promise.
+  - To replace a file safely: write a temporary file, fsync it, rename it over
+    the old one, then fsync the directory.
+
+      grep -E '^(Dirty|Writeback):' /proc/meminfo   # not yet on disk
+      sync                 # flush everything, and wait
+
+On your machine
+  nvme0n1   read 94.8 GiB in 2.8 million requests, 0.15 ms each; wrote 217.8 GiB
+            in 5.1 million requests, 0.46 ms each; busy 1% of the time; 345,678
+            cache flushes
+  sda       read 396.7 MiB in 3,120 requests, 7.52 ms each; wrote 102.5 MiB in
+            812 requests, 121.63 ms each; busy under 1% of the time
+  Since     boot, 3 days, 4 h ago
+  Pending   1.5 MiB not yet written, 0 B being written; data waits up to 30 s in
+            RAM
+
+  nvme0n1   Samsung SSD 980 PRO 500GB: NVMe flash, 476.9 GiB · scheduler none ·
+            8 hardware queues · volatile write cache · TRIM
+  sda       USB DISK 3.0: USB drive, 30.0 GiB · scheduler mq-deadline · no
+            volatile write cache
+
+Pitfalls
+  - A new file isn't durable until its directory is fsynced too: after a crash,
+    the data may exist but the name may not.
+  - Most drives have a volatile write cache; fsync flushes it. Settings or VMs
+    that ignore flushes ("unsafe" cache modes) trade durability for speed.
+  - On a crash, ext4 (in its default mode) and XFS keep the filesystem
+    consistent, not your file's latest contents: that's still fsync's job.
+  - Calling fsync after every small write is slow; batch writes, then sync once.
+
+Deep dive
+
+  ▾ Why doesn't Linux write immediately?
+
+    Waiting lets it merge many small writes into few large ones, skip data that
+    gets overwritten or deleted quickly (temporary files), and let programs
+    continue without waiting for the disk. Writeback threads flush data older
+    than vm.dirty_expire_centisecs (30 s by default), or sooner when dirty
+    memory grows past vm.dirty_background_ratio.
+
+  ▾ Why is rename the safe way to replace a file?
+
+    Rename is atomic: after a crash, the name points at either the old file or
+    the new one, never a mix. Writing in place can leave half old, half new
+    content. Fsync before the rename makes sure the new file's data is there
+    when the name moves; fsync on the directory makes the rename itself durable.
+    Editors and databases do exactly this.
+
+Related
+  Commands  sync
+  Paths     /proc/sys/vm/dirty_expire_centisecs
+  Hub       idk disk Disk
+  See also  idk 11.4 The page cache
+  See also  idk 4.3 From write() to the disk: the block layer

@@ -11,3 +11,5 @@ SwapTotal:       8388604 kB
 SwapFree:        8126460 kB
 HugePages_Total:       0
 HardwareCorrupted:     0 kB
+Dirty:              1536 kB
+Writeback:             0 kB

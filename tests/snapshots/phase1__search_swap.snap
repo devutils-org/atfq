@@ -11,6 +11,8 @@ Results for "swap"
               When RAM and swap are both used up, the kernel's OOM ("out of m…
   idk 3.2     NUMA: when some memory is closer
               may reclaim or swap on that node instead of using the far one.
+  idk 5.1     What a GPU does differently
+              Running out of VRAM fails or slows down hard; it isn't extended…
   idk 7.6     /dev and udev
               /dev/sda and /dev/sdb can swap places: scripts should use
   idk 11.1    free vs available
@@ -21,5 +23,3 @@ Results for "swap"
               ones to swap, and give every program the same simple layout.
   idk 3.1     RAM and the memory hierarchy
               Where do swap and the page cache fit?
-  idk 7.2     /tmp vs /var/tmp
-              swap under pressure, but a machine without swap has nowhere to…

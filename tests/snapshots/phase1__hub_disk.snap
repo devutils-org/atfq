@@ -17,6 +17,11 @@ On your machine
   zram0             8.0 GiB  SSD · swap
   2 loop or empty devices not shown
 
+  nvme0n1   Samsung SSD 980 PRO 500GB: NVMe flash, 476.9 GiB · scheduler none ·
+            8 hardware queues · volatile write cache · TRIM
+  sda       USB DISK 3.0: USB drive, 30.0 GiB · scheduler mq-deadline · no
+            volatile write cache
+
 Commands
   lsblk                      tree of disks and partitions
   df -h                      free space per mounted filesystem
@@ -33,6 +38,9 @@ Paths
   /etc/fstab             what gets mounted at boot
 
 Cards
+  idk 4.1   Hard drives, SSDs and NVMe
+  idk 4.2   Inside an SSD: flash, TRIM and wear
+  idk 4.4   IOPS, throughput and latency: how fast is a disk?
   idk 7.2   /tmp vs /var/tmp
   idk 7.4   Links, inodes and "disk full"
   idk 20.1  find
