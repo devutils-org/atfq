@@ -33,7 +33,7 @@ jobs:
           mkdir -p _site
           cp site/index.html _site/
           cargo run --locked --example book -- _site/book
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
