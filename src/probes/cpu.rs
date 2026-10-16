@@ -479,7 +479,10 @@ pub struct CpuFreq {
     /// cpuidle driver and CPU 0's idle states with how often each was used.
     pub idle_driver: Option<String>,
     pub idle_states: Vec<(String, u64)>,
-    /// Hottest thermal zone: its type and degrees Celsius.
+    /// The CPU's own sensor: its name and degrees Celsius.
+    pub cpu_temp: Option<(String, f64)>,
+    /// Hottest thermal zone: its type and degrees Celsius. Shown when the
+    /// CPU has no sensor of its own, since a zone may be the Wi-Fi card.
     pub hottest: Option<(String, f64)>,
 }
 
@@ -533,21 +536,35 @@ pub(crate) fn freq(ctx: &ProbeCtx) -> ProbeResult {
         })
         .collect();
     idle_states.sort();
-    let hottest = ctx
+    let zones: Vec<(String, f64)> = ctx
         .list("/sys/class/thermal")
         .unwrap_or_default()
         .iter()
         .filter(|z| z.starts_with("thermal_zone"))
         .filter_map(|z| {
             let dir = format!("/sys/class/thermal/{z}");
-            let milli: i64 = ctx.read_trimmed(&format!("{dir}/temp"))?.parse().ok()?;
+            let t = celsius(ctx, &format!("{dir}/temp"))?;
             let kind = ctx
                 .read_trimmed(&format!("{dir}/type"))
                 .unwrap_or(z.clone());
-            // Some sensors report nonsense when absent.
-            (milli > 0 && milli < 150_000).then(|| (kind, milli as f64 / 1000.0))
+            Some((kind, t))
         })
-        .max_by(|a, b| a.1.total_cmp(&b.1));
+        .collect();
+    let hottest_of = |v: Vec<(String, f64)>| v.into_iter().max_by(|a, b| a.1.total_cmp(&b.1));
+    let cpu_temp = hottest_of(cpu_sensors(ctx)).or_else(|| {
+        hottest_of(
+            zones
+                .iter()
+                .filter(|(kind, _)| kind == "x86_pkg_temp" || kind.contains("cpu"))
+                .cloned()
+                .collect(),
+        )
+    });
+    let hottest = if cpu_temp.is_some() {
+        None
+    } else {
+        hottest_of(zones)
+    };
     let data = CpuFreq {
         driver: first.and_then(|id| get(id, "scaling_driver")),
         governor: first.and_then(|id| get(id, "scaling_governor")),
@@ -557,11 +574,13 @@ pub(crate) fn freq(ctx: &ProbeCtx) -> ProbeResult {
         boost,
         idle_driver,
         idle_states: idle_states.into_iter().map(|(_, n, u)| (n, u)).collect(),
+        cpu_temp,
         hottest,
     };
     let nothing = data.driver.is_none()
         && data.current_khz.is_empty()
         && data.idle_driver.is_none()
+        && data.cpu_temp.is_none()
         && data.hottest.is_none();
     if nothing {
         let mut r = ProbeResult::new(FREQ, Status::Unavailable, None);
@@ -572,6 +591,54 @@ pub(crate) fn freq(ctx: &ProbeCtx) -> ProbeResult {
         return r;
     }
     ProbeResult::new(FREQ, Status::Ok, Some(ProbeData::Freq(data)))
+}
+
+/// Degrees Celsius from a file in millidegrees.
+fn celsius(ctx: &ProbeCtx, abs: &str) -> Option<f64> {
+    let milli: i64 = ctx.read_trimmed(abs)?.parse().ok()?;
+    // Some sensors report nonsense when absent.
+    (milli > 0 && milli < 150_000).then(|| milli as f64 / 1000.0)
+}
+
+/// CPU temperatures from hwmon drivers that only watch the CPU: one per
+/// package. AMD desktops and many Intel ones have no CPU thermal zone, so
+/// the zones alone would show the Wi-Fi card or the chipset.
+fn cpu_sensors(ctx: &ProbeCtx) -> Vec<(String, f64)> {
+    const DRIVERS: [&str; 3] = ["k10temp", "zenpower", "coretemp"];
+    let mut found = Vec::new();
+    for h in ctx.list("/sys/class/hwmon").unwrap_or_default() {
+        let dir = format!("/sys/class/hwmon/{h}");
+        let Some(name) = ctx.read_trimmed(&format!("{dir}/name")) else {
+            continue;
+        };
+        if !DRIVERS.contains(&name.as_str()) {
+            continue;
+        }
+        let temps: Vec<(String, f64)> = ctx
+            .list(&dir)
+            .unwrap_or_default()
+            .iter()
+            .filter_map(|f| {
+                let n = f.strip_prefix("temp")?.strip_suffix("_input")?;
+                let t = celsius(ctx, &format!("{dir}/{f}"))?;
+                let label = ctx
+                    .read_trimmed(&format!("{dir}/temp{n}_label"))
+                    .unwrap_or_default();
+                Some((label, t))
+            })
+            .collect();
+        // Tdie is the real die temperature; Tctl adds an offset on some
+        // Ryzen models, for the fans. coretemp has a package line, then cores.
+        let pick = ["Tdie", "Tctl"]
+            .iter()
+            .find_map(|l| temps.iter().find(|(label, _)| label == l))
+            .or_else(|| temps.iter().find(|(l, _)| l.starts_with("Package")))
+            .or_else(|| (temps.len() == 1).then(|| &temps[0]));
+        if let Some((label, t)) = pick {
+            found.push((format!("{name} {label}").trim_end().to_string(), *t));
+        }
+    }
+    found
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -772,8 +839,22 @@ mod tests {
         assert_eq!(f.idle_driver.as_deref(), Some("intel_idle"));
         assert_eq!(f.idle_states[0].0, "POLL");
         assert_eq!(f.idle_states.len(), 5);
-        assert_eq!(f.hottest, Some(("x86_pkg_temp".to_string(), 58.0)));
+        assert_eq!(f.cpu_temp, Some(("x86_pkg_temp".to_string(), 58.0)));
+        assert_eq!(f.hottest, None);
         assert_eq!(freq(&fixture("empty")).status, Status::Unavailable);
+    }
+
+    #[test]
+    fn cpu_sensor_over_hotter_devices() {
+        // The NVMe drive is hotter, and Core 1 hotter than the package line.
+        let Some(ProbeData::Freq(f)) = freq(&fixture("server")).data else {
+            panic!()
+        };
+        assert_eq!(
+            f.cpu_temp,
+            Some(("coretemp Package id 0".to_string(), 47.0))
+        );
+        assert_eq!(f.hottest, None);
     }
 
     #[test]

@@ -1348,6 +1348,9 @@ fn freq(f: &CpuFreq, w: usize) -> Vec<Line> {
         };
         out.extend(row("Idle", &format!("{text} (CPU 0, times entered)"), w));
     }
+    if let Some((sensor, t)) = &f.cpu_temp {
+        out.extend(row("CPU temp", &format!("{t:.0} °C ({sensor})"), w));
+    }
     if let Some((zone, t)) = &f.hottest {
         out.extend(row("Hottest", &format!("{t:.0} °C ({zone})"), w));
     }

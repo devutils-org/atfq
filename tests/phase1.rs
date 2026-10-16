@@ -181,3 +181,27 @@ fn cli_probe_and_json() {
     let v: serde_json::Value = serde_json::from_str(&out).unwrap();
     assert_eq!(v["match"], "none");
 }
+
+/// Git doesn't keep empty directories, so a fixture that relies on one
+/// passes here and fails on a fresh clone. Put a `.gitkeep` in it, or an
+/// entry like the real system's when a probe counts what is inside.
+#[test]
+fn fixtures_have_no_empty_directory() {
+    fn walk(dir: &std::path::Path, empty: &mut Vec<String>) {
+        let entries: Vec<_> = std::fs::read_dir(dir).unwrap().flatten().collect();
+        if entries.is_empty() {
+            empty.push(dir.display().to_string());
+        }
+        for e in entries {
+            if e.file_type().unwrap().is_dir() {
+                walk(&e.path(), empty);
+            }
+        }
+    }
+    let mut empty = Vec::new();
+    walk(
+        &std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures"),
+        &mut empty,
+    );
+    assert!(empty.is_empty(), "empty fixture directories: {empty:#?}");
+}

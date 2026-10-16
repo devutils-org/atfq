@@ -1,5 +1,6 @@
 ---
 source: tests/phase1.rs
+assertion_line: 31
 expression: "render::card(&lib, c, &live, PLAIN)"
 ---
 2.4  Clock speed, turbo and power saving
@@ -23,7 +24,7 @@ On your machine
   Turbo     allowed
   Idle      intel_idle: POLL 51,234, C1E 2.4 million, C6 1.8 million, C8
             950,000, C10 14.2 million (CPU 0, times entered)
-  Hottest   58 °C (x86_pkg_temp)
+  CPU temp  58 °C (x86_pkg_temp)
 
 Pitfalls
   - With intel_pstate and amd-pstate, the powersave governor still reaches full

@@ -2,4 +2,4 @@
 - [x] vim navigation
 - [~] frontend (book: `cargo run --example book`; GitHub Pages workflow ready, to enable in the repo settings)
 - [~] landing page (draft in site/index.html, DA to validate)
-- [ ] x86 tests
+- [x] x86 tests (Ryzen 9 3900X, Arch: all tests, 49 probes live)
