@@ -24,7 +24,7 @@ jobs:
           - { os: ubuntu-22.04-arm, arch: aarch64 }
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: rustup toolchain install
       - name: Tag matches Cargo.toml
         run: |
