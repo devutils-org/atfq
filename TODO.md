@@ -1,5 +1,5 @@
 - [x] improve ui -> take example on tuios (borders, theme)
 - [x] vim navigation
-- [~] frontend (book: `cargo run --example book`; GitHub Pages workflow ready, to enable in the repo settings)
-- [~] landing page (draft in site/index.html, DA to validate)
+- [x] frontend (book: `cargo run --example book`, published by devutils-org/devutils)
+- [x] landing page (in devutils-org/devutils)
 - [x] x86 tests (Ryzen 9 3900X, Arch: all tests, 49 probes live)

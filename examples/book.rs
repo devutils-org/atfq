@@ -1,10 +1,10 @@
 //! The content as a static website, laid out like an mdBook (the Rust book):
 //! contents on the left, one page per hub, chapter and card, previous and
-//! next arrows, search. Type from the landing page (`site/index.html`),
-//! colours from Tokyo Night.
+//! next arrows, search. Colours from Tokyo Night. The devutils site
+//! (devutils-org/devutils, `npm run book:atfq`) publishes it in its own style.
 //!
 //! ```text
-//! cargo run --example book            # writes site/book/, next to the landing page
+//! cargo run --example book            # writes target/book/
 //! cargo run --example book -- out/    # somewhere else
 //! ```
 //!
@@ -45,7 +45,7 @@ fn main() {
     let out = PathBuf::from(
         std::env::args()
             .nth(1)
-            .unwrap_or_else(|| "site/book".into()),
+            .unwrap_or_else(|| "target/book".into()),
     );
     let lib = match load() {
         Ok(lib) => lib,
