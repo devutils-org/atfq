@@ -1,5 +1,0 @@
-- [x] improve ui -> take example on tuios (borders, theme)
-- [x] vim navigation
-- [x] frontend (book: `cargo run --example book`, published by devutils-org/devutils)
-- [x] landing page (in devutils-org/devutils)
-- [x] x86 tests (Ryzen 9 3900X, Arch: all tests, 49 probes live)
