@@ -264,7 +264,7 @@ fn layout(lib: &Library, page: &Page, prev: Option<&Page>, next: Option<&Page>) 
   <button class="icon" id="toggle-search" type="button" aria-controls="search" title="Search (/ or s)">⌕</button>
   <a class="book-title" href="index.html">{BIN_NAME}<span>_</span> book</a>
   <a class="icon gh" href="../index.html" title="atfq home">home</a>
-  <a class="icon" href="https://github.com/moha-bekh/atfq" title="Source">git</a>
+  <a class="icon" href="https://github.com/devutils-org/atfq" title="Source">git</a>
 </header>
 <div class="search" id="search" hidden>
   <input id="search-input" type="search" placeholder="Search {count} cards: a word, an alias, an error message…" autocomplete="off" spellcheck="false" aria-label="Search the book">
@@ -392,7 +392,7 @@ fn intro(lib: &Library) -> String {
         r#"<p class="eyebrow">A Linux companion for the terminal</p>
 <h1 class="hero">Ask the question<span class="q">.</span> Your machine answers.</h1>
 <p class="lede"><strong>Short answers first</strong>, your machine's real state second, the deep "why" only if you want it. This is the book that ships inside <code>{BIN_NAME}</code>: every page here is one command away in your terminal.</p>
-<div class="install"><pre id="install-cmd"><span class="p">$ </span>cargo install --git https://github.com/moha-bekh/atfq</pre><button class="copy" type="button" data-copy="install-cmd">COPY</button></div>
+<div class="install"><pre id="install-cmd"><span class="p">$ </span>cargo install --git https://github.com/devutils-org/atfq</pre><button class="copy" type="button" data-copy="install-cmd">COPY</button></div>
 <ul class="stats" aria-label="What's inside"><li><b>{chapters}</b>chapters</li><li><b>{cards}</b>cards</li><li><b>{hubs}</b>hubs</li><li><b>{probes}</b>live probes</li></ul>
 
 <h2>Three parts</h2>

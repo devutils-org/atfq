@@ -29,7 +29,7 @@ never uses the network. One binary, content embedded, no root needed.
 A prebuilt binary, for x86-64 or ARM64 Linux (glibc 2.35 or later):
 
 ```
-curl -LO https://github.com/moha-bekh/atfq/releases/latest/download/atfq-x86_64-linux.tar.gz
+curl -LO https://github.com/devutils-org/atfq/releases/latest/download/atfq-x86_64-linux.tar.gz
 tar xzf atfq-x86_64-linux.tar.gz
 install -m 755 atfq-x86_64-linux/atfq ~/.local/bin/
 ```
