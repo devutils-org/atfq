@@ -112,6 +112,7 @@
   - [Kernel modules](cards/kernel/modules.md)
   - [dmesg and the kernel log](cards/kernel/dmesg.md)
   - [syscalls and strace](cards/kernel/strace.md)
+  - [Why a tool may not watch the kernel](cards/kernel/tracing.md)
 - [systemd](systemd)
   - [Units and timers](cards/systemd/units.md)
   - [Why a service won't start](cards/systemd/failing.md)

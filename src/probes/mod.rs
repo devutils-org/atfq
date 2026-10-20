@@ -46,7 +46,7 @@ pub use disk::{DiskHardware, DiskHw, DiskIo, DiskStats, Fstab, FstabEntry, UdevR
 pub use fsmount::{FsMount, FsMounts};
 pub use git::GitConfig;
 pub use gpu::{Connector, GpuCard, Gpus};
-pub use kernel::{Interrupts, KernelOverview};
+pub use kernel::{Interrupts, KernelOverview, Tracing};
 pub use kernel::{Modules, Sysctl, SysctlSetting, SysctlValue};
 pub use logs::LogInfo;
 pub use mem::MemSummary;
@@ -131,6 +131,7 @@ pub enum ProbeData {
     Crypto(CryptoInfo),
     Locale(LocaleInfo),
     Logs(LogInfo),
+    Tracing(Tracing),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -556,6 +557,12 @@ pub const REGISTRY: &[ProbeInfo] = &[
         name: kernel::IRQ,
         description: "busiest interrupt sources, hardware and software",
         run: kernel::irq,
+    },
+    ProbeInfo {
+        name: kernel::TRACING,
+        description:
+            "what lets a tool watch the kernel: perf and BPF settings, lockdown, BTF, capabilities",
+        run: kernel::tracing,
     },
     ProbeInfo {
         name: mem::VM,

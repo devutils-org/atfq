@@ -236,10 +236,10 @@ One fact, four surfaces: the CLI, the TUI, the prompt and an agent.
   `~/.ssh`, git's config), and runs one program, `systemctl`, with fixed
   arguments. It never opens a private key or a credential, and never runs
   what you type.
-- **"What does it cover?"** 121 cards in 30 chapters. The theory: kernel,
+- **"What does it cover?"** 122 cards in 30 chapters. The theory: kernel,
   CPU, memory, storage, GPU, networks, containers, concurrency,
   filesystems, time, cryptography, text. The practice: nine hubs from Disk
-  to Logs. The shell: environment, find and friends, SSH, git. 49 probes
+  to Logs. The shell: environment, find and friends, SSH, git. 50 probes
   answer from the machine.
 - **"Does it need root?"** No. Where root would show more (another user's
   process on a port, AppArmor profiles), it says so: `needs root`, with the

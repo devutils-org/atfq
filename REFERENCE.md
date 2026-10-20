@@ -120,9 +120,9 @@ binary, as `which atfq` prints it):
 ## What's inside
 
 - 9 hubs (Disk, Permissions, Processes & scheduling, Memory, CPU, Network,
-  Boot, GPU, Logs) and 121 cards in 30 chapters, in three parts (how it
+  Boot, GPU, Logs) and 122 cards in 30 chapters, in three parts (how it
   works, your system, shell and commands): `atfq toc` lists them.
-- 49 live probes. They read `/proc`, `/sys` and `/etc` directly, plus a
+- 50 live probes. They read `/proc`, `/sys` and `/etc` directly, plus a
   few files in your home folder: names and public keys in `~/.ssh`, and
   git's config, of which only your name's and email's presence are
   shown. Never a private key or a credential. The only

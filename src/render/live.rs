@@ -13,7 +13,7 @@ use crate::probes::{
 use crate::probes::{CpuCaches, CpuFeatures, CpuFreq, CpuTopology, CpuVulns, MemErrors, Numa};
 use crate::probes::{CryptoInfo, FsMounts, LocaleInfo, LogInfo, TimeInfo};
 use crate::probes::{DiskHardware, DiskIo, GitConfig, Gpus, SshSetup};
-use crate::probes::{Interrupts, KernelOverview, NetLayers, VirtualMemory};
+use crate::probes::{Interrupts, KernelOverview, NetLayers, Tracing, VirtualMemory};
 use crate::probes::{Ipc, Limit, Limits, Threads, VirtInfo};
 
 /// Width of the label column (`RAM`, `Swap`, `Zombies`…).
@@ -92,6 +92,7 @@ pub(crate) fn result(r: &ProbeResult, w: usize) -> Vec<Line> {
         (_, Some(ProbeData::Crypto(c))) => crypto(c, w),
         (_, Some(ProbeData::Locale(l))) => locale(l, w),
         (_, Some(ProbeData::Logs(l))) => logs(l, w),
+        (_, Some(ProbeData::Tracing(t))) => tracing(t, w),
         (_, None) => Vec::new(),
     };
     for note in &r.notes {
@@ -1951,6 +1952,67 @@ fn limits(l: &Limits, w: usize) -> Vec<Line> {
             &format!("{} files open on the whole system{max}", count(n)),
             w,
         ));
+    }
+    out
+}
+
+fn tracing(t: &Tracing, w: usize) -> Vec<Line> {
+    let mut out = Vec::new();
+    if let Some(p) = t.perf_event_paranoid {
+        let what = match p {
+            i32::MIN..=-1 => "every event, for everyone",
+            0 => "everything but raw tracepoints",
+            1 => "your own processes and the kernel's, not CPU-wide",
+            2 => "your own processes only, in user space",
+            _ => "nothing without CAP_PERFMON (a distro patch)",
+        };
+        out.extend(row("Perf", &format!("perf_event_paranoid {p}: {what}"), w));
+    }
+    if let Some(b) = t.unprivileged_bpf_disabled {
+        let what = if b == 0 {
+            "allowed to any user"
+        } else {
+            "refused without CAP_BPF"
+        };
+        out.extend(row("BPF", &format!("unprivileged eBPF {what} ({b})"), w));
+    }
+    if let Some(k) = t.kptr_restrict {
+        let what = match k {
+            0 => "shown",
+            1 => "hidden without CAP_SYSLOG",
+            _ => "hidden from everyone",
+        };
+        out.extend(row(
+            "Addresses",
+            &format!("kernel addresses {what} (kptr_restrict {k})"),
+            w,
+        ));
+    }
+    if let Some(l) = &t.lockdown {
+        let what = match l.as_str() {
+            "none" => "off",
+            "integrity" => "the running kernel cannot be modified (unsigned modules, /dev/mem)",
+            _ => "kernel memory cannot be read either: kprobes, eBPF kernel reads, perf, tracefs",
+        };
+        out.extend(row("Lockdown", &format!("{l}: {what}"), w));
+    }
+    let btf = if t.btf {
+        "present: portable eBPF programs (CO-RE) can load"
+    } else {
+        "missing: portable eBPF programs cannot load"
+    };
+    out.extend(row("BTF", btf, w));
+    if let Some(m) = &t.memlock {
+        out.extend(row("Memlock", &limit(m, "locked per process", size), w));
+    }
+    if let (Some(p), Some(b)) = (t.cap_perfmon, t.cap_bpf) {
+        let held = match (p, b) {
+            (true, true) => "this process holds CAP_PERFMON and CAP_BPF",
+            (true, false) => "this process holds CAP_PERFMON, not CAP_BPF",
+            (false, true) => "this process holds CAP_BPF, not CAP_PERFMON",
+            (false, false) => "this process holds neither CAP_PERFMON nor CAP_BPF",
+        };
+        out.extend(row("You", held, w));
     }
     out
 }

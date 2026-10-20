@@ -132,6 +132,11 @@ kernel.irq  busiest interrupt sources, hardware and software
   not available on this system
   note: /proc/interrupts: not found
 
+kernel.tracing  what lets a tool watch the kernel: perf and BPF settings, lockdown, BTF, capabilities
+
+  not available on this system
+  note: /proc/sys/kernel: not found
+
 mem.vm  page size, page faults, swap traffic, huge pages
 
   not available on this system

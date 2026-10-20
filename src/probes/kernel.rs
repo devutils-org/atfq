@@ -1,14 +1,17 @@
 //! Kernel probes: `kernel.sysctl` (a few telling settings, and the ones set
-//! in /etc) and `kernel.modules` (loaded modules and taint flags).
+//! in /etc), `kernel.modules` (loaded modules and taint flags) and
+//! `kernel.tracing` (what decides whether a tool may watch the kernel).
 
 use serde::Serialize;
 
+use super::conc::Limit;
 use super::{ProbeCtx, ProbeData, ProbeResult, Status};
 
 pub(crate) const SYSCTL: &str = "kernel.sysctl";
 pub(crate) const MODULES: &str = "kernel.modules";
 pub(crate) const OVERVIEW: &str = "kernel.overview";
 pub(crate) const IRQ: &str = "kernel.irq";
+pub(crate) const TRACING: &str = "kernel.tracing";
 
 /// Interrupt sources listed by `kernel.irq`.
 const IRQ_TOP: usize = 6;
@@ -343,10 +346,98 @@ pub(crate) fn irq(ctx: &ProbeCtx) -> ProbeResult {
     )
 }
 
+/// What a perf, eBPF or tracing tool needs from the kernel, read as an
+/// ordinary user: the settings that refuse it, and what this process holds.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct Tracing {
+    /// `kernel.perf_event_paranoid`: -1 everything, 0 no raw tracepoints,
+    /// 1 no CPU-wide events, 2 own processes only; above 2, distro patches
+    /// that refuse perf entirely without `CAP_PERFMON`.
+    pub perf_event_paranoid: Option<i32>,
+    /// `kernel.kptr_restrict`: 0 kernel addresses shown, 1 hidden without
+    /// `CAP_SYSLOG`, 2 hidden from everyone.
+    pub kptr_restrict: Option<u8>,
+    /// `kernel.unprivileged_bpf_disabled`: 0 allowed, 1 or 2 refused without
+    /// `CAP_BPF`.
+    pub unprivileged_bpf_disabled: Option<u8>,
+    /// Kernel lockdown mode: none, integrity or confidentiality.
+    pub lockdown: Option<String>,
+    /// /sys/kernel/btf/vmlinux: the kernel's own type information, which
+    /// portable eBPF programs need.
+    pub btf: bool,
+    /// Locked-memory limit of this process: older kernels charge eBPF maps
+    /// to it.
+    pub memlock: Option<Limit>,
+    /// Whether this process holds `CAP_PERFMON` and `CAP_BPF` (effective).
+    pub cap_perfmon: Option<bool>,
+    pub cap_bpf: Option<bool>,
+}
+
+/// `CAP_PERFMON` and `CAP_BPF`, as bits of `CapEff` in /proc/self/status.
+const CAP_PERFMON_BIT: u32 = 38;
+const CAP_BPF_BIT: u32 = 39;
+
+pub(crate) fn tracing(ctx: &ProbeCtx) -> ProbeResult {
+    if let Err(e) = ctx.list("/proc/sys/kernel") {
+        return ProbeResult::failed(TRACING, e);
+    }
+    let number = |name: &str| ctx.read_trimmed(&format!("/proc/sys/kernel/{name}"));
+    // `none [integrity] confidentiality`: the active mode is in brackets.
+    let lockdown = ctx
+        .read_trimmed("/sys/kernel/security/lockdown")
+        .and_then(|l| Some(l.split('[').nth(1)?.split(']').next()?.to_string()));
+    let memlock = ctx.read("/proc/self/limits").ok().and_then(|text| {
+        let line = text.lines().find(|l| l.starts_with("Max locked memory"))?;
+        let mut f = line["Max locked memory".len()..].split_whitespace();
+        let (soft, hard) = (f.next()?, f.next()?);
+        Some(Limit {
+            soft: soft.parse().ok(),
+            hard: hard.parse().ok(),
+        })
+    });
+    let caps = ctx.read("/proc/self/status").ok().and_then(|status| {
+        let hex = status.lines().find_map(|l| l.strip_prefix("CapEff:"))?;
+        u64::from_str_radix(hex.trim(), 16).ok()
+    });
+    let data = Tracing {
+        perf_event_paranoid: number("perf_event_paranoid").and_then(|v| v.parse().ok()),
+        kptr_restrict: number("kptr_restrict").and_then(|v| v.parse().ok()),
+        unprivileged_bpf_disabled: number("unprivileged_bpf_disabled").and_then(|v| v.parse().ok()),
+        lockdown,
+        btf: ctx.exists("/sys/kernel/btf/vmlinux"),
+        memlock,
+        cap_perfmon: caps.map(|c| c >> CAP_PERFMON_BIT & 1 == 1),
+        cap_bpf: caps.map(|c| c >> CAP_BPF_BIT & 1 == 1),
+    };
+    ProbeResult::new(TRACING, Status::Ok, Some(ProbeData::Tracing(data)))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probes::fixture;
+
+    #[test]
+    fn tracing_settings_and_capabilities() {
+        let Some(ProbeData::Tracing(t)) = tracing(&fixture("laptop")).data else {
+            panic!()
+        };
+        assert_eq!(t.perf_event_paranoid, Some(2));
+        assert_eq!(t.kptr_restrict, Some(1));
+        assert_eq!(t.unprivileged_bpf_disabled, Some(2));
+        assert_eq!(t.lockdown.as_deref(), Some("none"));
+        assert!(t.btf);
+        assert_eq!(
+            t.memlock,
+            Some(Limit {
+                soft: Some(8_388_608),
+                hard: Some(8_388_608)
+            })
+        );
+        // the fixture's status has no capability lines
+        assert_eq!((t.cap_perfmon, t.cap_bpf), (None, None));
+        assert_eq!(tracing(&fixture("empty")).status, Status::Unavailable);
+    }
 
     #[test]
     fn reads_watched_and_configured_settings() {

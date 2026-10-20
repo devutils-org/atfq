@@ -210,6 +210,7 @@ Part II · Your system
       21.2  Kernel modules
       21.3  dmesg and the kernel log
       21.4  syscalls and strace
+      21.5  Why a tool may not watch the kernel
   22. systemd
       22.1  Units and timers
       22.2  Why a service won't start
