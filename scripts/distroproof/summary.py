@@ -29,7 +29,11 @@ def main(report_path):
     for target in report['targets']:
         name = target['name']
         cell_path = ROOT / '.distroproof' / 'collect' / name / 'cell.json'
-        cell = json.loads(cell_path.read_text()) if cell_path.is_file() else {'builds': {}}
+        try:
+            cell = json.loads(cell_path.read_text()) if cell_path.is_file() else {'builds': {}}
+        except ValueError:
+            cell = {'builds': {}}
+            print(f'{name}: cell.json is not valid JSON (the sweep stopped while writing it)')
         builds = cell['builds']
         print(f"{name}  (VM: {target['outcome']})")
         for build in ('release', 'static'):

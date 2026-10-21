@@ -56,6 +56,13 @@ distroproof up --no-tui --jobs 4 --json dist/matrix.json
 python3 scripts/distroproof/summary.py dist/matrix.json
 ```
 
+Latest run (2026-10-21, 0.1.1): the static build passes every check on all 19
+targets — Debian 10 to sid, Ubuntu 18.04 to 24.04, Rocky 8 and 9, Fedora 43 and
+44, Arch, Alpine, NixOS, Gentoo, Debian as root and Fedora under lockdown. The
+probes a machine cannot answer say so: no CPU frequency in a VM, no systemd on
+Alpine. The 0.1.0 release, linked against glibc 2.34, did not start on seven of
+them: Debian 10 and 11, Ubuntu 18.04 and 20.04, Rocky 8, Alpine and NixOS.
+
 ## Documentation
 
 [CLI, TUI and MCP reference](REFERENCE.md) · [Demo](docs/demo.md) ·

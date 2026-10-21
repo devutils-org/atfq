@@ -3,12 +3,13 @@
 ## 0.1.1 — unreleased
 
 - Static release binaries (musl) for x86_64 and aarch64: no glibc requirement.
-  0.1.0's binaries needed glibc 2.34 and did not start on Debian 11, Ubuntu 20.04
-  or 18.04, Rocky 8 or Alpine.
+  0.1.0's binaries needed glibc 2.34 and did not start on Debian 10 and 11,
+  Ubuntu 18.04 and 20.04, Rocky 8, Alpine or NixOS.
 - Each release archive is signed by a build provenance attestation
   (`gh attestation verify`).
 - `distroproof.toml` runs the static build and the latest release side by side
-  in VMs of every distribution distroproof knows.
+  in VMs of every distribution distroproof knows. The static build passes every
+  check on all 19 targets (2026-10-21).
 - New card and probe `kernel.tracing`: why a tool may not watch the kernel.
 
 ## 0.1.0 — 2026-10-18

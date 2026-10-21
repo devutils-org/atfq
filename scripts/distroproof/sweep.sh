@@ -5,6 +5,9 @@
 # measured, not judged.
 set -u
 here=$PWD
+# The agent may start the command without HOME (root targets).
+home=${HOME:-$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f6)}
+home=${home:-/root}
 out=$here/cell.json
 log=$(mktemp)
 static_failed=0
@@ -45,7 +48,7 @@ for dir in "$here"/dist/distroproof/*/; do
     check card-why "$bin" free --why
     check search "$bin" search zombie
     check fuzzy sh -c "'$bin' memroy 2>&1 | grep -q memory"
-    check ask-redact sh -c "out=\$('$bin' ask memory --redact 'why is RAM full?') && ! printf '%s' \"\$out\" | grep -q '$HOME'"
+    check ask-redact sh -c "out=\$('$bin' ask memory --redact 'why is RAM full?') && ! printf '%s' \"\$out\" | grep -q '$home'"
     mcp_session "$bin" > "$log" 2>&1
     if [ "$(grep -c '"result"' "$log")" -ge 3 ]; then echo "[$build] ok    mcp"
     else echo "[$build] FAIL  mcp: $(head -c 200 "$log")"; failed="$failed mcp"; fi
