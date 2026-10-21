@@ -43,6 +43,19 @@ atfq tui             # interactive browser
 atfq mcp             # read-only MCP server on stdio
 ```
 
+## Checked on every distribution
+
+[distroproof](https://github.com/devutils-org/distroproof) boots each distribution
+it knows on its own kernel and runs atfq there: the static build and the latest
+release side by side, every hub, search, the AI prompt, the MCP server and every
+probe, which must answer without crashing whatever the machine lacks.
+
+```sh
+sh scripts/distroproof/build.sh
+distroproof up --no-tui --jobs 4 --json dist/matrix.json
+python3 scripts/distroproof/summary.py dist/matrix.json
+```
+
 ## Documentation
 
 [CLI, TUI and MCP reference](REFERENCE.md) · [Demo](docs/demo.md) ·
