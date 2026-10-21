@@ -1,4 +1,4 @@
-//! From what the user typed to a hub or a card (ROADMAP.md section 7).
+//! From what the user typed to a hub or a card (docs/ROADMAP.md section 7).
 
 use serde::Serialize;
 

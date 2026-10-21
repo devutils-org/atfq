@@ -1,4 +1,4 @@
-//! Loads every content file, checks it against the rules in ROADMAP.md
+//! Loads every content file, checks it against the rules in docs/ROADMAP.md
 //! section 6.3, and indexes it for lookups.
 
 use std::collections::{BTreeMap, HashMap};

@@ -28,7 +28,7 @@ read the diff of every snapshot before committing.
 ## Adding or fixing a card
 
 Cards are Markdown files in `content/cards/`, hubs in `content/hubs/`.
-`ROADMAP.md` section 6 describes the format and section 9 the writing
+[`docs/ROADMAP.md`](docs/ROADMAP.md) section 6 describes the format and section 9 the writing
 guide; the essentials:
 
 - Start from a question a developer actually has, or an error message they
@@ -70,7 +70,7 @@ Probes live in `src/probes/`. The rules:
 ## Commits and pull requests
 
 One topic per pull request, with tests. Decisions the roadmap doesn't
-cover go in `DECISIONS.md`, one line each: date — decision — reason.
+cover go in [`docs/DECISIONS.md`](docs/DECISIONS.md), one line each: date — decision — reason.
 
 By contributing, you agree that your contribution is dual licensed under
 the MIT and Apache-2.0 licenses, like the rest of the project.

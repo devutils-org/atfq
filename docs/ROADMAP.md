@@ -63,8 +63,9 @@ Single crate (library + binary) for the PoC. Split into a workspace only if it b
 ```
 atfq/
   Cargo.toml
-  ROADMAP.md
-  DECISIONS.md            decisions taken during development, one line each
+  docs/
+    ROADMAP.md
+    DECISIONS.md          decisions taken during development, one line each
   content/
     SUMMARY.md            table of contents (mdBook-style), defines order and numbering
     hubs/

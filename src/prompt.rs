@@ -1,4 +1,4 @@
-//! `atfq ask`: a ready-to-paste prompt for an AI assistant (ROADMAP.md 8.3).
+//! `atfq ask`: a ready-to-paste prompt for an AI assistant (docs/ROADMAP.md 8.3).
 //! Nothing is sent anywhere: the prompt is printed, the user decides.
 
 use serde::Serialize;

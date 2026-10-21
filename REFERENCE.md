@@ -26,7 +26,7 @@ never uses the network. One binary, content embedded, no root needed.
 
 ## Install
 
-A prebuilt binary, for x86-64 or ARM64 Linux (glibc 2.35 or later):
+A prebuilt static binary, for x86-64 or ARM64 Linux, with no libc requirement:
 
 ```
 curl -LO https://github.com/devutils-org/atfq/releases/latest/download/atfq-x86_64-linux.tar.gz
@@ -34,7 +34,9 @@ tar xzf atfq-x86_64-linux.tar.gz
 install -m 755 atfq-x86_64-linux/atfq ~/.local/bin/
 ```
 
-Replace `x86_64` with `aarch64` on ARM. Each release lists SHA-256 sums.
+Replace `x86_64` with `aarch64` on ARM. Each release lists SHA-256 sums, and
+`gh attestation verify atfq-x86_64-linux.tar.gz --repo devutils-org/atfq` checks
+that an archive was built from this repository by its release workflow.
 
 From source, with a Rust toolchain:
 
@@ -145,9 +147,9 @@ cargo clippy --all-targets -- -D warnings
 INSTA_UPDATE=always cargo test   # accept changed snapshots (review the diff!)
 ```
 
-- `ROADMAP.md` is the plan and the rules: architecture, content format,
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) is the plan and the rules: architecture, content format,
   writing guide.
-- `DECISIONS.md` records every decision the roadmap didn't cover.
+- [`docs/DECISIONS.md`](docs/DECISIONS.md) records every decision the roadmap didn't cover.
 - Content lives in `content/` as Markdown with YAML frontmatter;
   `content/SUMMARY.md` sets the order and the chapter numbers. A test checks
   every rule of the format (unique ids, references, probe names, TL;DR

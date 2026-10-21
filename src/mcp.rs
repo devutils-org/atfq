@@ -1,5 +1,5 @@
 //! `atfq mcp`: the same knowledge and probes for AI agents, as an MCP server
-//! on stdio (ROADMAP.md 8.4). Every tool is read-only.
+//! on stdio (docs/ROADMAP.md 8.4). Every tool is read-only.
 
 use std::io;
 use std::sync::Arc;

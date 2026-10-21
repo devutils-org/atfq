@@ -12,7 +12,7 @@ use common::{laptop, lib, show, PLAIN, WHY};
 
 #[test]
 fn embedded_content_is_valid() {
-    // Library::embedded runs every rule of ROADMAP.md section 6.3.
+    // Library::embedded runs every rule of docs/ROADMAP.md section 6.3.
     lib();
 }
 

@@ -253,4 +253,4 @@ One fact, four surfaces: the CLI, the TUI, the prompt and an agent.
   32-bit ARM.
 - **"How do I add a card?"** A Markdown file in `content/`, a line in
   `content/SUMMARY.md`, and `cargo test`: a test checks ids, references,
-  probes and the TL;DR length. `ROADMAP.md` section 9 is the writing guide.
+  probes and the TL;DR length. [`ROADMAP.md`](ROADMAP.md) section 9 is the writing guide.

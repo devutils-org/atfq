@@ -1,0 +1,24 @@
+# Changelog
+
+## 0.1.1 — unreleased
+
+- Static release binaries (musl) for x86_64 and aarch64: no glibc requirement.
+  0.1.0's binaries needed glibc 2.34 and did not start on Debian 11, Ubuntu 20.04
+  or 18.04, Rocky 8 or Alpine.
+- Each release archive is signed by a build provenance attestation
+  (`gh attestation verify`).
+- `distroproof.toml` runs the static build and the latest release side by side
+  in VMs of every distribution distroproof knows.
+- New card and probe `kernel.tracing`: why a tool may not watch the kernel.
+
+## 0.1.0 — 2026-10-18
+
+First release.
+
+- Hubs for memory, disk, CPU, GPU, network, boot, processes, permissions and logs,
+  and over a hundred cards, numbered like a book (`atfq toc`).
+- Live probes read the machine (procfs, sysfs, a few read-only commands), with a
+  short note instead of a crash when something is missing.
+- Fuzzy matching and full-text search; `--why` for the deep dive; `--json`.
+- A TUI with keyboard and mouse, `atfq ask` to build a prompt for an AI assistant
+  (`--redact`), and `atfq mcp`, a read-only MCP server on stdio.

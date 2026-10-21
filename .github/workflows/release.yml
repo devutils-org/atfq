@@ -1,5 +1,6 @@
-# Push a tag such as v0.1.0 to build Linux binaries and open a draft
-# release with them. Review the draft on GitHub, then publish it.
+# Push a tag such as v0.1.0 to build static Linux binaries, attest their build
+# provenance (Sigstore) and open a draft release with them. Review the draft on
+# GitHub, then publish it.
 name: Release
 
 on:
@@ -18,14 +19,21 @@ jobs:
     strategy:
       matrix:
         include:
-          # Ubuntu 22.04 builds against glibc 2.35, so the binaries run on
-          # older distributions too.
+          # Static musl binaries: no glibc floor, so they run on every
+          # distribution, Alpine included (distroproof.toml checks it).
           - { os: ubuntu-22.04, arch: x86_64 }
           - { os: ubuntu-22.04-arm, arch: aarch64 }
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    env:
+      TARGET: ${{ matrix.arch }}-unknown-linux-musl
     steps:
       - uses: actions/checkout@v7
-      - run: rustup toolchain install
+      - run: rustup toolchain install && rustup target add "$TARGET"
+      - run: sudo apt-get update && sudo apt-get install -y musl-tools
       - name: Tag matches Cargo.toml
         run: |
           version=$(cargo metadata --no-deps --format-version 1 \
@@ -33,13 +41,20 @@ jobs:
           test "v$version" = "$GITHUB_REF_NAME" || {
             echo "tag $GITHUB_REF_NAME, but Cargo.toml says $version"; exit 1; }
       - run: cargo test --locked
-      - run: cargo build --release --locked
+      - run: cargo build --release --locked --target "$TARGET"
+      - name: Check that the binary is static
+        run: |
+          file "target/$TARGET/release/atfq" | grep -Eq 'statically linked|static-pie linked'
+          "target/$TARGET/release/atfq" --version
       - name: Package
         run: |
           dir=atfq-${{ matrix.arch }}-linux
           mkdir "$dir"
-          cp target/release/atfq README.md LICENSE-MIT LICENSE-APACHE "$dir"/
+          cp "target/$TARGET/release/atfq" README.md LICENSE-MIT LICENSE-APACHE "$dir"/
           tar czf "$dir.tar.gz" "$dir"
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: atfq-${{ matrix.arch }}-linux.tar.gz
       - uses: actions/upload-artifact@v7
         with:
           name: atfq-${{ matrix.arch }}-linux
