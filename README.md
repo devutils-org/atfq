@@ -20,14 +20,14 @@
 
 A static binary for Linux x86-64: it needs no particular libc, so it runs on any
 distribution, Alpine included ([checked with distroproof](#checked-on-every-distribution)).
-Use `aarch64` instead of `x86_64` on ARM64. Each archive is signed by a build
-provenance attestation, which `gh attestation verify` checks.
+Use `aarch64` instead of `x86_64` on ARM64. Each release archive has a signed build provenance attestation, verified using `gh attestation verify`.
 
 ```sh
-curl -LO https://github.com/devutils-org/atfq/releases/latest/download/atfq-x86_64-linux.tar.gz
-gh attestation verify atfq-x86_64-linux.tar.gz --repo devutils-org/atfq
-tar xzf atfq-x86_64-linux.tar.gz
-mkdir -p ~/.local/bin
+curl -fL https://github.com/devutils-org/atfq/releases/latest/download/atfq-x86_64-linux.tar.gz \
+  -o atfq-x86_64-linux.tar.gz && \
+gh attestation verify atfq-x86_64-linux.tar.gz --repo devutils-org/atfq && \
+tar xzf atfq-x86_64-linux.tar.gz && \
+mkdir -p ~/.local/bin && \
 install -m 755 atfq-x86_64-linux/atfq ~/.local/bin/
 ```
 
