@@ -25,4 +25,4 @@ expression: t.screen()
 "│17. Memory              ││  Hub       atfq memory Memory                      │"
 "│  17.1 free vs available││  See also  atfq 17.3 Swap and swappiness           │"
 "╰────────────────────────╯╰────────────────────────────────────────────────────╯"
-" NORMAL  q quit  jk move  tab link  ⏎ open  ⌫ back  / search  ? AI   M mouse:on "
+" NORMAL  q quit  +/- width  jk move  tab link  ⏎ open  ⌫ back        M mouse:on "

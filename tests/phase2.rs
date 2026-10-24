@@ -354,6 +354,44 @@ fn ask_overlay() {
 }
 
 #[test]
+fn sidebar_resize_keyboard_and_mouse() {
+    let lib = lib();
+    let mut t = Tui::new(&lib);
+    let sidebar = |t: &Tui<'_>| t.app.toc_region("disk").unwrap();
+    let initial = sidebar(&t);
+    t.key(KeyCode::Char('+'));
+    assert_eq!(sidebar(&t).width, initial.width + 4);
+    t.key(KeyCode::Char('-'));
+    assert_eq!(sidebar(&t).width, initial.width);
+
+    // The right border is immediately after the inner TOC region.
+    t.mouse(MouseEventKind::Down(MouseButton::Left), initial.right(), 5);
+    t.mouse(MouseEventKind::Drag(MouseButton::Left), 44, 5);
+    assert_eq!(sidebar(&t).width, 43);
+    t.mouse(MouseEventKind::Up(MouseButton::Left), 44, 5);
+    t.mouse(MouseEventKind::Drag(MouseButton::Left), 30, 5);
+    assert_eq!(sidebar(&t).width, 43, "release ends resizing");
+    assert_eq!(t.app.current(), None, "resizing does not open a page");
+
+    for _ in 0..30 {
+        t.key(KeyCode::Char('+'));
+    }
+    assert_eq!(sidebar(&t).width, 58, "leave 20 columns for content");
+    t.term.backend_mut().resize(40, 10);
+    t.term.resize(Rect::new(0, 0, 40, 10)).unwrap();
+    t.draw();
+    assert_eq!(sidebar(&t).width, 18);
+    t.term.backend_mut().resize(80, 24);
+    t.term.resize(Rect::new(0, 0, 80, 24)).unwrap();
+    t.draw();
+    assert_eq!(sidebar(&t).width, 58, "restore the requested width");
+    for _ in 0..30 {
+        t.key(KeyCode::Char('-'));
+    }
+    assert_eq!(sidebar(&t).width, 10, "keep the sidebar usable");
+}
+
+#[test]
 fn small_terminal_does_not_panic() {
     let lib = lib();
     let mut app = App::new(&lib, laptop(), sys());

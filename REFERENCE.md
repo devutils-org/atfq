@@ -88,13 +88,15 @@ Contents on the left, the page on the right.
 | `?` | the AI prompt for this page |
 | `r` | run the probes again |
 | `M` | mouse on or off (off: select text to copy) |
+| `-`, `+` | shrink, widen the sidebar by four columns |
 | `q`, Esc | quit (Esc first closes search or the prompt) |
 
 In search, Ctrl-n / Ctrl-p (or Ctrl-j / Ctrl-k) walk the results, Ctrl-w
 erases a word and Ctrl-u the whole query.
 
 With the mouse: click selects, a second click opens, right click goes back,
-the wheel scrolls the pane under the pointer. In tmux, mouse support needs
+the wheel scrolls the pane under the pointer. Drag the sidebar's right border
+to resize it. In tmux, mouse support needs
 `set -g mouse on`.
 
 ### MCP server

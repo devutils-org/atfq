@@ -25,4 +25,4 @@ expression: t.screen()
 "│- `free -h`: RAM and swap, in human units                                     │"
 "│- `vmstat 1`: memory and swap activity every second (Ctrl-C stops)            │"
 "╰──────────────────────────────────────────────────────────────────────────────╯"
-" PROMPT  esc close  ↑↓ scroll  q quit                                M mouse:on "
+" PROMPT  esc close  +/- width  ↑↓ scroll  q quit                     M mouse:on "

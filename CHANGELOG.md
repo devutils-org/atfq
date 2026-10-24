@@ -1,6 +1,13 @@
 # Changelog
 
-## 0.1.1 — unreleased
+## 0.1.2 — 2026-10-24
+
+- TUI sidebar section and chapter titles use the accent colour for readability.
+- Resize the sidebar with `+` / `-` or by dragging its right border with the mouse.
+  The width adapts to smaller terminals and is restored when space is available.
+- Show the sidebar width shortcuts in the bottom help bar.
+
+## 0.1.1 — 2026-10-21
 
 - Static release binaries (musl) for x86_64 and aarch64: no glibc requirement.
   0.1.0's binaries needed glibc 2.34 and did not start on Debian 10 and 11,

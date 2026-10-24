@@ -103,6 +103,9 @@ pub struct App<'a> {
     toc_reveal: bool,
     /// Height of the TOC pane at the last draw.
     toc_height: usize,
+    toc_width: Option<u16>,
+    main_area: Rect,
+    dragging_sidebar: bool,
     page: Option<Page<'a>>,
     history: Vec<Visit>,
     focus: Pane,
@@ -133,6 +136,9 @@ impl<'a> App<'a> {
             toc_scroll: 0,
             toc_reveal: true,
             toc_height: 0,
+            toc_width: None,
+            main_area: Rect::default(),
+            dragging_sidebar: false,
             page: None,
             history: Vec::new(),
             focus: Pane::Toc,
@@ -502,6 +508,20 @@ impl<'a> App<'a> {
             return;
         }
         let ctrl = k.modifiers.contains(KeyModifiers::CONTROL);
+        if !ctrl
+            && !matches!(self.mode, Mode::Search { .. })
+            && matches!(k.code, KeyCode::Char('+' | '-'))
+        {
+            let width = self.sidebar_width();
+            self.toc_width = Some(self.clamp_sidebar_width(if k.code == KeyCode::Char('+') {
+                width.saturating_add(4)
+            } else {
+                width.saturating_sub(4)
+            }));
+            self.count = None;
+            self.pending_g = false;
+            return;
+        }
         match &mut self.mode {
             Mode::Search { query, view } => {
                 match k.code {
@@ -586,6 +606,7 @@ impl<'a> App<'a> {
 
     fn toggle_mouse(&mut self) {
         self.mouse = !self.mouse;
+        self.dragging_sidebar = false;
         self.message = Some(if self.mouse {
             "Mouse on: click to open, right click to go back".to_string()
         } else {
@@ -595,6 +616,28 @@ impl<'a> App<'a> {
 
     fn mouse_event(&mut self, m: MouseEvent) {
         let at = Position::new(m.column, m.row);
+        if self.dragging_sidebar {
+            match m.kind {
+                MouseEventKind::Drag(MouseButton::Left) | MouseEventKind::Up(MouseButton::Left) => {
+                    self.toc_width = Some(self.clamp_sidebar_width(
+                        m.column.saturating_sub(self.main_area.x).saturating_add(1),
+                    ));
+                    if m.kind == MouseEventKind::Up(MouseButton::Left) {
+                        self.dragging_sidebar = false;
+                    }
+                    return;
+                }
+                _ => {}
+            }
+        }
+        if m.kind == MouseEventKind::Down(MouseButton::Left)
+            && !matches!(self.mode, Mode::Ask { .. })
+            && self.main_area.contains(at)
+            && m.column == self.main_area.x + self.sidebar_width().saturating_sub(1)
+        {
+            self.dragging_sidebar = true;
+            return;
+        }
         // Last drawn wins: items are drawn over their pane.
         let hit = self
             .regions
@@ -647,19 +690,32 @@ impl<'a> App<'a> {
                     None => {}
                 }
             }
-            // Moves, drags and button releases are ignored.
+            // Other moves, drags and button releases are ignored.
             _ => {}
         }
     }
 
     // ----- drawing ----------------------------------------------------
 
+    fn clamp_sidebar_width(&self, width: u16) -> u16 {
+        let max = self.main_area.width.saturating_sub(20);
+        width.clamp(12.min(max), max)
+    }
+
+    fn sidebar_width(&self) -> u16 {
+        self.clamp_sidebar_width(
+            self.toc_width
+                .unwrap_or((self.main_area.width / 3).clamp(20, 30)),
+        )
+    }
+
     pub fn draw(&mut self, f: &mut Frame<'_>) {
         self.regions.clear();
         let area = f.area();
         let [main, footer] =
             Split::vertical([Constraint::Min(1), Constraint::Length(1)]).areas(area);
-        let toc_width = (area.width / 3).clamp(20, 30);
+        self.main_area = main;
+        let toc_width = self.sidebar_width();
         let [toc, content] =
             Split::horizontal([Constraint::Length(toc_width), Constraint::Min(1)]).areas(main);
         self.draw_toc(f, toc);
@@ -705,9 +761,9 @@ impl<'a> App<'a> {
             let text = truncate(&format!("{}{}", "  ".repeat(e.depth), e.text), width);
             let mut style = Style::default();
             if e.header {
-                style = style.add_modifier(Modifier::BOLD);
+                style = style.fg(theme::ACCENT).add_modifier(Modifier::BOLD);
             } else if e.handle.is_none() {
-                style = style.fg(theme::MUTED);
+                style = style.fg(theme::ACCENT);
             }
             if e.handle.is_some() && e.handle == current {
                 style = style.fg(theme::ACCENT).add_modifier(Modifier::BOLD);
@@ -826,6 +882,7 @@ impl<'a> App<'a> {
         let keys: &[(&str, &str)] = match self.mode {
             Mode::Normal => &[
                 ("q", "quit"),
+                ("+/-", "width"),
                 ("jk", "move"),
                 ("tab", "link"),
                 ("⏎", "open"),
@@ -841,7 +898,12 @@ impl<'a> App<'a> {
                 ("⏎", "open"),
                 ("⌫", "erase"),
             ],
-            Mode::Ask { .. } => &[("esc", "close"), ("↑↓", "scroll"), ("q", "quit")],
+            Mode::Ask { .. } => &[
+                ("esc", "close"),
+                ("+/-", "width"),
+                ("↑↓", "scroll"),
+                ("q", "quit"),
+            ],
         };
         let width = area.width as usize;
         let mut spans = vec![
