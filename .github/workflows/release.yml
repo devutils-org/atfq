@@ -52,7 +52,7 @@ jobs:
           mkdir "$dir"
           cp "target/$TARGET/release/atfq" README.md LICENSE-MIT LICENSE-APACHE "$dir"/
           tar czf "$dir.tar.gz" "$dir"
-      - uses: actions/attest-build-provenance@v2
+      - uses: actions/attest-build-provenance@v4
         with:
           subject-path: atfq-${{ matrix.arch }}-linux.tar.gz
       - uses: actions/upload-artifact@v7
